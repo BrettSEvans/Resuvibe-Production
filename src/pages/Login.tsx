@@ -67,10 +67,11 @@ export default function Login() {
       return;
     }
     if (data.session) {
+      // Auto-confirm enabled — send straight to onboarding
       toast.success("Account created! Let's get you set up.");
       navigate("/onboarding");
     } else {
-      toast.success("Account created! Please sign in to continue.");
+      toast.success("Account created! Check your email for a confirmation link to activate your account.");
     }
   };
 
