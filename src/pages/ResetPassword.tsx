@@ -123,7 +123,7 @@ export default function ResetPassword() {
           <div className="flex justify-center mb-2">
             <BrandLogo iconSize="2.4em" />
           </div>
-          <CardTitle className="text-xl font-bold text-foreground">Set New Password</CardTitle>
+          <CardTitle className="text-xl font-bold text-foreground">Reset Password</CardTitle>
           <CardDescription>Enter and confirm your new password</CardDescription>
         </CardHeader>
         <CardContent>
