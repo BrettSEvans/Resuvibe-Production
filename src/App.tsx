@@ -71,6 +71,7 @@ function AuthenticatedApp() {
     return (
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/stories" element={<StoryBoard />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
