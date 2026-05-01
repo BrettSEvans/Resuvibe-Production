@@ -15,8 +15,11 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
+
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +51,10 @@ export default function Login() {
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
@@ -205,7 +212,32 @@ export default function Login() {
                     <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9" required minLength={6} />
                   </div>
                 </div>
-                <Button type="submit" className="w-full gap-2" disabled={loading}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="signup-confirm-password" className={passwordMismatch ? "text-destructive" : undefined}>
+                    Confirm Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${passwordMismatch ? "text-destructive" : "text-muted-foreground"}`} />
+                    <Input
+                      id="signup-confirm-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className={`pl-9 ${passwordMismatch ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      aria-invalid={passwordMismatch}
+                      aria-describedby={passwordMismatch ? "signup-confirm-password-error" : undefined}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  {passwordMismatch && (
+                    <p id="signup-confirm-password-error" className="text-sm font-medium text-destructive">
+                      Passwords do not match
+                    </p>
+                  )}
+                </div>
+                <Button type="submit" className="w-full gap-2" disabled={loading || passwordMismatch}>
                   <Mail className="h-4 w-4" /> Create Account
                 </Button>
               </form>
