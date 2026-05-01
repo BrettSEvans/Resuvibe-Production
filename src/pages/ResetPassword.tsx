@@ -45,15 +45,29 @@ export default function ResetPassword() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
+    const { data: updateData, error } = await supabase.auth.updateUser({ password });
     if (error) {
+      setLoading(false);
       toast.error(error.message);
-    } else {
-      setSuccess(true);
-      toast.success("Password updated successfully!");
-      setTimeout(() => navigate("/login"), 2000);
+      return;
     }
+    // Recovery flow already establishes a session — keep user signed in and route based on onboarding state
+    let nextPath = "/";
+    const userId = updateData?.user?.id;
+    if (userId) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed_at")
+        .eq("id", userId)
+        .single();
+      if (!profile?.onboarding_completed_at) {
+        nextPath = "/onboarding";
+      }
+    }
+    setLoading(false);
+    setSuccess(true);
+    toast.success("Password updated successfully!");
+    setTimeout(() => navigate(nextPath, { replace: true }), 1200);
   };
 
   if (success) {
