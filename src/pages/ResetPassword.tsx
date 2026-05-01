@@ -20,18 +20,45 @@ export default function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    // Listen for password recovery event from the magic link
+    let cancelled = false;
+
+    // 1. Listen for the PASSWORD_RECOVERY event (fires after the SDK processes the link)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
         setIsRecovery(true);
       }
     });
-    // Also check hash for type=recovery
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
-      setIsRecovery(true);
-    }
-    return () => subscription.unsubscribe();
+
+    (async () => {
+      // 2. Hash-fragment style: #access_token=...&type=recovery
+      if (window.location.hash.includes("type=recovery")) {
+        if (!cancelled) setIsRecovery(true);
+      }
+
+      // 3. PKCE style: ?code=... — exchange for a session
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error && !cancelled) {
+          setIsRecovery(true);
+          // Clean the code out of the URL so refreshes don't re-exchange
+          url.searchParams.delete("code");
+          window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+        }
+      }
+
+      // 4. If a session already exists (SDK auto-processed the link), treat as recovery
+      const { data } = await supabase.auth.getSession();
+      if (data.session && !cancelled) {
+        setIsRecovery(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
