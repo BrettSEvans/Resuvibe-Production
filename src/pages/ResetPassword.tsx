@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Lock, CheckCircle } from "lucide-react";
+import { Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 
 export default function ResetPassword() {
@@ -16,6 +16,8 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isRecovery, setIsRecovery] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     // Listen for password recovery event from the magic link
@@ -43,15 +45,29 @@ export default function ResetPassword() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
+    const { data: updateData, error } = await supabase.auth.updateUser({ password });
     if (error) {
+      setLoading(false);
       toast.error(error.message);
-    } else {
-      setSuccess(true);
-      toast.success("Password updated successfully!");
-      setTimeout(() => navigate("/login"), 2000);
+      return;
     }
+    // Recovery flow already establishes a session — keep user signed in and route based on onboarding state
+    let nextPath = "/";
+    const userId = updateData?.user?.id;
+    if (userId) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed_at")
+        .eq("id", userId)
+        .single();
+      if (!profile?.onboarding_completed_at) {
+        nextPath = "/onboarding";
+      }
+    }
+    setLoading(false);
+    setSuccess(true);
+    toast.success("Password updated successfully!");
+    setTimeout(() => navigate(nextPath, { replace: true }), 1200);
   };
 
   if (success) {
@@ -63,7 +79,7 @@ export default function ResetPassword() {
               <CheckCircle className="h-12 w-12 text-green-500" />
             </div>
             <CardTitle className="text-xl">Password Updated!</CardTitle>
-            <CardDescription>Redirecting you to sign in...</CardDescription>
+            <CardDescription>Signing you in...</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -106,7 +122,16 @@ export default function ResetPassword() {
               <Label htmlFor="new-password">New Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="new-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9" required minLength={6} />
+                <Input id="new-password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 pr-9" required minLength={6} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
               <p className="text-xs text-muted-foreground">Minimum 6 characters</p>
             </div>
@@ -114,7 +139,16 @@ export default function ResetPassword() {
               <Label htmlFor="confirm-password">Confirm Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="confirm-password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-9" required minLength={6} />
+                <Input id="confirm-password" type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-9 pr-9" required minLength={6} />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showConfirmPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
               {confirmPassword && password !== confirmPassword && (
                 <p className="text-xs text-destructive">Passwords do not match</p>
