@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Mail, Lock, LogIn } from "lucide-react";
+import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 
 export default function Login() {
@@ -18,6 +18,9 @@ export default function Login() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
@@ -193,7 +196,16 @@ export default function Login() {
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9" required />
+                    <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 pr-9" required />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword((v) => !v)}
+                      aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showLoginPassword}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                    >
+                      {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
                 <Button type="submit" className="w-full gap-2" disabled={loading}>
@@ -215,7 +227,16 @@ export default function Login() {
                   <Label htmlFor="signup-password">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9" required minLength={6} />
+                    <Input id="signup-password" type={showSignupPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 pr-9" required minLength={6} />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPassword((v) => !v)}
+                      aria-label={showSignupPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showSignupPassword}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                    >
+                      {showSignupPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -226,16 +247,25 @@ export default function Login() {
                     <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${passwordMismatch ? "text-destructive" : "text-muted-foreground"}`} />
                     <Input
                       id="signup-confirm-password"
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`pl-9 ${passwordMismatch ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                      className={`pl-9 pr-9 ${passwordMismatch ? "border-destructive focus-visible:ring-destructive" : ""}`}
                       aria-invalid={passwordMismatch}
                       aria-describedby={passwordMismatch ? "signup-confirm-password-error" : undefined}
                       required
                       minLength={6}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showConfirmPassword}
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded ${passwordMismatch ? "text-destructive" : "text-muted-foreground"}`}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                   {passwordMismatch && (
                     <p id="signup-confirm-password-error" className="text-sm font-medium text-destructive">
