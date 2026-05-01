@@ -62,6 +62,7 @@ function AuthenticatedApp() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        {import.meta.env.DEV && <Route path="/stories" element={<StoryBoard />} />}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -71,6 +72,7 @@ function AuthenticatedApp() {
     return (
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
+        {import.meta.env.DEV && <Route path="/stories" element={<StoryBoard />} />}
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     );
