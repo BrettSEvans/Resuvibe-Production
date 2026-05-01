@@ -79,7 +79,7 @@ export default function ResetPassword() {
               <CheckCircle className="h-12 w-12 text-green-500" />
             </div>
             <CardTitle className="text-xl">Password Updated!</CardTitle>
-            <CardDescription>Redirecting you to sign in...</CardDescription>
+            <CardDescription>Signing you in...</CardDescription>
           </CardHeader>
         </Card>
       </div>
