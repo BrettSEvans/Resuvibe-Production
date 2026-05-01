@@ -56,7 +56,7 @@ export default function Login() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: window.location.origin },
@@ -64,8 +64,13 @@ export default function Login() {
     setLoading(false);
     if (error) {
       toast.error(error.message);
+      return;
+    }
+    if (data.session) {
+      toast.success("Account created! Let's get you set up.");
+      navigate("/onboarding");
     } else {
-      toast.success("Check your email for a verification link! Your account will need admin approval before you can sign in.");
+      toast.success("Account created! Please sign in to continue.");
     }
   };
 
