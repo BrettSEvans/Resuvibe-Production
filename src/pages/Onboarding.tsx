@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const COMMON_INDUSTRIES = [
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -117,9 +119,10 @@ export default function Onboarding() {
       toast.error("Failed to save profile: " + error.message);
     } else {
       toast.success("Welcome aboard! Your profile is set up.");
+      await queryClient.invalidateQueries({ queryKey: ["profile_check", user.id] });
       navigate("/applications");
     }
-  }, [user, firstName, lastName, experience, resumeText, skills, industries, masterCoverLetter, navigate]);
+  }, [user, firstName, lastName, experience, resumeText, skills, industries, masterCoverLetter, navigate, queryClient]);
 
   const handleSkip = async () => {
     if (!user) return;
@@ -127,6 +130,7 @@ export default function Onboarding() {
       .from("profiles")
       .update({ onboarding_completed_at: new Date().toISOString() })
       .eq("id", user.id);
+    await queryClient.invalidateQueries({ queryKey: ["profile_check", user.id] });
     navigate("/applications");
   };
 
