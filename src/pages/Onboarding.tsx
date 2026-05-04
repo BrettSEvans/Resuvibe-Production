@@ -102,19 +102,21 @@ export default function Onboarding() {
     if (!user) return;
     setLoading(true);
     const completedAt = new Date().toISOString();
+    const profilePayload = {
+      id: user.id,
+      first_name: firstName || null,
+      last_name: lastName || null,
+      years_experience: experience || null,
+      resume_text: resumeText || null,
+      key_skills: skills.length > 0 ? skills : null,
+      target_industries: industries.length > 0 ? industries : null,
+      master_cover_letter: masterCoverLetter || null,
+      onboarding_completed_at: completedAt,
+    };
+
     const { error } = await supabase
       .from("profiles")
-      .update({
-        first_name: firstName || null,
-        last_name: lastName || null,
-        years_experience: experience || null,
-        resume_text: resumeText || null,
-        key_skills: skills.length > 0 ? skills : null,
-        target_industries: industries.length > 0 ? industries : null,
-        master_cover_letter: masterCoverLetter || null,
-        onboarding_completed_at: completedAt,
-      })
-      .eq("id", user.id);
+      .upsert(profilePayload, { onConflict: "id" });
     setLoading(false);
     if (error) {
       toast.error("Failed to save profile: " + error.message);
@@ -131,8 +133,7 @@ export default function Onboarding() {
     const completedAt = new Date().toISOString();
     await supabase
       .from("profiles")
-      .update({ onboarding_completed_at: completedAt })
-      .eq("id", user.id);
+      .upsert({ id: user.id, onboarding_completed_at: completedAt }, { onConflict: "id" });
     queryClient.setQueryData(["profile_check", user.id], { onboarding_completed_at: completedAt });
     await queryClient.invalidateQueries({ queryKey: ["profile_check", user.id] });
     navigate("/applications");
