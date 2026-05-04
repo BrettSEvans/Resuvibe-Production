@@ -236,6 +236,11 @@ export default function Onboarding() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Key Skills</Label>
+                {extractedSkills.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    We pre-selected {extractedSkills.length} skills extracted from your resume. Adjust as needed.
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-1.5">
                   {COMMON_SKILLS.map((s) => (
                     <Badge
