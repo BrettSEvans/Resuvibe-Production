@@ -35,11 +35,14 @@ function useProfileCheck(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 60_000,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("onboarding_completed_at")
         .eq("id", userId!)
-        .single();
+        .maybeSingle();
+
+      if (error) throw error;
+
       return data;
     },
   });
