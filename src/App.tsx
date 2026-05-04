@@ -86,7 +86,7 @@ function AuthenticatedApp() {
       <TutorialTour active={tour.active} onComplete={tour.complete} />
       <Routes>
         <Route path="/" element={<Applications />} />
-        <Route path="/applications" element={<Navigate to="/" replace />} />
+        <Route path="/applications" element={<Applications />} />
         <Route path="/applications/new" element={<NewApplication />} />
         <Route path="/applications/:id" element={<ApplicationDetail />} />
         <Route path="/templates" element={<Templates />} />

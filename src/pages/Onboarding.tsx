@@ -101,6 +101,7 @@ export default function Onboarding() {
   const handleComplete = useCallback(async () => {
     if (!user) return;
     setLoading(true);
+    const completedAt = new Date().toISOString();
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -111,7 +112,7 @@ export default function Onboarding() {
         key_skills: skills.length > 0 ? skills : null,
         target_industries: industries.length > 0 ? industries : null,
         master_cover_letter: masterCoverLetter || null,
-        onboarding_completed_at: new Date().toISOString(),
+        onboarding_completed_at: completedAt,
       })
       .eq("id", user.id);
     setLoading(false);
@@ -119,6 +120,7 @@ export default function Onboarding() {
       toast.error("Failed to save profile: " + error.message);
     } else {
       toast.success("Welcome aboard! Your profile is set up.");
+      queryClient.setQueryData(["profile_check", user.id], { onboarding_completed_at: completedAt });
       await queryClient.invalidateQueries({ queryKey: ["profile_check", user.id] });
       navigate("/applications");
     }
@@ -126,10 +128,12 @@ export default function Onboarding() {
 
   const handleSkip = async () => {
     if (!user) return;
+    const completedAt = new Date().toISOString();
     await supabase
       .from("profiles")
-      .update({ onboarding_completed_at: new Date().toISOString() })
+      .update({ onboarding_completed_at: completedAt })
       .eq("id", user.id);
+    queryClient.setQueryData(["profile_check", user.id], { onboarding_completed_at: completedAt });
     await queryClient.invalidateQueries({ queryKey: ["profile_check", user.id] });
     navigate("/applications");
   };
