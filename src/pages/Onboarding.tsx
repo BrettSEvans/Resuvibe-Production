@@ -242,7 +242,7 @@ export default function Onboarding() {
                   </p>
                 )}
                 <div className="flex flex-wrap gap-1.5">
-                  {COMMON_SKILLS.map((s) => (
+                  {(extractedSkills.length > 0 ? extractedSkills : COMMON_SKILLS).map((s) => (
                     <Badge
                       key={s}
                       variant={skills.includes(s) ? "default" : "outline"}
@@ -263,9 +263,9 @@ export default function Onboarding() {
                   />
                   <Button type="button" size="sm" variant="outline" onClick={addCustomSkill}>Add</Button>
                 </div>
-                {skills.filter((s) => !COMMON_SKILLS.includes(s)).length > 0 && (
+                {skills.filter((s) => !(extractedSkills.length > 0 ? extractedSkills : COMMON_SKILLS).includes(s)).length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-1">
-                    {skills.filter((s) => !COMMON_SKILLS.includes(s)).map((s) => (
+                    {skills.filter((s) => !(extractedSkills.length > 0 ? extractedSkills : COMMON_SKILLS).includes(s)).map((s) => (
                       <Badge key={s} variant="default" className="text-xs gap-1">
                         {s} <X className="h-2.5 w-2.5 cursor-pointer" onClick={() => toggleSkill(s)} />
                       </Badge>
