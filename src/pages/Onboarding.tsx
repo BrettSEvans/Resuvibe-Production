@@ -117,7 +117,7 @@ export default function Onboarding() {
       toast.error("Failed to save profile: " + error.message);
     } else {
       toast.success("Welcome aboard! Your profile is set up.");
-      navigate("/?tour=1");
+      navigate("/applications");
     }
   }, [user, firstName, lastName, experience, resumeText, skills, industries, masterCoverLetter, navigate]);
 
