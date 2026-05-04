@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,6 +48,9 @@ export default function Onboarding() {
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
   const [industries, setIndustries] = useState<string[]>([]);
+  const [extractedSkills, setExtractedSkills] = useState<string[]>([]);
+  const [extractingSkills, setExtractingSkills] = useState(false);
+  const [extractedFromText, setExtractedFromText] = useState<string>("");
 
   // Step 4 fields (Story 1.3: master cover letter)
   const [masterCoverLetter, setMasterCoverLetter] = useState("");
@@ -70,6 +73,28 @@ export default function Onboarding() {
   const toggleIndustry = (ind: string) => {
     setIndustries((prev) => prev.includes(ind) ? prev.filter((i) => i !== ind) : [...prev, ind]);
   };
+
+  const handleNext = useCallback(async () => {
+    if (step === 2 && resumeText.trim().length >= 50 && resumeText !== extractedFromText) {
+      setExtractingSkills(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("extract-resume-skills", {
+          body: { resumeText },
+        });
+        if (!error && data?.success && Array.isArray(data.skills)) {
+          const extracted: string[] = data.skills;
+          setExtractedSkills(extracted);
+          setExtractedFromText(resumeText);
+          setSkills((prev) => Array.from(new Set([...prev, ...extracted])));
+        }
+      } catch (e) {
+        console.error("Skill extraction failed:", e);
+      } finally {
+        setExtractingSkills(false);
+      }
+    }
+    setStep((s) => s + 1);
+  }, [step, resumeText, extractedFromText]);
 
   const handleComplete = useCallback(async () => {
     if (!user) return;
@@ -211,6 +236,11 @@ export default function Onboarding() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Key Skills</Label>
+                {extractedSkills.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    We pre-selected {extractedSkills.length} skills extracted from your resume. Adjust as needed.
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-1.5">
                   {COMMON_SKILLS.map((s) => (
                     <Badge
@@ -304,8 +334,8 @@ export default function Onboarding() {
             </div>
             <div>
               {step < totalSteps ? (
-                <Button size="sm" onClick={() => setStep(step + 1)} className="gap-1">
-                  {step === 4 && !masterCoverLetter ? "Skip" : "Next"} <ArrowRight className="h-3.5 w-3.5" />
+                <Button size="sm" onClick={handleNext} disabled={extractingSkills} className="gap-1">
+                  {extractingSkills ? "Extracting…" : step === 4 && !masterCoverLetter ? "Skip" : "Next"} <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               ) : (
                 <Button size="sm" onClick={handleComplete} disabled={loading} className="gap-1">
