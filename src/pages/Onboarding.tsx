@@ -74,6 +74,28 @@ export default function Onboarding() {
     setIndustries((prev) => prev.includes(ind) ? prev.filter((i) => i !== ind) : [...prev, ind]);
   };
 
+  const handleNext = useCallback(async () => {
+    if (step === 2 && resumeText.trim().length >= 50 && resumeText !== extractedFromText) {
+      setExtractingSkills(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("extract-resume-skills", {
+          body: { resumeText },
+        });
+        if (!error && data?.success && Array.isArray(data.skills)) {
+          const extracted: string[] = data.skills;
+          setExtractedSkills(extracted);
+          setExtractedFromText(resumeText);
+          setSkills((prev) => Array.from(new Set([...prev, ...extracted])));
+        }
+      } catch (e) {
+        console.error("Skill extraction failed:", e);
+      } finally {
+        setExtractingSkills(false);
+      }
+    }
+    setStep((s) => s + 1);
+  }, [step, resumeText, extractedFromText]);
+
   const handleComplete = useCallback(async () => {
     if (!user) return;
     setLoading(true);
