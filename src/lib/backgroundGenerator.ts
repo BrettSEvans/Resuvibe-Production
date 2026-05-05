@@ -130,13 +130,22 @@ class BackgroundGenerationManager {
     companyUrl,
     jobDescription,
     useManualInput,
+    selections,
   }: {
     applicationId?: string;
     jobUrl: string;
     companyUrl?: string;
     jobDescription?: string;
     useManualInput?: boolean;
+    selections?: { resume?: boolean; coverLetter?: boolean; jdAnalysis?: boolean; materials?: boolean; dashboard?: boolean };
   }): Promise<string> {
+    const sel = {
+      resume: selections?.resume ?? true,
+      coverLetter: selections?.coverLetter ?? true,
+      jdAnalysis: selections?.jdAnalysis ?? false,
+      materials: selections?.materials ?? false,
+      dashboard: selections?.dashboard ?? false,
+    };
     let appId = applicationId;
     if (!appId) {
       const saved = await saveJobApplication({
@@ -164,7 +173,7 @@ class BackgroundGenerationManager {
     this.notify();
 
     // Run in background (don't await at call site)
-    this.runPipeline(appId, jobUrl, companyUrl, jobDescription, useManualInput);
+    this.runPipeline(appId, jobUrl, companyUrl, jobDescription, useManualInput, sel);
 
     return appId;
   }
@@ -174,7 +183,8 @@ class BackgroundGenerationManager {
     jobUrl: string,
     companyUrl?: string,
     manualDescription?: string,
-    useManualInput?: boolean
+    useManualInput?: boolean,
+    sel: { resume: boolean; coverLetter: boolean; jdAnalysis: boolean; materials: boolean; dashboard: boolean } = { resume: true, coverLetter: true, jdAnalysis: false, materials: false, dashboard: false }
   ) {
     try {
       // ========== PHASE 1: Scrape job (sequential — everything else depends on markdown) ==========
@@ -202,7 +212,7 @@ class BackgroundGenerationManager {
       await saveJobApplication({ id: appId, job_url: jobUrl, generation_status: "analyzing" } as any);
 
       // Launch all independent tasks concurrently
-      const brandingPromise = (companyUrl?.trim())
+      const brandingPromise = (sel.dashboard && companyUrl?.trim())
         ? scrapeCompanyBranding(companyUrl).catch((e) => { console.warn("Branding scrape failed:", e); return null; })
         : Promise.resolve(null);
 
@@ -211,7 +221,8 @@ class BackgroundGenerationManager {
         jobDescription: markdown,
       }).catch((e) => { console.warn("Analysis failed:", e); return null; });
 
-      const jdIntelligencePromise = (markdown && markdown.length >= 50)
+      const needsJdIntel = sel.jdAnalysis || sel.materials || sel.dashboard;
+      const jdIntelligencePromise = (needsJdIntel && markdown && markdown.length >= 50)
         ? parseJobDescription({ jobDescriptionMarkdown: markdown, companyName: "" }).catch((e) => { console.warn("JD intelligence parse failed:", e); return null; })
         : Promise.resolve(null);
 
@@ -296,45 +307,54 @@ class BackgroundGenerationManager {
       } as any);
 
       // ========== PHASE 3: Generate resume (foreground phase end) ==========
-      this.updateJob(appId, { status: "resume", progress: "Generating tailored resume..." });
+      if (sel.resume) {
+        this.updateJob(appId, { status: "resume", progress: "Generating tailored resume..." });
 
-      if (resumeText && markdown) {
-        const [atsResult, clarityResult] = await Promise.allSettled([
-          generateOptimizedResume({
-            jobDescription: markdown,
-            resumeText,
-            missingKeywords: [],
-            companyName,
-            jobTitle,
-          }),
-          generateClarityResume({
-            jobDescription: markdown,
-            resumeText,
-            companyName,
-            jobTitle,
-          }),
-        ]);
+        if (resumeText && markdown) {
+          const [atsResult, clarityResult] = await Promise.allSettled([
+            generateOptimizedResume({
+              jobDescription: markdown,
+              resumeText,
+              missingKeywords: [],
+              companyName,
+              jobTitle,
+            }),
+            generateClarityResume({
+              jobDescription: markdown,
+              resumeText,
+              companyName,
+              jobTitle,
+            }),
+          ]);
 
-        const savePayload: any = {
-          id: appId,
-          job_url: jobUrl,
-          generation_status: "resume-complete",
-          status: "resume-complete",
-        };
+          const savePayload: any = {
+            id: appId,
+            job_url: jobUrl,
+            generation_status: "resume-complete",
+            status: "resume-complete",
+          };
 
-        if (atsResult.status === "fulfilled") {
-          savePayload.resume_html = atsResult.value.resume_html;
+          if (atsResult.status === "fulfilled") {
+            savePayload.resume_html = atsResult.value.resume_html;
+          } else {
+            console.warn("ATS resume generation failed:", atsResult.reason);
+          }
+
+          if (clarityResult.status === "fulfilled") {
+            savePayload.clarity_resume_html = clarityResult.value.resume_html;
+          } else {
+            console.warn("Clarity resume generation failed:", clarityResult.reason);
+          }
+
+          await saveJobApplication(savePayload);
         } else {
-          console.warn("ATS resume generation failed:", atsResult.reason);
+          await saveJobApplication({
+            id: appId,
+            job_url: jobUrl,
+            generation_status: "resume-complete",
+            status: "resume-complete",
+          } as any);
         }
-
-        if (clarityResult.status === "fulfilled") {
-          savePayload.clarity_resume_html = clarityResult.value.resume_html;
-        } else {
-          console.warn("Clarity resume generation failed:", clarityResult.reason);
-        }
-
-        await saveJobApplication(savePayload);
       } else {
         await saveJobApplication({
           id: appId,
@@ -345,17 +365,20 @@ class BackgroundGenerationManager {
       }
 
       // Build list of assets that will be generated in background
-      const upcomingAssets: string[] = ["Cover Letter"];
-      const recommendedAssetNames = (jdIntelligence?.recommended_assets || []).map((a: any) => a.name);
-      upcomingAssets.push(...recommendedAssetNames);
-      upcomingAssets.push("Dashboard");
+      const upcomingAssets: string[] = [];
+      if (sel.coverLetter) upcomingAssets.push("Cover Letter");
+      if (sel.materials) {
+        const recommendedAssetNames = (jdIntelligence?.recommended_assets || []).map((a: any) => a.name);
+        upcomingAssets.push(...recommendedAssetNames);
+      }
+      if (sel.dashboard) upcomingAssets.push("Dashboard");
 
       // Signal foreground completion — user navigates to detail page now
       this.updateJob(appId, {
         status: "resume-complete",
-        progress: "Resume ready! Generating remaining assets...",
+        progress: upcomingAssets.length ? "Resume ready! Generating remaining assets..." : "Done!",
         generatingAssets: upcomingAssets,
-        currentAsset: "Cover Letter",
+        currentAsset: upcomingAssets[0],
       });
 
       // ========== PHASE 4: Background (research + cover letter + materials + dashboard) ==========
@@ -363,44 +386,48 @@ class BackgroundGenerationManager {
       // 4a. Research company (deferred from foreground — only feeds dashboard)
       let researchedSections: any[] | undefined;
       let researchedCfoScenarios: any[] | undefined;
-      try {
-        this.updateJob(appId, { progress: "Researching company..." });
-        const { researchCompany } = await import("@/lib/api/researchCompany");
-        const research = await researchCompany({
-          jobUrl: jobUrl || undefined,
-          companyUrl: companyUrl || undefined,
-          jobTitle,
-          companyName,
-          department,
-          jobDescription: markdown,
-        });
-        researchedSections = research.sections;
-        researchedCfoScenarios = research.cfoScenarios;
-      } catch (e) {
-        console.warn("Research failed:", e);
+      if (sel.dashboard) {
+        try {
+          this.updateJob(appId, { progress: "Researching company..." });
+          const { researchCompany } = await import("@/lib/api/researchCompany");
+          const research = await researchCompany({
+            jobUrl: jobUrl || undefined,
+            companyUrl: companyUrl || undefined,
+            jobTitle,
+            companyName,
+            department,
+            jobDescription: markdown,
+          });
+          researchedSections = research.sections;
+          researchedCfoScenarios = research.cfoScenarios;
+        } catch (e) {
+          console.warn("Research failed:", e);
+        }
       }
 
       // 4b. Generate cover letter
-      this.updateJob(appId, { status: "cover-letter", progress: "Generating cover letter...", currentAsset: "Cover Letter" });
-      let coverLetter = "";
-      try {
-        await streamTailoredLetter({
-          jobDescription: markdown,
-          onDelta: (text) => { coverLetter += text; },
-          onDone: () => {},
-        });
-        await saveJobApplication({
-          id: appId,
-          job_url: jobUrl,
-          cover_letter: coverLetter,
-          generation_status: "cover-letter-complete",
-        } as any);
-      } catch (e) {
-        console.warn("Cover letter generation failed:", e);
+      if (sel.coverLetter) {
+        this.updateJob(appId, { status: "cover-letter", progress: "Generating cover letter...", currentAsset: "Cover Letter" });
+        let coverLetter = "";
+        try {
+          await streamTailoredLetter({
+            jobDescription: markdown,
+            onDelta: (text) => { coverLetter += text; },
+            onDone: () => {},
+          });
+          await saveJobApplication({
+            id: appId,
+            job_url: jobUrl,
+            cover_letter: coverLetter,
+            generation_status: "cover-letter-complete",
+          } as any);
+        } catch (e) {
+          console.warn("Cover letter generation failed:", e);
+        }
       }
 
       // 4c. Generate dynamic materials from JD-recommended assets
-      const recommendedAssets = jdIntelligence?.recommended_assets || [];
+      const recommendedAssets = sel.materials ? (jdIntelligence?.recommended_assets || []) : [];
       if (recommendedAssets.length > 0) {
         this.updateJob(appId, { status: "generating-materials", progress: `Generating materials (0/${recommendedAssets.length})...` });
 
@@ -520,42 +547,47 @@ class BackgroundGenerationManager {
       }
 
       // 4d. PAUSE for dashboard customization — store research data on job
-      this.updateJob(appId, {
-        status: "awaiting-dashboard-config",
-        progress: "Customize your dashboard",
-        currentAsset: "Dashboard",
-        researchedSections,
-        researchedCfoScenarios,
-        scrapedBranding: brandingData,
-        _pipelineState: {
-          jobUrl,
-          companyUrl,
-          markdown,
-          brandingData,
-          companyName,
-          jobTitle,
-          department,
-          competitors,
-          customers,
-          products,
-          jdIntelligence,
-          candidateName,
-        },
-      });
+      if (sel.dashboard) {
+        this.updateJob(appId, {
+          status: "awaiting-dashboard-config",
+          progress: "Customize your dashboard",
+          currentAsset: "Dashboard",
+          researchedSections,
+          researchedCfoScenarios,
+          scrapedBranding: brandingData,
+          _pipelineState: {
+            jobUrl,
+            companyUrl,
+            markdown,
+            brandingData,
+            companyName,
+            jobTitle,
+            department,
+            competitors,
+            customers,
+            products,
+            jdIntelligence,
+            candidateName,
+          },
+        });
 
-      // Auto-resume with defaults after 5 minutes if user doesn't interact
-      setTimeout(() => {
-        const currentJob = this.jobs.get(appId);
-        if (currentJob?.status === "awaiting-dashboard-config") {
-          console.log("[Pipeline] Auto-resuming dashboard generation with defaults for", appId);
-          this.resumeDashboardGeneration(appId, {
-            selectedSections: researchedSections?.slice(0, 7),
-            selectedCfoScenarios: researchedCfoScenarios
-              ?.sort((a: any, b: any) => (a.relevanceRank || 99) - (b.relevanceRank || 99))
-              .slice(0, 3),
-          });
-        }
-      }, 300_000);
+        // Auto-resume with defaults after 5 minutes if user doesn't interact
+        setTimeout(() => {
+          const currentJob = this.jobs.get(appId);
+          if (currentJob?.status === "awaiting-dashboard-config") {
+            console.log("[Pipeline] Auto-resuming dashboard generation with defaults for", appId);
+            this.resumeDashboardGeneration(appId, {
+              selectedSections: researchedSections?.slice(0, 7),
+              selectedCfoScenarios: researchedCfoScenarios
+                ?.sort((a: any, b: any) => (a.relevanceRank || 99) - (b.relevanceRank || 99))
+                .slice(0, 3),
+            });
+          }
+        }, 300_000);
+      } else {
+        this.updateJob(appId, { status: "complete", progress: "Done!" });
+        await saveJobApplication({ id: appId, job_url: jobUrl, status: "complete", generation_status: "complete" } as any);
+      }
     } catch (err: any) {
       console.error("Background generation error:", err);
       this.updateJob(appId, { status: "error", progress: "Failed", error: err.message });
