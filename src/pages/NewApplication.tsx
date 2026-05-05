@@ -211,7 +211,7 @@ const NewApplication = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Globe className="h-5 w-5" /> Company Website URL (optional)
+                      <Globe className="h-5 w-5" /> Company Website URL
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -230,7 +230,10 @@ const NewApplication = () => {
 
               <Button
                 onClick={handleAnalyze}
-                disabled={useManualInput ? !manualJobDescription.trim() : !jobUrl.trim()}
+                disabled={
+                  (useManualInput ? !manualJobDescription.trim() : !jobUrl.trim()) ||
+                  (genDashboard && !isValidUrl(companyUrl))
+                }
                 className="w-full"
                 size="lg"
               >
