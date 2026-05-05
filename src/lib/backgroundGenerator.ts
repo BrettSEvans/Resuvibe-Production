@@ -547,42 +547,47 @@ class BackgroundGenerationManager {
       }
 
       // 4d. PAUSE for dashboard customization — store research data on job
-      this.updateJob(appId, {
-        status: "awaiting-dashboard-config",
-        progress: "Customize your dashboard",
-        currentAsset: "Dashboard",
-        researchedSections,
-        researchedCfoScenarios,
-        scrapedBranding: brandingData,
-        _pipelineState: {
-          jobUrl,
-          companyUrl,
-          markdown,
-          brandingData,
-          companyName,
-          jobTitle,
-          department,
-          competitors,
-          customers,
-          products,
-          jdIntelligence,
-          candidateName,
-        },
-      });
+      if (sel.dashboard) {
+        this.updateJob(appId, {
+          status: "awaiting-dashboard-config",
+          progress: "Customize your dashboard",
+          currentAsset: "Dashboard",
+          researchedSections,
+          researchedCfoScenarios,
+          scrapedBranding: brandingData,
+          _pipelineState: {
+            jobUrl,
+            companyUrl,
+            markdown,
+            brandingData,
+            companyName,
+            jobTitle,
+            department,
+            competitors,
+            customers,
+            products,
+            jdIntelligence,
+            candidateName,
+          },
+        });
 
-      // Auto-resume with defaults after 5 minutes if user doesn't interact
-      setTimeout(() => {
-        const currentJob = this.jobs.get(appId);
-        if (currentJob?.status === "awaiting-dashboard-config") {
-          console.log("[Pipeline] Auto-resuming dashboard generation with defaults for", appId);
-          this.resumeDashboardGeneration(appId, {
-            selectedSections: researchedSections?.slice(0, 7),
-            selectedCfoScenarios: researchedCfoScenarios
-              ?.sort((a: any, b: any) => (a.relevanceRank || 99) - (b.relevanceRank || 99))
-              .slice(0, 3),
-          });
-        }
-      }, 300_000);
+        // Auto-resume with defaults after 5 minutes if user doesn't interact
+        setTimeout(() => {
+          const currentJob = this.jobs.get(appId);
+          if (currentJob?.status === "awaiting-dashboard-config") {
+            console.log("[Pipeline] Auto-resuming dashboard generation with defaults for", appId);
+            this.resumeDashboardGeneration(appId, {
+              selectedSections: researchedSections?.slice(0, 7),
+              selectedCfoScenarios: researchedCfoScenarios
+                ?.sort((a: any, b: any) => (a.relevanceRank || 99) - (b.relevanceRank || 99))
+                .slice(0, 3),
+            });
+          }
+        }, 300_000);
+      } else {
+        this.updateJob(appId, { status: "complete", progress: "Done!" });
+        await saveJobApplication({ id: appId, job_url: jobUrl, status: "complete", generation_status: "complete" } as any);
+      }
     } catch (err: any) {
       console.error("Background generation error:", err);
       this.updateJob(appId, { status: "error", progress: "Failed", error: err.message });
