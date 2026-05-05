@@ -173,12 +173,6 @@ class BackgroundGenerationManager {
     this.notify();
 
     // Run in background (don't await at call site)
-    this.runPipeline(appId, jobUrl, companyUrl, jobDescription, useManualInput);
-
-    return appId;
-  }
-
-    // Run in background (don't await at call site)
     this.runPipeline(appId, jobUrl, companyUrl, jobDescription, useManualInput, sel);
 
     return appId;
