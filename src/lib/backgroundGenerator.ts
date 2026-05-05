@@ -365,17 +365,20 @@ class BackgroundGenerationManager {
       }
 
       // Build list of assets that will be generated in background
-      const upcomingAssets: string[] = ["Cover Letter"];
-      const recommendedAssetNames = (jdIntelligence?.recommended_assets || []).map((a: any) => a.name);
-      upcomingAssets.push(...recommendedAssetNames);
-      upcomingAssets.push("Dashboard");
+      const upcomingAssets: string[] = [];
+      if (sel.coverLetter) upcomingAssets.push("Cover Letter");
+      if (sel.materials) {
+        const recommendedAssetNames = (jdIntelligence?.recommended_assets || []).map((a: any) => a.name);
+        upcomingAssets.push(...recommendedAssetNames);
+      }
+      if (sel.dashboard) upcomingAssets.push("Dashboard");
 
       // Signal foreground completion — user navigates to detail page now
       this.updateJob(appId, {
         status: "resume-complete",
-        progress: "Resume ready! Generating remaining assets...",
+        progress: upcomingAssets.length ? "Resume ready! Generating remaining assets..." : "Done!",
         generatingAssets: upcomingAssets,
-        currentAsset: "Cover Letter",
+        currentAsset: upcomingAssets[0],
       });
 
       // ========== PHASE 4: Background (research + cover letter + materials + dashboard) ==========
@@ -383,40 +386,44 @@ class BackgroundGenerationManager {
       // 4a. Research company (deferred from foreground — only feeds dashboard)
       let researchedSections: any[] | undefined;
       let researchedCfoScenarios: any[] | undefined;
-      try {
-        this.updateJob(appId, { progress: "Researching company..." });
-        const { researchCompany } = await import("@/lib/api/researchCompany");
-        const research = await researchCompany({
-          jobUrl: jobUrl || undefined,
-          companyUrl: companyUrl || undefined,
-          jobTitle,
-          companyName,
-          department,
-          jobDescription: markdown,
-        });
-        researchedSections = research.sections;
-        researchedCfoScenarios = research.cfoScenarios;
-      } catch (e) {
-        console.warn("Research failed:", e);
+      if (sel.dashboard) {
+        try {
+          this.updateJob(appId, { progress: "Researching company..." });
+          const { researchCompany } = await import("@/lib/api/researchCompany");
+          const research = await researchCompany({
+            jobUrl: jobUrl || undefined,
+            companyUrl: companyUrl || undefined,
+            jobTitle,
+            companyName,
+            department,
+            jobDescription: markdown,
+          });
+          researchedSections = research.sections;
+          researchedCfoScenarios = research.cfoScenarios;
+        } catch (e) {
+          console.warn("Research failed:", e);
+        }
       }
 
       // 4b. Generate cover letter
-      this.updateJob(appId, { status: "cover-letter", progress: "Generating cover letter...", currentAsset: "Cover Letter" });
-      let coverLetter = "";
-      try {
-        await streamTailoredLetter({
-          jobDescription: markdown,
-          onDelta: (text) => { coverLetter += text; },
-          onDone: () => {},
-        });
-        await saveJobApplication({
-          id: appId,
-          job_url: jobUrl,
-          cover_letter: coverLetter,
-          generation_status: "cover-letter-complete",
-        } as any);
-      } catch (e) {
-        console.warn("Cover letter generation failed:", e);
+      if (sel.coverLetter) {
+        this.updateJob(appId, { status: "cover-letter", progress: "Generating cover letter...", currentAsset: "Cover Letter" });
+        let coverLetter = "";
+        try {
+          await streamTailoredLetter({
+            jobDescription: markdown,
+            onDelta: (text) => { coverLetter += text; },
+            onDone: () => {},
+          });
+          await saveJobApplication({
+            id: appId,
+            job_url: jobUrl,
+            cover_letter: coverLetter,
+            generation_status: "cover-letter-complete",
+          } as any);
+        } catch (e) {
+          console.warn("Cover letter generation failed:", e);
+        }
       }
 
       // 4c. Generate dynamic materials from JD-recommended assets
