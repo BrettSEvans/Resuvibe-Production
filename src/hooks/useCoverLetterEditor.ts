@@ -50,6 +50,7 @@ export function useCoverLetterEditor({
       let accumulated = "";
       await streamTailoredLetter({
         jobDescription,
+        candidateName: [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(" ") || undefined,
         customInstructions: userProfile?.master_cover_letter
           ? `Use this as my master cover letter style reference:\n${userProfile.master_cover_letter}`
           : undefined,
