@@ -94,7 +94,7 @@ ${customInstructions ? `\nAdditional instructions from the candidate: ${customIn
           { role: 'system', content: systemPrompt },
           {
             role: 'user',
-            content: `Here is my base cover letter:\n\n${BASE_COVER_LETTER}\n\n---\n\nHere is the job posting I'm applying to:\n\n${jobDescription}`
+            content: `Here is my base cover letter:\n\n${baseLetter}\n\n---\n\nHere is the job posting I'm applying to:\n\n${jobDescription}`
           },
         ],
         stream: true,
