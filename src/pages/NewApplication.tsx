@@ -18,6 +18,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BatchJobInput from "@/components/BatchJobInput";
 import GenerationProgressBar, { type PipelineStage } from "@/components/GenerationProgressBar";
 import { backgroundGenerator } from "@/lib/backgroundGenerator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 type Step = "input" | "analyzing";
 
