@@ -167,20 +167,26 @@ export default function Onboarding() {
           <CardTitle className="text-xl font-bold text-foreground">Set Up Your Profile</CardTitle>
           <CardDescription>Step {step} of {totalSteps}</CardDescription>
           <div className="flex items-center justify-center pt-1">
-            {[1, 2, 3, 4, 5].map((s, idx) => (
+            {[1, 2, 3, 4, 5].map((s, idx) => {
+              const isNavigable = s <= step;
+              return (
               <div key={s} className="flex items-center">
-                <div
+                <button
+                  type="button"
+                  onClick={() => isNavigable && setStep(s)}
+                  disabled={!isNavigable}
                   className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium transition-colors ${
                     s === step
                       ? "bg-primary text-primary-foreground"
                       : s < step
-                      ? "bg-primary/20 text-primary"
-                      : "bg-muted text-muted-foreground"
-                  }`}
+                      ? "bg-primary/20 text-primary hover:bg-primary/30"
+                      : "bg-muted text-muted-foreground cursor-not-allowed"
+                  } ${isNavigable ? "cursor-pointer" : ""}`}
                   aria-current={s === step ? "step" : undefined}
+                  aria-label={`Go to step ${s}`}
                 >
                   {stepIcons[s - 1]}
-                </div>
+                </button>
                 {idx < 4 && (
                   <div
                     className={`h-0.5 w-6 mx-1 transition-colors ${
