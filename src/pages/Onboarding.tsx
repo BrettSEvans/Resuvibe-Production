@@ -338,7 +338,7 @@ export default function Onboarding() {
               <Rocket className="h-12 w-12 mx-auto text-primary" />
               <h3 className="text-lg font-semibold text-foreground">You're all set!</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Your profile is ready. Start by creating your first job application — just paste a job URL and we'll handle the rest.
+                Your profile is ready. Start by creating your first job application.
               </p>
             </div>
           )}
