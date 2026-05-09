@@ -30,7 +30,15 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, signOut } = useAuth();
-  const [step, setStep] = useState(1);
+  const [step, setStepRaw] = useState(1);
+  const [maxStep, setMaxStep] = useState(1);
+  const setStep = useCallback((s: number | ((prev: number) => number)) => {
+    setStepRaw((prev) => {
+      const next = typeof s === "function" ? (s as (p: number) => number)(prev) : s;
+      setMaxStep((m) => Math.max(m, next));
+      return next;
+    });
+  }, []);
   const [loading, setLoading] = useState(false);
 
   const handleSignOut = async () => {
@@ -168,7 +176,7 @@ export default function Onboarding() {
           <CardDescription>Step {step} of {totalSteps}</CardDescription>
           <div className="flex items-center justify-center pt-1">
             {[1, 2, 3, 4, 5].map((s, idx) => {
-              const isNavigable = s <= step;
+              const isNavigable = s <= maxStep;
               return (
               <div key={s} className="flex items-center">
                 <button
@@ -178,7 +186,7 @@ export default function Onboarding() {
                   className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium transition-colors ${
                     s === step
                       ? "bg-primary text-primary-foreground"
-                      : s < step
+                      : s <= maxStep
                       ? "bg-primary/20 text-primary hover:bg-primary/30"
                       : "bg-muted text-muted-foreground cursor-not-allowed"
                   } ${isNavigable ? "cursor-pointer" : ""}`}
@@ -190,7 +198,7 @@ export default function Onboarding() {
                 {idx < 4 && (
                   <div
                     className={`h-0.5 w-6 mx-1 transition-colors ${
-                      s < step ? "bg-primary/40" : "bg-muted"
+                      s < maxStep ? "bg-primary/40" : "bg-muted"
                     }`}
                     aria-hidden="true"
                   />
