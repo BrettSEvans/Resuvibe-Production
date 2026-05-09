@@ -196,7 +196,8 @@ export default function Onboarding() {
                   />
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
           <Progress value={progress} className="h-1.5" />
         </CardHeader>
