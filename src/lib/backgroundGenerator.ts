@@ -290,7 +290,7 @@ class BackgroundGenerationManager {
         department = jdIntelligence.department;
       }
 
-      const { resumeText, candidateName } = profileResult;
+      const { resumeText, candidateName, masterCoverLetter } = profileResult;
 
       // Save intermediate results
       await saveJobApplication({
