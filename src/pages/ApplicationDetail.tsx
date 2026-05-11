@@ -94,7 +94,9 @@ const ApplicationDetail = () => {
               onClick={() => nextId && navigate(`/applications/${nextId}`)} title="Next application">
               <ChevronRightIcon className="h-4 w-4" />
             </Button>
-            <Badge variant={app.status === "complete" ? "default" : "secondary"}>{app.status}</Badge>
+            {app.status !== "complete" && (
+              <Badge variant="secondary">{app.status}</Badge>
+            )}
           </div>
         </div>
 
