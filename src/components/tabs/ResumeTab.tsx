@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import VersionDownloadAlert from "@/components/VersionDownloadAlert";
 import { Button } from "@/components/ui/button";
