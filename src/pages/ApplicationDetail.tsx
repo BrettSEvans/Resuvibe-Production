@@ -73,30 +73,32 @@ const ApplicationDetail = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate("/applications")}>
               <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Button>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {companyName || "Unknown Company"} — {jobTitle || "Unknown Role"}
-              </h1>
-              <p className="text-xs text-muted-foreground">{app.job_url}</p>
+            <div className="flex items-center gap-2" data-tour="prev-next">
+              <Button variant="outline" size="icon" className="h-8 w-8" disabled={!prevId}
+                onClick={() => prevId && navigate(`/applications/${prevId}`)} title="Previous application">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" className="h-8 w-8" disabled={!nextId}
+                onClick={() => nextId && navigate(`/applications/${nextId}`)} title="Next application">
+                <ChevronRightIcon className="h-4 w-4" />
+              </Button>
+              {app.status !== "complete" && (
+                <Badge variant="secondary">{app.status}</Badge>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-2" data-tour="prev-next">
-            <Button variant="outline" size="icon" className="h-8 w-8" disabled={!prevId}
-              onClick={() => prevId && navigate(`/applications/${prevId}`)} title="Previous application">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8" disabled={!nextId}
-              onClick={() => nextId && navigate(`/applications/${nextId}`)} title="Next application">
-              <ChevronRightIcon className="h-4 w-4" />
-            </Button>
-            {app.status !== "complete" && (
-              <Badge variant="secondary">{app.status}</Badge>
-            )}
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {companyName || "Unknown Company"} — {jobTitle || "Unknown Role"}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium">Job Listing:</span> {app.job_url}
+            </p>
           </div>
         </div>
 
