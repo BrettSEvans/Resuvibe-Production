@@ -133,6 +133,7 @@ function ResumeDownloadButton({
   displayHtml,
   isOlderVersion,
   companyName,
+  jobTitle,
   userProfile,
   toast,
   disabled,
@@ -142,6 +143,7 @@ function ResumeDownloadButton({
   displayHtml: string;
   isOlderVersion: boolean;
   companyName: string;
+  jobTitle: string;
   userProfile: UserProfileSnapshot | null;
   toast: ToastFn;
   disabled?: boolean;
