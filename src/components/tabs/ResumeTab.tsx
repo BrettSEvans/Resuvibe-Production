@@ -236,9 +236,9 @@ function ResumeVariantToolbar({
 }) {
   const disabled = isRefining || isRegenerating;
   return (
-    <div className="flex flex-wrap items-center gap-2 w-full">
-      <div className="flex items-center gap-2 w-[400px] max-w-full mx-auto">
-
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full">
+      <div />
+      <div className="flex items-center gap-2 w-[400px] max-w-full justify-self-center">
         <Input
           placeholder="Ask for changes (e.g. shorten the summary)"
           value={askPrompt}
@@ -263,17 +263,19 @@ function ResumeVariantToolbar({
           {isRefining ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
         </Button>
       </div>
-      <Button variant="outline" size="sm" onClick={onEdit} disabled={disabled}>
-        <Edit3 className="mr-2 h-4 w-4" /> Edit
-      </Button>
-      <Button variant="outline" size="sm" disabled={disabled} onClick={onRegenerate}>
-        {isRegenerating ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <RefreshCw className="mr-2 h-4 w-4" />
-        )}
-        {isRegenerating ? "Regenerating…" : "Regenerate"}
-      </Button>
+      <div className="flex items-center gap-2 justify-self-end">
+        <Button variant="outline" size="sm" onClick={onEdit} disabled={disabled}>
+          <Edit3 className="mr-2 h-4 w-4" /> Edit
+        </Button>
+        <Button variant="outline" size="sm" disabled={disabled} onClick={onRegenerate}>
+          {isRegenerating ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="mr-2 h-4 w-4" />
+          )}
+          {isRegenerating ? "Regenerating…" : "Regenerate"}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -679,7 +681,7 @@ export function ResumeTab({
 
       {/* Sub-tabs for ATS Play vs Clarity */}
       <Tabs value={activeVariant} onValueChange={(v) => { setActiveVariant(v as ResumeVariant); setEditingResume(false); setPreviewResumeHtml(null); }}>
-        <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center justify-between gap-2">
           <TooltipProvider delayDuration={150}>
             <TabsList>
               <Tooltip>
@@ -712,7 +714,7 @@ export function ResumeTab({
               </Tooltip>
             </TabsList>
           </TooltipProvider>
-          <div id="resume-variant-actions" className="flex flex-1 flex-wrap items-center gap-2" />
+          <div id="resume-variant-actions" className="flex flex-1 items-center gap-2" />
           {(() => {
             const activeHtml = activeVariant === "ats" ? atsHtml : clarityHtml;
             if (!activeHtml) return null;
