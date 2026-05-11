@@ -35,6 +35,8 @@ import {
   ChevronDown,
   Send,
   ArrowUp,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -225,6 +227,9 @@ function ResumeVariantToolbar({
   onAskForChanges,
   onEdit,
   onRegenerate,
+  chatVisible,
+  onToggleChat,
+  hasChatHistory,
 }: {
   isRegenerating: boolean;
   isRefining: boolean;
@@ -233,12 +238,27 @@ function ResumeVariantToolbar({
   onAskForChanges: () => void;
   onEdit: () => void;
   onRegenerate: () => void;
+  chatVisible: boolean;
+  onToggleChat: () => void;
+  hasChatHistory: boolean;
 }) {
   const disabled = isRefining || isRegenerating;
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full">
       <div />
-      <div className="flex items-center gap-2 w-[400px] max-w-full justify-self-center">
+      <div className="flex items-center gap-2 w-[440px] max-w-full justify-self-center">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onToggleChat}
+          disabled={!hasChatHistory}
+          aria-label={chatVisible ? "Hide chat history" : "Show chat history"}
+          title={hasChatHistory ? (chatVisible ? "Hide chat history" : "Show chat history") : "No chat history yet"}
+          className="h-9 w-9 shrink-0"
+        >
+          {chatVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </Button>
         <Input
           placeholder="Ask for changes (e.g. shorten the summary)"
           value={askPrompt}
@@ -332,11 +352,15 @@ function ResumeVariantContent({
   const htmlField = variant === "ats" ? "resume_html" : "clarity_resume_html";
   const [askPrompt, setAskPrompt] = useState("");
   const [isRefining, setIsRefining] = useState(false);
+  const [chatHistory, setChatHistory] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [chatVisible, setChatVisible] = useState(false);
 
   const handleAskForChanges = async () => {
     if (!askPrompt.trim() || !html) return;
     setIsRefining(true);
     const promptText = askPrompt.trim();
+    setChatHistory((h) => [...h, { role: "user", content: promptText }]);
+    setChatVisible(true);
     try {
       // Save current as revision
       try {
@@ -411,9 +435,11 @@ function ResumeVariantContent({
       setApp((prev) => prev ? { ...prev, [htmlField]: cleaned } : prev);
       setResumeRevisionTrigger((t) => t + 1);
       setAskPrompt("");
+      setChatHistory((h) => [...h, { role: "assistant", content: `Updated ${variantLabel} resume based on your request.` }]);
       toast({ title: "Changes applied", description: `${variantLabel} resume updated.` });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
+      setChatHistory((h) => [...h, { role: "assistant", content: `Couldn't apply changes: ${message}` }]);
       toast({ title: "Couldn't apply changes", description: message, variant: "destructive" });
     } finally {
       setIsRefining(false);
@@ -447,12 +473,32 @@ function ResumeVariantContent({
       onAskForChanges={handleAskForChanges}
       onEdit={() => { setEditingResume(true); setPreviewResumeHtml(null); }}
       onRegenerate={() => openRegenDialog(variant)}
+      chatVisible={chatVisible}
+      onToggleChat={() => setChatVisible((v) => !v)}
+      hasChatHistory={chatHistory.length > 0}
     />
   );
 
   return (
     <div className="space-y-4">
       {toolbarTarget ? createPortal(toolbar, toolbarTarget) : toolbar}
+
+      {chatVisible && chatHistory.length > 0 && (
+        <Card>
+          <CardContent className="pt-4 space-y-2 max-h-[240px] overflow-y-auto">
+            {chatHistory.map((msg, i) => (
+              <div key={i} className={`text-sm p-2 rounded ${msg.role === "user" ? "bg-primary/10 text-right ml-8" : "bg-muted mr-8"}`}>
+                {msg.content}
+              </div>
+            ))}
+            {isRefining && (
+              <div className="text-sm p-2 rounded bg-muted flex items-center gap-2 mr-8">
+                <Loader2 className="h-3 w-3 animate-spin" /> Refining…
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {editingResume ? (
         <InlineHtmlEditor
