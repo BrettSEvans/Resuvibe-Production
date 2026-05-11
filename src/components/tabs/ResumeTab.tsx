@@ -681,7 +681,7 @@ export function ResumeTab({
 
       {/* Sub-tabs for ATS Play vs Clarity */}
       <Tabs value={activeVariant} onValueChange={(v) => { setActiveVariant(v as ResumeVariant); setEditingResume(false); setPreviewResumeHtml(null); }}>
-        <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center justify-between gap-2">
           <TooltipProvider delayDuration={150}>
             <TabsList>
               <Tooltip>
