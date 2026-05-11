@@ -283,7 +283,7 @@ function ResumeVariantToolbar({
           {isRefining ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
         </Button>
       </div>
-      <div className="flex items-center gap-2 justify-self-end ml-2">
+      <div className="flex items-center gap-2 justify-self-end ml-6">
         <Button variant="outline" size="sm" onClick={onEdit} disabled={disabled}>
           <Edit3 className="mr-2 h-4 w-4" /> Edit
         </Button>
