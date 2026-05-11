@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Sparkles, Sun, Moon, Shield, LogOut, Menu, User } from "lucide-react";
+import { Sparkles, Sun, Moon, Shield, LogOut, Menu } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -55,12 +55,13 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
   const links = [
     { to: "/", label: "Applications", icon: null, match: (p: string) => p === "/" || p === "/applications", tourId: "applications" },
     { to: "/templates", label: "Templates", icon: null, match: (p: string) => p === "/templates", tourId: "templates" },
-    { to: "/profile", label: "Profile", icon: <User className="h-3.5 w-3.5" />, match: (p: string) => p === "/profile", tourId: "profile" },
     ...(isAdmin ? [
       { to: "/stories", label: "Stories", icon: null, match: (p: string) => p === "/stories", tourId: undefined },
       { to: "/admin", label: "Admin", icon: <Shield className="h-3.5 w-3.5" />, match: (p: string) => p === "/admin", tourId: undefined },
     ] : []),
   ];
+
+  const profileActive = pathname === "/profile";
 
   const handleNav = (to: string) => {
     navigate(to);
@@ -97,14 +98,24 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
 
         <div className="flex items-center gap-2">
           {user && (
-            <Avatar className="h-7 w-7 shrink-0">
-              {(user.user_metadata?.avatar_url || user.user_metadata?.picture) && (
-                <AvatarImage src={user.user_metadata?.avatar_url || user.user_metadata?.picture} alt="Avatar" />
+            <button
+              onClick={() => navigate("/profile")}
+              aria-label="Profile"
+              data-tour="profile"
+              className={cn(
+                "rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-shadow",
+                profileActive && "ring-2 ring-primary ring-offset-2 ring-offset-background"
               )}
-              <AvatarFallback className="bg-primary/20 text-primary text-[10px]">
-                {user.email?.charAt(0).toUpperCase() ?? "?"}
-              </AvatarFallback>
-            </Avatar>
+            >
+              <Avatar className="h-8 w-8 shrink-0">
+                {(user.user_metadata?.avatar_url || user.user_metadata?.picture) && (
+                  <AvatarImage src={user.user_metadata?.avatar_url || user.user_metadata?.picture} alt="Avatar" />
+                )}
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                  {user.email?.charAt(0).toUpperCase() ?? "?"}
+                </AvatarFallback>
+              </Avatar>
+            </button>
           )}
           <ThemeToggle />
           <Button
