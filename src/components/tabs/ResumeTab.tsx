@@ -473,6 +473,9 @@ function ResumeVariantContent({
       onAskForChanges={handleAskForChanges}
       onEdit={() => { setEditingResume(true); setPreviewResumeHtml(null); }}
       onRegenerate={() => openRegenDialog(variant)}
+      chatVisible={chatVisible}
+      onToggleChat={() => setChatVisible((v) => !v)}
+      hasChatHistory={chatHistory.length > 0}
     />
   );
 
