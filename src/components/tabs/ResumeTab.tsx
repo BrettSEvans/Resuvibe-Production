@@ -435,9 +435,11 @@ function ResumeVariantContent({
       setApp((prev) => prev ? { ...prev, [htmlField]: cleaned } : prev);
       setResumeRevisionTrigger((t) => t + 1);
       setAskPrompt("");
+      setChatHistory((h) => [...h, { role: "assistant", content: `Updated ${variantLabel} resume based on your request.` }]);
       toast({ title: "Changes applied", description: `${variantLabel} resume updated.` });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unknown error";
+      setChatHistory((h) => [...h, { role: "assistant", content: `Couldn't apply changes: ${message}` }]);
       toast({ title: "Couldn't apply changes", description: message, variant: "destructive" });
     } finally {
       setIsRefining(false);
