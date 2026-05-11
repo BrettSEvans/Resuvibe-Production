@@ -322,6 +322,95 @@ function ResumeVariantContent({
   toast: ToastFn;
 }) {
   const htmlField = variant === "ats" ? "resume_html" : "clarity_resume_html";
+  const [askPrompt, setAskPrompt] = useState("");
+  const [isRefining, setIsRefining] = useState(false);
+
+  const handleAskForChanges = async () => {
+    if (!askPrompt.trim() || !html) return;
+    setIsRefining(true);
+    const promptText = askPrompt.trim();
+    try {
+      // Save current as revision
+      try {
+        await supabase.from("resume_revisions").insert({
+          application_id: id,
+          html,
+          label: `Before "${promptText.slice(0, 60)}" (${variantLabel})`,
+          revision_number: Date.now(),
+          resume_type: variant,
+        });
+      } catch (_) { /* non-critical */ }
+
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/refine-material`;
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          currentContent: html,
+          contentType: "html",
+          assetName: `${variantLabel} resume`,
+          userMessage: promptText,
+        }),
+      });
+
+      if (!resp.ok || !resp.body) {
+        let msg = "Refine failed";
+        try { const j = await resp.json(); if (j?.error) msg = j.error; } catch (_) {}
+        throw new Error(msg);
+      }
+
+      // Stream SSE and accumulate full HTML
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let result = "";
+      let done = false;
+      while (!done) {
+        const { done: streamDone, value } = await reader.read();
+        if (streamDone) break;
+        buffer += decoder.decode(value, { stream: true });
+        let nl: number;
+        while ((nl = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, nl);
+          buffer = buffer.slice(nl + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") { done = true; break; }
+          try {
+            const p = JSON.parse(json);
+            const c = p.choices?.[0]?.delta?.content;
+            if (c) result += c;
+          } catch {
+            buffer = line + "\n" + buffer;
+            break;
+          }
+        }
+      }
+
+      let cleaned = result.trim()
+        .replace(/^```html\s*/i, "")
+        .replace(/^```\s*/, "")
+        .replace(/\s*```$/, "")
+        .trim();
+
+      if (!cleaned || cleaned.length < 50) throw new Error("AI returned empty response");
+
+      await saveJobApplication({ id, job_url: app.job_url, [htmlField]: cleaned } as any);
+      setApp((prev) => prev ? { ...prev, [htmlField]: cleaned } : prev);
+      setResumeRevisionTrigger((t) => t + 1);
+      setAskPrompt("");
+      toast({ title: "Changes applied", description: `${variantLabel} resume updated.` });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Unknown error";
+      toast({ title: "Couldn't apply changes", description: message, variant: "destructive" });
+    } finally {
+      setIsRefining(false);
+    }
+  };
 
   if (!html) {
     return (
@@ -344,6 +433,10 @@ function ResumeVariantContent({
     <div className="space-y-4">
       <ResumeVariantToolbar
         isRegenerating={isRegenerating}
+        isRefining={isRefining}
+        askPrompt={askPrompt}
+        setAskPrompt={setAskPrompt}
+        onAskForChanges={handleAskForChanges}
         onEdit={() => { setEditingResume(true); setPreviewResumeHtml(null); }}
         onRegenerate={() => openRegenDialog(variant)}
       />
