@@ -98,14 +98,24 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
 
         <div className="flex items-center gap-2">
           {user && (
-            <Avatar className="h-7 w-7 shrink-0">
-              {(user.user_metadata?.avatar_url || user.user_metadata?.picture) && (
-                <AvatarImage src={user.user_metadata?.avatar_url || user.user_metadata?.picture} alt="Avatar" />
+            <button
+              onClick={() => navigate("/profile")}
+              aria-label="Profile"
+              data-tour="profile"
+              className={cn(
+                "rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-shadow",
+                profileActive && "ring-2 ring-primary ring-offset-2 ring-offset-background"
               )}
-              <AvatarFallback className="bg-primary/20 text-primary text-[10px]">
-                {user.email?.charAt(0).toUpperCase() ?? "?"}
-              </AvatarFallback>
-            </Avatar>
+            >
+              <Avatar className="h-8 w-8 shrink-0">
+                {(user.user_metadata?.avatar_url || user.user_metadata?.picture) && (
+                  <AvatarImage src={user.user_metadata?.avatar_url || user.user_metadata?.picture} alt="Avatar" />
+                )}
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                  {user.email?.charAt(0).toUpperCase() ?? "?"}
+                </AvatarFallback>
+              </Avatar>
+            </button>
           )}
           <ThemeToggle />
           <Button
