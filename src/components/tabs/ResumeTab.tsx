@@ -538,7 +538,7 @@ export function ResumeTab({
                 <span>
                   <TabsTrigger value="ats" className="flex items-center gap-1.5">
                     <Target className="h-3.5 w-3.5" />
-                    ATS Play
+                    ATS
                     {isBgGenerating && !atsHtml && <Loader2 className="h-3 w-3 animate-spin" />}
                   </TabsTrigger>
                 </span>
