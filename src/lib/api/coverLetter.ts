@@ -29,12 +29,16 @@ export async function streamTailoredLetter({
   jobDescription,
   customInstructions,
   candidateName,
+  masterCoverLetter,
+  resumeText,
   onDelta,
   onDone,
 }: {
   jobDescription: string;
   customInstructions?: string;
   candidateName?: string;
+  masterCoverLetter?: string | null;
+  resumeText?: string | null;
   onDelta: (text: string) => void;
   onDone: () => void;
 }) {
@@ -44,7 +48,7 @@ export async function streamTailoredLetter({
     {
       method: 'POST',
       headers,
-      body: JSON.stringify({ jobDescription, customInstructions, candidateName }),
+      body: JSON.stringify({ jobDescription, customInstructions, candidateName, masterCoverLetter, resumeText }),
     }
   );
 
