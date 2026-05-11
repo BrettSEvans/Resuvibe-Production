@@ -352,6 +352,8 @@ function ResumeVariantContent({
   const htmlField = variant === "ats" ? "resume_html" : "clarity_resume_html";
   const [askPrompt, setAskPrompt] = useState("");
   const [isRefining, setIsRefining] = useState(false);
+  const [chatHistory, setChatHistory] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [chatVisible, setChatVisible] = useState(false);
 
   const handleAskForChanges = async () => {
     if (!askPrompt.trim() || !html) return;
