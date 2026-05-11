@@ -74,7 +74,7 @@ const ApplicationDetail = () => {
       <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
+          <div className="flex items-baseline gap-3 min-w-0">
             <Button variant="ghost" size="sm" onClick={() => navigate("/applications")} className="shrink-0 h-auto px-2 py-1 text-xs font-normal text-muted-foreground hover:text-foreground">
               <ArrowLeft className="h-3 w-3 mr-1" /> Back
             </Button>
