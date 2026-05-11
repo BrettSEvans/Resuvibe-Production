@@ -145,42 +145,48 @@ export function CoverLetterTab({
             <Button variant="outline" size="sm" onClick={() => handleCopy(displayContent, "Cover letter")}>
               <Copy className="mr-2 h-4 w-4" /> Copy
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => guardedDownload(() => {
-                const printWindow = window.open("", "_blank");
-                if (!printWindow) {
-                  toast({ title: "Popup blocked", description: "Allow popups to download PDF, or use DOCX download instead.", variant: "destructive" });
-                  return;
-                }
-                const pdfTitle = buildFileName(userProfile?.first_name, userProfile?.last_name, "cover-letter", companyName, "pdf");
-                const content = displayContent;
-                const htmlContent = isHtmlContent(content)
-                  ? content
-                  : `<!DOCTYPE html><html><head><title>${pdfTitle}</title><style>
-                    @page { size: letter; margin: 0; }
-                    body { font-family: Roboto, Arial, sans-serif; font-size: 10.5pt; line-height: 1.6; color: #111; margin: 0; padding: 1in 1in 0.75in 1in; }
-                    .content { white-space: pre-wrap; }
-                  </style></head><body><div class="content">${content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div></body></html>`;
-                printWindow.document.write(htmlContent);
-                printWindow.document.close();
-                printWindow.onload = () => { printWindow.print(); };
-              })}
-            >
-              <Download className="mr-2 h-4 w-4" /> Download PDF
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => guardedDownload(() => {
-                const name = buildFileName(userProfile?.first_name, userProfile?.last_name, "cover-letter", companyName, "docx");
-                downloadTextAsDocx(displayContent, name);
-                toast({ title: "Downloading", description: "Cover letter DOCX file is being prepared." });
-              })}
-            >
-              <Download className="mr-2 h-4 w-4" /> Download DOCX
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="mr-2 h-4 w-4" /> Download
+                  <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() => guardedDownload(() => {
+                    const printWindow = window.open("", "_blank");
+                    if (!printWindow) {
+                      toast({ title: "Popup blocked", description: "Allow popups to download PDF, or use DOCX download instead.", variant: "destructive" });
+                      return;
+                    }
+                    const pdfTitle = buildFileName(userProfile?.first_name, userProfile?.last_name, "cover-letter", companyName, "pdf");
+                    const content = displayContent;
+                    const htmlContent = isHtmlContent(content)
+                      ? content
+                      : `<!DOCTYPE html><html><head><title>${pdfTitle}</title><style>
+                        @page { size: letter; margin: 0; }
+                        body { font-family: Roboto, Arial, sans-serif; font-size: 10.5pt; line-height: 1.6; color: #111; margin: 0; padding: 1in 1in 0.75in 1in; }
+                        .content { white-space: pre-wrap; }
+                      </style></head><body><div class="content">${content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div></body></html>`;
+                    printWindow.document.write(htmlContent);
+                    printWindow.document.close();
+                    printWindow.onload = () => { printWindow.print(); };
+                  })}
+                >
+                  <FileDown className="mr-2 h-4 w-4" /> PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => guardedDownload(() => {
+                    const name = buildFileName(userProfile?.first_name, userProfile?.last_name, "cover-letter", companyName, "docx");
+                    downloadTextAsDocx(displayContent, name);
+                    toast({ title: "Downloading", description: "Cover letter DOCX file is being prepared." });
+                  })}
+                >
+                  <Download className="mr-2 h-4 w-4" /> DOCX
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </>
         )}
         {!editingCoverLetter && (
