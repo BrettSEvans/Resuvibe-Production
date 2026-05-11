@@ -192,7 +192,7 @@ export function CoverLetterTab({
         );
         return portalTarget ? createPortal(downloadBtn, portalTarget) : downloadBtn;
       })()}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full">
+      <div className="flex items-center gap-2 w-full">
         <div className="justify-self-start">
           {coverLetter && (
             <Button variant="outline" size="sm" onClick={() => handleCopy(displayContent, "Cover letter")}>
