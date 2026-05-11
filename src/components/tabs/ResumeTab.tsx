@@ -255,7 +255,7 @@ function ResumeVariantToolbar({
           disabled={!hasChatHistory}
           aria-label={chatVisible ? "Hide chat history" : "Show chat history"}
           title={hasChatHistory ? (chatVisible ? "Hide chat history" : "Show chat history") : "No chat history yet"}
-          className="h-9 w-9 shrink-0 -mr-1"
+          className="h-9 w-9 shrink-0 -mr-1.5"
         >
           {chatVisible ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
         </Button>
