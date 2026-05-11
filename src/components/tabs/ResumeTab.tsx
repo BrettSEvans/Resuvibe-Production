@@ -483,6 +483,23 @@ function ResumeVariantContent({
     <div className="space-y-4">
       {toolbarTarget ? createPortal(toolbar, toolbarTarget) : toolbar}
 
+      {chatVisible && chatHistory.length > 0 && (
+        <Card>
+          <CardContent className="pt-4 space-y-2 max-h-[240px] overflow-y-auto">
+            {chatHistory.map((msg, i) => (
+              <div key={i} className={`text-sm p-2 rounded ${msg.role === "user" ? "bg-primary/10 text-right ml-8" : "bg-muted mr-8"}`}>
+                {msg.content}
+              </div>
+            ))}
+            {isRefining && (
+              <div className="text-sm p-2 rounded bg-muted flex items-center gap-2 mr-8">
+                <Loader2 className="h-3 w-3 animate-spin" /> Refining…
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {editingResume ? (
         <InlineHtmlEditor
           html={html}
