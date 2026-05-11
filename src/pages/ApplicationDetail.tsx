@@ -82,9 +82,13 @@ const ApplicationDetail = () => {
               <h1 className="text-2xl font-bold tracking-tight truncate">
                 {companyName || "Unknown Company"} — {jobTitle || "Unknown Role"}
               </h1>
-              <p className="text-xs text-muted-foreground truncate">
-                <span className="font-medium">Job Listing:</span> {app.job_url}
-              </p>
+              {app.job_url && (
+                <p className="text-xs text-muted-foreground truncate">
+                  <a href={app.job_url} target="_blank" rel="noopener noreferrer" className="hover:text-foreground hover:underline">
+                    {app.job_url}
+                  </a>
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0" data-tour="prev-next">
