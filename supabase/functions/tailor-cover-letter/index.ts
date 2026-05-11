@@ -5,34 +5,42 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const BASE_COVER_LETTER = `To the Gusto GTM Team,
-
-I am excitedly applying for the Head of GTM Process & Tooling position at Gusto. While my previous background spans sales, operations and program management, my true "geek out" passion, and common thread through my career, lies in building the internal systems, AI-driven tools, and streamlined processes that empower teams to excel. I am particularly excited about Gusto's commitment to making complex business tasks simple and personal—a philosophy I apply to the internal tools I build for my own colleagues.
-
-At Gusto, I envision my role as a bridge between data and execution. I want to work alongside the GTM team and stakeholders to create an evolving ecosystem of automated agents and intelligence tools that help our reps exceed their quotas. I believe we are at a tipping point where AI tools allow us to transition from "knowledge workers" to "judgment workers," and I have already begun prototyping how this looks in a GTM environment.
-
-As a demonstration of my vision for Gusto's GTM path, I have developed a functioning mock-up of a Business Intelligence Dashboard. This dashboard represents the "Intel Officer" approach—arming the team with technical ammunition and competitive counters in real-time. Beyond dashboards, I would work with the team and stakeholders/partners to build "Agentic Staff"—automated workflows that act as a force multiplier for the team.
-
-I realize that even the most advanced AI agents and dashboards are simply "arrows in the quiver". The GTM team members are the ones who actually hit the target. My goal is to provide them with vetted, useful tools that eliminate manual friction, allowing them to focus entirely on the hard work of winning business and helping small businesses thrive.
-
-I am eager to see if my vision for interconnected agents and AI-driven operations integrates with the path the Gusto team has already forged.
-
-Sincerely,
-Brett Evans`;
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { jobDescription, customInstructions, cultureSignals, seniority, candidateName } = await req.json();
-    const signatureName = (typeof candidateName === 'string' && candidateName.trim()) ? candidateName.trim() : 'Brett Evans';
-    const baseLetter = BASE_COVER_LETTER.replace(/Brett Evans/g, signatureName);
+    const {
+      jobDescription,
+      customInstructions,
+      cultureSignals,
+      seniority,
+      candidateName,
+      masterCoverLetter,
+      resumeText,
+    } = await req.json();
+
+    const signatureName = (typeof candidateName === 'string' && candidateName.trim())
+      ? candidateName.trim()
+      : 'the candidate';
 
     if (!jobDescription) {
       return new Response(
         JSON.stringify({ success: false, error: 'Job description is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const hasMaster = typeof masterCoverLetter === 'string' && masterCoverLetter.trim().length > 0;
+    const hasResume = typeof resumeText === 'string' && resumeText.trim().length > 0;
+
+    if (!hasMaster && !hasResume) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'No source content available. Please upload a resume or add a master cover letter in your profile.',
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -45,7 +53,7 @@ serve(async (req) => {
       );
     }
 
-    // Build culture signal injection
+    // Culture signal injection
     let cultureInjection = '';
     if (cultureSignals && Array.isArray(cultureSignals) && cultureSignals.length > 0) {
       const clSignals = cultureSignals.filter((s: any) => s.route_to === 'cover_letter' || s.route_to === 'interview_prep');
@@ -58,7 +66,7 @@ serve(async (req) => {
       }
     }
 
-    // Build tone adjustment
+    // Tone adjustment
     let toneInjection = '';
     if (seniority?.level) {
       const level = seniority.level;
@@ -67,20 +75,28 @@ serve(async (req) => {
       else toneInjection = '\nTONE: Vision-oriented, "aligned with your mission to..."';
     }
 
-    const systemPrompt = `You are an expert cover letter writer. You will be given ${signatureName}'s base cover letter and a job description. Your task is to lightly tailor the cover letter to match the job.
+    const systemPrompt = `You are an expert cover letter writer. You will craft a tailored cover letter for ${signatureName} using ONLY the source material provided by the candidate (their master cover letter and/or resume) and the target job description.
 
 CRITICAL Rules:
-- You MUST replace EVERY instance of "Gusto" with the actual company name from the job posting. The base letter uses "Gusto" as a placeholder — it is NOT the target company unless the job posting is literally for Gusto.
-- You MUST replace the role title ("Head of GTM Process & Tooling") with the actual role title from the job posting.
-- You MUST replace the greeting ("To the Gusto GTM Team") with an appropriate greeting for the target company and team.
-- The signature MUST be exactly "${signatureName}" — do not change, abbreviate, or substitute the candidate's name.
-- Adjust 2-3 talking points to align with the job's key requirements
-- Keep the candidate's core narrative, tone, and experience intact
-- Maintain the same general structure and length
-- Keep the letter professional but enthusiastic
-- Do NOT invent new experiences — only reframe existing ones
-- Output ONLY the tailored cover letter text, no explanations or metadata${cultureInjection}${toneInjection}
+- Use ONLY facts, experiences, accomplishments, skills, and tone drawn from the candidate's provided source material. Do NOT invent experiences, employers, metrics, or credentials.
+- Do NOT introduce names of companies, people, or roles that are not present in the source material or the target job posting.
+- Address the letter to the actual target company and role from the job posting. Use an appropriate greeting (e.g. "Dear [Company] Hiring Team," or a specific team if named in the JD).
+- Sign the letter exactly as "${signatureName}". Do not abbreviate or substitute the name.
+${hasMaster
+  ? `- A master cover letter has been provided. Use it as the primary reference for voice, tone, structure, and signature talking points. Lightly tailor 2-3 talking points to align with the target job's key requirements. Keep the candidate's core narrative intact.`
+  : `- No master cover letter was provided. Build the letter from the candidate's resume content, selecting the most relevant experiences and accomplishments for this specific job. Aim for 3-4 concise paragraphs.`}
+- Keep the letter professional but warm and human.
+- Output ONLY the final cover letter text — no explanations, no metadata, no markdown fences.${cultureInjection}${toneInjection}
 ${customInstructions ? `\nAdditional instructions from the candidate: ${customInstructions}` : ''}`;
+
+    const userParts: string[] = [];
+    if (hasMaster) {
+      userParts.push(`MY MASTER COVER LETTER (voice/tone/structure reference):\n\n${masterCoverLetter.trim()}`);
+    }
+    if (hasResume) {
+      userParts.push(`MY RESUME (source of facts and accomplishments):\n\n${resumeText.trim()}`);
+    }
+    userParts.push(`TARGET JOB POSTING:\n\n${jobDescription}`);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -92,10 +108,7 @@ ${customInstructions ? `\nAdditional instructions from the candidate: ${customIn
         model: 'google/gemini-3-flash-preview',
         messages: [
           { role: 'system', content: systemPrompt },
-          {
-            role: 'user',
-            content: `Here is my base cover letter:\n\n${baseLetter}\n\n---\n\nHere is the job posting I'm applying to:\n\n${jobDescription}`
-          },
+          { role: 'user', content: userParts.join('\n\n---\n\n') },
         ],
         stream: true,
       }),

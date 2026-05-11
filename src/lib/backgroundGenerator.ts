@@ -229,17 +229,19 @@ class BackgroundGenerationManager {
       const profilePromise = (async () => {
         let resumeText = "";
         let candidateName = "";
+        let masterCoverLetter = "";
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
             const { data: profile } = await supabase
               .from("profiles")
-              .select("first_name, middle_name, last_name, resume_text")
+              .select("first_name, middle_name, last_name, resume_text, master_cover_letter")
               .eq("id", user.id)
               .single();
             if (profile) {
               candidateName = [profile.first_name, profile.middle_name, profile.last_name]
                 .filter(Boolean).join(" ");
+              masterCoverLetter = profile.master_cover_letter || "";
             }
             const { data: activeResume } = await supabase
               .from("user_resumes")
@@ -256,7 +258,7 @@ class BackgroundGenerationManager {
         } catch (e) {
           console.warn("Failed to fetch user resume text:", e);
         }
-        return { resumeText, candidateName };
+        return { resumeText, candidateName, masterCoverLetter };
       })();
 
       // Await all parallel tasks
@@ -288,7 +290,7 @@ class BackgroundGenerationManager {
         department = jdIntelligence.department;
       }
 
-      const { resumeText, candidateName } = profileResult;
+      const { resumeText, candidateName, masterCoverLetter } = profileResult;
 
       // Save intermediate results
       await saveJobApplication({
@@ -413,6 +415,8 @@ class BackgroundGenerationManager {
           await streamTailoredLetter({
             jobDescription: markdown,
             candidateName,
+            masterCoverLetter: masterCoverLetter || undefined,
+            resumeText: resumeText || undefined,
             onDelta: (text) => { coverLetter += text; },
             onDone: () => {},
           });
