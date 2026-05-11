@@ -540,38 +540,56 @@ export function ResumeTab({
 
       {/* Sub-tabs for ATS Play vs Clarity */}
       <Tabs value={activeVariant} onValueChange={(v) => { setActiveVariant(v as ResumeVariant); setEditingResume(false); setPreviewResumeHtml(null); }}>
-        <TooltipProvider delayDuration={150}>
-          <TabsList>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <TabsTrigger value="ats" className="flex items-center gap-1.5">
-                    <Target className="h-3.5 w-3.5" />
-                    ATS
-                    {isBgGenerating && !atsHtml && <Loader2 className="h-3 w-3 animate-spin" />}
-                  </TabsTrigger>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs">
-                <strong>ATS Play</strong> — Optimized for Applicant Tracking Systems with maximum keyword density, mirrored terminology, and structured sections to pass automated screening.
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <TabsTrigger value="clarity" className="flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Clarity
-                    {isBgGenerating && !clarityHtml && <Loader2 className="h-3 w-3 animate-spin" />}
-                  </TabsTrigger>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs">
-                <strong>Clarity</strong> — Human-first strategy optimized for recruiter readability. Highlights impact, outcomes, and career narrative so a hiring manager can understand your value in 5 seconds.
-              </TooltipContent>
-            </Tooltip>
-          </TabsList>
-        </TooltipProvider>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <TooltipProvider delayDuration={150}>
+            <TabsList>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <TabsTrigger value="ats" className="flex items-center gap-1.5">
+                      <Target className="h-3.5 w-3.5" />
+                      ATS
+                      {isBgGenerating && !atsHtml && <Loader2 className="h-3 w-3 animate-spin" />}
+                    </TabsTrigger>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <strong>ATS Play</strong> — Optimized for Applicant Tracking Systems with maximum keyword density, mirrored terminology, and structured sections to pass automated screening.
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <TabsTrigger value="clarity" className="flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Clarity
+                      {isBgGenerating && !clarityHtml && <Loader2 className="h-3 w-3 animate-spin" />}
+                    </TabsTrigger>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <strong>Clarity</strong> — Human-first strategy optimized for recruiter readability. Highlights impact, outcomes, and career narrative so a hiring manager can understand your value in 5 seconds.
+                </TooltipContent>
+              </Tooltip>
+            </TabsList>
+          </TooltipProvider>
+          {(() => {
+            const activeHtml = activeVariant === "ats" ? atsHtml : clarityHtml;
+            if (!activeHtml) return null;
+            const displayHtml = previewResumeHtml || activeHtml;
+            return (
+              <ResumeDownloadButton
+                variant={activeVariant}
+                variantLabel={activeVariant === "ats" ? "ATS Play" : "Clarity"}
+                displayHtml={displayHtml}
+                isOlderVersion={!!previewResumeHtml}
+                companyName={companyName}
+                userProfile={userProfile}
+                toast={toast}
+              />
+            );
+          })()}
+        </div>
 
         <TabsContent value="ats" className="space-y-4 mt-4">
           <ResumeVariantContent
