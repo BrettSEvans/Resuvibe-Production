@@ -30,7 +30,14 @@ import {
   FileDown,
   Sparkles,
   Target,
+  ChevronDown,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import ResumeHealthPanel from "@/components/ResumeHealthPanel";
 import ResumeRevisions from "@/components/ResumeRevisions";
 import InlineHtmlEditor from "@/components/InlineHtmlEditor";
