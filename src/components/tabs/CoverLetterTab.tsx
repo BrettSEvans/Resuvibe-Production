@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Copy,
@@ -13,6 +14,9 @@ import {
   Download,
   FileDown,
   ChevronDown,
+  ArrowUp,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   DropdownMenu,
