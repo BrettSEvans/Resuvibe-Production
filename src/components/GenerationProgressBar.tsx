@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export type PipelineStage = "reviewing-job" | "branding" | "analyzing" | "research" | "resume" | "complete";
 
-const STAGES: { key: PipelineStage; label: string }[] = [
+const ALL_STAGES: { key: PipelineStage; label: string }[] = [
   { key: "reviewing-job", label: "Reviewing Job" },
   { key: "branding", label: "Branding" },
   { key: "analyzing", label: "Analyzing" },
@@ -12,17 +12,15 @@ const STAGES: { key: PipelineStage; label: string }[] = [
   { key: "complete", label: "Done" },
 ];
 
-function stageIndex(stage: PipelineStage): number {
-  return STAGES.findIndex((s) => s.key === stage);
-}
-
 interface GenerationProgressBarProps {
   currentStage: PipelineStage;
   error?: string;
+  showBranding?: boolean;
 }
 
-export default function GenerationProgressBar({ currentStage, error }: GenerationProgressBarProps) {
-  const currentIdx = stageIndex(currentStage);
+export default function GenerationProgressBar({ currentStage, error, showBranding = true }: GenerationProgressBarProps) {
+  const STAGES = showBranding ? ALL_STAGES : ALL_STAGES.filter((s) => s.key !== "branding");
+  const currentIdx = STAGES.findIndex((s) => s.key === currentStage);
 
   return (
     <div className="w-full space-y-3">

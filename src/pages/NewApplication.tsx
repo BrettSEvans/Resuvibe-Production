@@ -251,7 +251,7 @@ const NewApplication = () => {
         {step === "analyzing" && (
           <Card>
             <CardContent className="py-10 space-y-6">
-              <GenerationProgressBar currentStage={pipelineStage} error={pipelineError} />
+              <GenerationProgressBar currentStage={pipelineStage} error={pipelineError} showBranding={genDashboard} />
               <div className="flex items-center justify-center gap-3 mt-2">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">
