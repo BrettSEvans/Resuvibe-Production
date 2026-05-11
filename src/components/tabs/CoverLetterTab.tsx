@@ -237,7 +237,7 @@ export function CoverLetterTab({
             </Button>
           </div>
         )}
-        <div className="flex items-center gap-2 ml-6">
+        <div className="flex items-center gap-2 ml-auto">
           {!editingCoverLetter && (
             <Button variant="outline" size="sm" onClick={handleStartEdit} disabled={!coverLetter}>
               <Edit3 className="mr-2 h-4 w-4" /> Edit
