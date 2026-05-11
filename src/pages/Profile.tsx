@@ -140,7 +140,7 @@ export default function Profile() {
         <h1 className="text-2xl font-heading font-bold text-foreground flex items-center gap-2">
           <User className="h-6 w-6 text-primary" /> Profile
         </h1>
-        <Button onClick={handleSave} disabled={saving} className="gap-2">
+        <Button onClick={handleSave} disabled={saving || !isDirty} className="gap-2">
           <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}
         </Button>
       </div>
