@@ -535,11 +535,13 @@ export function ResumeTab({
           <TabsList>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="ats" className="flex items-center gap-1.5">
-                  <Target className="h-3.5 w-3.5" />
-                  ATS Play
-                  {isBgGenerating && !atsHtml && <Loader2 className="h-3 w-3 animate-spin" />}
-                </TabsTrigger>
+                <span>
+                  <TabsTrigger value="ats" className="flex items-center gap-1.5">
+                    <Target className="h-3.5 w-3.5" />
+                    ATS Play
+                    {isBgGenerating && !atsHtml && <Loader2 className="h-3 w-3 animate-spin" />}
+                  </TabsTrigger>
+                </span>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">
                 <strong>ATS Play</strong> — Optimized for Applicant Tracking Systems with maximum keyword density, mirrored terminology, and structured sections to pass automated screening.
@@ -547,11 +549,13 @@ export function ResumeTab({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="clarity" className="flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Clarity
-                  {isBgGenerating && !clarityHtml && <Loader2 className="h-3 w-3 animate-spin" />}
-                </TabsTrigger>
+                <span>
+                  <TabsTrigger value="clarity" className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Clarity
+                    {isBgGenerating && !clarityHtml && <Loader2 className="h-3 w-3 animate-spin" />}
+                  </TabsTrigger>
+                </span>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">
                 <strong>Clarity</strong> — Human-first strategy optimized for recruiter readability. Highlights impact, outcomes, and career narrative so a hiring manager can understand your value in 5 seconds.
