@@ -71,7 +71,7 @@ const ApplicationDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 md:px-8 pt-2 pb-4 md:pt-4 md:pb-8 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 pt-2.5 pb-4 md:pt-5 md:pb-8 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
