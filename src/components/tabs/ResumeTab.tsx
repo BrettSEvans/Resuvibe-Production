@@ -133,6 +133,7 @@ function ResumeDownloadButton({
   displayHtml,
   isOlderVersion,
   companyName,
+  jobTitle,
   userProfile,
   toast,
   disabled,
@@ -142,6 +143,7 @@ function ResumeDownloadButton({
   displayHtml: string;
   isOlderVersion: boolean;
   companyName: string;
+  jobTitle: string;
   userProfile: UserProfileSnapshot | null;
   toast: ToastFn;
   disabled?: boolean;
@@ -182,7 +184,7 @@ function ResumeDownloadButton({
   };
 
   const downloadDocx = () => {
-    const name = buildFileName(userProfile?.first_name, userProfile?.last_name, `${variant}-resume`, companyName, "docx");
+    const name = buildFileName(userProfile?.first_name, userProfile?.last_name, `${variant}-resume`, companyName, "docx", jobTitle);
     downloadHtmlAsDocx(displayHtml, name);
     toast({ title: "Downloading", description: `${variantLabel} resume DOCX file is being prepared.` });
   };
@@ -723,6 +725,7 @@ export function ResumeTab({
                 displayHtml={displayHtml}
                 isOlderVersion={!!previewResumeHtml}
                 companyName={companyName}
+                jobTitle={jobTitle}
                 userProfile={userProfile}
                 toast={toast}
               />
