@@ -4,6 +4,7 @@ import VersionDownloadAlert from "@/components/VersionDownloadAlert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -530,23 +531,36 @@ export function ResumeTab({
 
       {/* Sub-tabs for ATS Play vs Clarity */}
       <Tabs value={activeVariant} onValueChange={(v) => { setActiveVariant(v as ResumeVariant); setEditingResume(false); setPreviewResumeHtml(null); }}>
-        <TabsList>
-          <TabsTrigger value="ats" className="flex items-center gap-1.5">
-            <Target className="h-3.5 w-3.5" />
-            ATS Play
-            {isBgGenerating && !atsHtml && <Loader2 className="h-3 w-3 animate-spin" />}
-          </TabsTrigger>
-          <TabsTrigger value="clarity" className="flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" />
-            Clarity
-            {isBgGenerating && !clarityHtml && <Loader2 className="h-3 w-3 animate-spin" />}
-          </TabsTrigger>
-        </TabsList>
+        <TooltipProvider delayDuration={150}>
+          <TabsList>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="ats" className="flex items-center gap-1.5">
+                  <Target className="h-3.5 w-3.5" />
+                  ATS Play
+                  {isBgGenerating && !atsHtml && <Loader2 className="h-3 w-3 animate-spin" />}
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                <strong>ATS Play</strong> — Optimized for Applicant Tracking Systems with maximum keyword density, mirrored terminology, and structured sections to pass automated screening.
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="clarity" className="flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Clarity
+                  {isBgGenerating && !clarityHtml && <Loader2 className="h-3 w-3 animate-spin" />}
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                <strong>Clarity</strong> — Human-first strategy optimized for recruiter readability. Highlights impact, outcomes, and career narrative so a hiring manager can understand your value in 5 seconds.
+              </TooltipContent>
+            </Tooltip>
+          </TabsList>
+        </TooltipProvider>
 
         <TabsContent value="ats" className="space-y-4 mt-4">
-          <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
-            <strong>ATS Play</strong> — Optimized for Applicant Tracking Systems with maximum keyword density, mirrored terminology, and structured sections to pass automated screening.
-          </div>
           <ResumeVariantContent
             variant="ats"
             variantLabel="ATS Play"
@@ -575,9 +589,6 @@ export function ResumeTab({
         </TabsContent>
 
         <TabsContent value="clarity" className="space-y-4 mt-4">
-          <div className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
-            <strong>Clarity</strong> — Human-first strategy optimized for recruiter readability. Highlights impact, outcomes, and career narrative so a hiring manager can understand your value in 5 seconds.
-          </div>
           <ResumeVariantContent
             variant="clarity"
             variantLabel="Clarity"
