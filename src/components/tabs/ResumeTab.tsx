@@ -35,6 +35,8 @@ import {
   ChevronDown,
   Send,
   ArrowUp,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   DropdownMenu,
