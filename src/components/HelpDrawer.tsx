@@ -599,7 +599,7 @@ export function HelpDrawer() {
       <Button
         size="icon"
         onClick={() => { setOpen(true); setSearch(""); }}
-        className="fixed bottom-4 left-4 z-50 h-10 w-10 rounded-full shadow-lg bg-primary text-white dark:text-black border-none hover:bg-primary/90"
+        className="fixed bottom-4 left-4 z-50 h-10 w-10 rounded-full shadow-lg bg-primary/30 text-primary border-none hover:bg-primary hover:text-primary-foreground transition-colors"
         aria-label="Help"
       >
         <HelpCircle className="h-5 w-5" />
