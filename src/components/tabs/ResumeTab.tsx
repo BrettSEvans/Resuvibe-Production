@@ -235,7 +235,7 @@ function ResumeVariantToolbar({
   const disabled = isRefining || isRegenerating;
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-2 flex-1 min-w-[240px] max-w-xl">
+      <div className="flex items-center gap-2 w-[220px]">
         <Input
           placeholder="Ask for changes (e.g. shorten the summary)"
           value={askPrompt}
@@ -432,17 +432,22 @@ function ResumeVariantContent({
     );
   }
 
+  const toolbarTarget = typeof document !== "undefined" ? document.getElementById("resume-variant-actions") : null;
+  const toolbar = (
+    <ResumeVariantToolbar
+      isRegenerating={isRegenerating}
+      isRefining={isRefining}
+      askPrompt={askPrompt}
+      setAskPrompt={setAskPrompt}
+      onAskForChanges={handleAskForChanges}
+      onEdit={() => { setEditingResume(true); setPreviewResumeHtml(null); }}
+      onRegenerate={() => openRegenDialog(variant)}
+    />
+  );
+
   return (
     <div className="space-y-4">
-      <ResumeVariantToolbar
-        isRegenerating={isRegenerating}
-        isRefining={isRefining}
-        askPrompt={askPrompt}
-        setAskPrompt={setAskPrompt}
-        onAskForChanges={handleAskForChanges}
-        onEdit={() => { setEditingResume(true); setPreviewResumeHtml(null); }}
-        onRegenerate={() => openRegenDialog(variant)}
-      />
+      {toolbarTarget ? createPortal(toolbar, toolbarTarget) : toolbar}
 
       {editingResume ? (
         <InlineHtmlEditor
@@ -704,6 +709,7 @@ export function ResumeTab({
               </Tooltip>
             </TabsList>
           </TooltipProvider>
+          <div id="resume-variant-actions" className="flex flex-wrap items-center gap-2 ml-auto justify-end" />
           {(() => {
             const activeHtml = activeVariant === "ats" ? atsHtml : clarityHtml;
             if (!activeHtml) return null;
