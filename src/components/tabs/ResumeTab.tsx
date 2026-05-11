@@ -710,7 +710,7 @@ export function ResumeTab({
               </Tooltip>
             </TabsList>
           </TooltipProvider>
-          <div id="resume-variant-actions" className="flex flex-wrap items-center gap-2 ml-auto justify-end" />
+          <div id="resume-variant-actions" className="flex flex-1 flex-wrap items-center gap-2" />
           {(() => {
             const activeHtml = activeVariant === "ats" ? atsHtml : clarityHtml;
             if (!activeHtml) return null;
