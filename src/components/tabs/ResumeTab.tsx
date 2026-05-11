@@ -172,47 +172,53 @@ function ResumeVariantToolbar({
         <Button variant="outline" size="sm" onClick={onEdit}>
           <Edit3 className="mr-2 h-4 w-4" /> Edit
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => guardedDownload(() => {
-            const iframe = document.createElement("iframe");
-            iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:none;";
-            document.body.appendChild(iframe);
-            const doc = iframe.contentDocument || iframe.contentWindow?.document;
-            if (!doc) {
-              toast({ title: "Error", description: "Could not open print frame.", variant: "destructive" });
-              document.body.removeChild(iframe);
-              return;
-            }
-            const printStyles = `<style>@page{size:letter;margin:0}@media print{html{margin:0 !important;padding:0 !important}body{margin:0 !important;padding:0.5in !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>`;
-            const sourceDoc = new DOMParser().parseFromString(displayHtml, "text/html");
-            const printDocument = `<!DOCTYPE html><html><head><meta charset="utf-8" /><title></title>${printStyles}${sourceDoc.head?.innerHTML || ""}</head><body>${sourceDoc.body?.innerHTML || displayHtml}</body></html>`;
-            doc.open();
-            doc.write(printDocument);
-            doc.close();
-            doc.title = "";
-            const triggerPrint = () => {
-              try { iframe.contentWindow?.print(); } catch (_) {}
-              setTimeout(() => { if (iframe.parentNode) document.body.removeChild(iframe); }, 1000);
-            };
-            iframe.onload = () => setTimeout(triggerPrint, 400);
-            setTimeout(triggerPrint, 1500);
-          })}
-        >
-          <FileDown className="mr-2 h-4 w-4" /> Download PDF
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => guardedDownload(() => {
-            const name = buildFileName(userProfile?.first_name, userProfile?.last_name, `${variant}-resume`, companyName, "docx");
-            downloadHtmlAsDocx(displayHtml, name);
-            toast({ title: "Downloading", description: `${variantLabel} resume DOCX file is being prepared.` });
-          })}
-        >
-          <Download className="mr-2 h-4 w-4" /> Download DOCX
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Download className="mr-2 h-4 w-4" /> Download
+              <ChevronDown className="ml-1 h-3.5 w-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem
+              onSelect={() => guardedDownload(() => {
+                const iframe = document.createElement("iframe");
+                iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:none;";
+                document.body.appendChild(iframe);
+                const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                if (!doc) {
+                  toast({ title: "Error", description: "Could not open print frame.", variant: "destructive" });
+                  document.body.removeChild(iframe);
+                  return;
+                }
+                const printStyles = `<style>@page{size:letter;margin:0}@media print{html{margin:0 !important;padding:0 !important}body{margin:0 !important;padding:0.5in !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>`;
+                const sourceDoc = new DOMParser().parseFromString(displayHtml, "text/html");
+                const printDocument = `<!DOCTYPE html><html><head><meta charset="utf-8" /><title></title>${printStyles}${sourceDoc.head?.innerHTML || ""}</head><body>${sourceDoc.body?.innerHTML || displayHtml}</body></html>`;
+                doc.open();
+                doc.write(printDocument);
+                doc.close();
+                doc.title = "";
+                const triggerPrint = () => {
+                  try { iframe.contentWindow?.print(); } catch (_) {}
+                  setTimeout(() => { if (iframe.parentNode) document.body.removeChild(iframe); }, 1000);
+                };
+                iframe.onload = () => setTimeout(triggerPrint, 400);
+                setTimeout(triggerPrint, 1500);
+              })}
+            >
+              <FileDown className="mr-2 h-4 w-4" /> PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => guardedDownload(() => {
+                const name = buildFileName(userProfile?.first_name, userProfile?.last_name, `${variant}-resume`, companyName, "docx");
+                downloadHtmlAsDocx(displayHtml, name);
+                toast({ title: "Downloading", description: `${variantLabel} resume DOCX file is being prepared.` });
+              })}
+            >
+              <Download className="mr-2 h-4 w-4" /> DOCX
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button variant="outline" size="sm" disabled={isRegenerating} onClick={onRegenerate}>
           {isRegenerating ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
