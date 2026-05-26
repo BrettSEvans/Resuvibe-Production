@@ -1,3 +1,4 @@
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,8 +14,17 @@ import { DetailsTab } from "@/components/tabs/DetailsTab";
 import DynamicMaterialsSection from "@/components/DynamicMaterialsSection";
 import { PageShell } from "@/components/PageShell";
 
+/** Valid tab slugs — must match the route segment and the Tabs value prop. */
+const VALID_TABS = ["resume", "cover-letter", "jd-analysis", "materials", "details"] as const;
+type TabSlug = typeof VALID_TABS[number];
+
 const ApplicationDetail = () => {
   const detail = useApplicationDetail();
+  const { tab: tabParam } = useParams<{ id: string; tab?: string }>();
+  const activeTab: TabSlug = (VALID_TABS as readonly string[]).includes(tabParam ?? "")
+    ? (tabParam as TabSlug)
+    : "resume";
+
   const {
     id, navigate, toast, app, setApp, loading, saving, isValidUuid,
     coverLetter, setCoverLetter, editingCoverLetter, setEditingCoverLetter,
@@ -111,7 +121,11 @@ const ApplicationDetail = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="resume" className="space-y-4">
+        <Tabs
+          value={activeTab}
+          onValueChange={(val) => navigate(`/applications/${id}/${val}`)}
+          className="space-y-4"
+        >
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <TabsList className="justify-start flex-wrap">
               <TabsTrigger value="resume">Resume</TabsTrigger>

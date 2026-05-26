@@ -105,6 +105,7 @@ function AuthenticatedApp() {
         <Route path="/applications" element={<Applications />} />
         <Route path="/applications/new" element={<NewApplication />} />
         <Route path="/applications/:id" element={<ApplicationDetail />} />
+        <Route path="/applications/:id/:tab" element={<ApplicationDetail />} />
         <Route path="/templates" element={<Templates />} />
         <Route path="/stories" element={<StoryBoard />} />
         <Route path="/profile" element={<Profile />} />
