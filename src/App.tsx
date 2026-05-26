@@ -27,6 +27,7 @@ import { HelpDrawer } from "./components/HelpDrawer";
 import { TutorialTour, useTourState } from "./components/TutorialTour";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "@/hooks/useTheme";
+import { AdBanner } from "./components/ads/AdBanner";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,16 @@ function AuthenticatedApp() {
     <>
       <BackgroundJobsBanner />
       <AppHeader aiChatOpen={aiChatOpen} onAiChatToggle={() => setAiChatOpen((o) => !o)} />
+
+      {/* Leaderboard ad — desktop only, below header */}
+      <div className="hidden md:flex w-full justify-center border-b border-border/40 bg-muted/20 py-1.5">
+        <AdBanner size="leaderboard" />
+      </div>
+      {/* Mobile banner — mobile only, below header */}
+      <div className="flex md:hidden w-full justify-center border-b border-border/40 bg-muted/20 py-1">
+        <AdBanner size="mobile-banner" />
+      </div>
+
       <AiChat isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
       <HelpDrawer />
       <TutorialTour active={tour.active} onComplete={tour.complete} />
@@ -103,6 +114,13 @@ function AuthenticatedApp() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+
+      {/* Sticky footer ad */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center bg-background/95 backdrop-blur border-t border-border/40 py-1 md:hidden">
+        <AdBanner size="sticky-footer" />
+      </div>
+      {/* Bottom padding so content clears sticky footer on mobile */}
+      <div className="h-14 md:hidden" />
     </>
   );
 }

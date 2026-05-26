@@ -4,8 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { getJobApplications, deleteJobApplication } from "@/lib/api/jobApplication";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PipelineBoard } from "@/components/PipelineBoard";
 import {
   Plus,
   FileText,
@@ -13,7 +11,6 @@ import {
   Eye,
   Copy,
   Loader2,
-  LayoutTemplate,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
@@ -52,6 +49,9 @@ import { backgroundGenerator } from "@/lib/backgroundGenerator";
 import { useActiveJobCount } from "@/hooks/useBackgroundJob";
 import { supabase } from "@/integrations/supabase/client";
 import type { JobApplicationListItem } from "@/types/models";
+import { InterstitialAd } from "@/components/ads/InterstitialAd";
+import { useAdManager } from "@/hooks/useAdManager";
+import { PageShell } from "@/components/PageShell";
 
 type SortKey = "company_name" | "job_title" | "status" | "created_at" | "updated_at";
 type SortDir = "asc" | "desc";
@@ -59,6 +59,21 @@ type SortDir = "asc" | "desc";
 const Applications = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { recordDocumentAction, recordInterstitialShown } = useAdManager();
+  const [interstitialOpen, setInterstitialOpen] = useState(false);
+  const pendingActionRef = useRef<(() => void) | null>(null);
+
+  const triggerWithInterstitial = (action: () => void) => {
+    const showAd = recordDocumentAction();
+    if (showAd) {
+      recordInterstitialShown();
+      pendingActionRef.current = action;
+      setInterstitialOpen(true);
+    } else {
+      action();
+    }
+  };
+
   const [applications, setApplications] = useState<JobApplicationListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewId, setPreviewId] = useState<string | null>(null);
@@ -158,10 +173,12 @@ const Applications = () => {
     toast({ title: "Copied!", description: "Dashboard HTML copied to clipboard." });
   };
 
-  const handleCopyCoverLetter = async (text: string, e: React.MouseEvent) => {
+  const handleCopyCoverLetter = (text: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    await navigator.clipboard.writeText(text);
-    toast({ title: "Copied!", description: "Cover letter copied to clipboard." });
+    triggerWithInterstitial(async () => {
+      await navigator.clipboard.writeText(text);
+      toast({ title: "Copied!", description: "Cover letter copied to clipboard." });
+    });
   };
 
   const toggleSort = (key: SortKey) => {
@@ -190,8 +207,17 @@ const Applications = () => {
   const previewApp = applications.find((a) => a.id === previewId);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6">
+    <>
+      <InterstitialAd
+        open={interstitialOpen}
+        onClose={() => {
+          setInterstitialOpen(false);
+          pendingActionRef.current?.();
+          pendingActionRef.current = null;
+        }}
+      />
+      <PageShell showSecondSkyscraper={applications.length > 5}>
+      <div className="p-4 md:p-8 space-y-6">
         {/* Story 1.2: Profile completeness nudge */}
         {profileIncomplete && !bannerDismissed && (
           <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
@@ -214,22 +240,13 @@ const Applications = () => {
             <p className="text-muted-foreground text-sm">Your saved applications and dashboards</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/templates")}>
-              <LayoutTemplate className="mr-2 h-4 w-4" /> Templates
-            </Button>
             <Button onClick={() => navigate("/applications/new")} data-tour="new-app">
               <Plus className="mr-2 h-4 w-4" /> New Application
             </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="applications" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="applications">Applications</TabsTrigger>
-            <TabsTrigger value="pipeline" data-tour="pipeline-tab">Pipeline</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="applications">
+        <div className="space-y-4">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -373,29 +390,7 @@ const Applications = () => {
             )}
           </>
         )}
-          </TabsContent>
-
-          <TabsContent value="pipeline">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : applications.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No applications yet</h3>
-                  <p className="text-muted-foreground mb-4">Create your first application to see the pipeline.</p>
-                  <Button onClick={() => navigate("/applications/new")}>
-                    <Plus className="mr-2 h-4 w-4" /> New Application
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <PipelineBoard applications={applications} onRefresh={loadApplications} />
-            )}
-          </TabsContent>
-        </Tabs>
+        </div>
       </div>
 
       {/* Story 3.2: Delete confirmation dialog */}
@@ -415,7 +410,8 @@ const Applications = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+      </PageShell>
+    </>
   );
 };
 

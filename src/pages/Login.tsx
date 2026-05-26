@@ -33,17 +33,12 @@ export default function Login() {
       toast.error(error.message);
       return;
     }
-    // Check approval status
+    // Check if account has been deactivated
     const { data: profile } = await supabase
       .from("profiles")
       .select("approval_status")
       .eq("id", data.user.id)
       .single();
-    if (profile?.approval_status === "pending") {
-      await supabase.auth.signOut();
-      toast.error("Your account is pending admin approval. You'll be notified when approved.");
-      return;
-    }
     if (profile?.approval_status === "deleted") {
       await supabase.auth.signOut();
       toast.error("This account has been deactivated. Contact support for assistance.");

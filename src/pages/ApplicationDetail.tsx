@@ -11,6 +11,7 @@ import { CoverLetterTab } from "@/components/tabs/CoverLetterTab";
 import { JDAnalysisTab } from "@/components/tabs/JDAnalysisTab";
 import { DetailsTab } from "@/components/tabs/DetailsTab";
 import DynamicMaterialsSection from "@/components/DynamicMaterialsSection";
+import { PageShell } from "@/components/PageShell";
 
 const ApplicationDetail = () => {
   const detail = useApplicationDetail();
@@ -52,26 +53,30 @@ const ApplicationDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <PageShell showSecondSkyscraper>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </PageShell>
     );
   }
 
   if (!app || !isValidUuid) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Application not found.</p>
-        <Button variant="outline" onClick={() => navigate("/applications")}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
-        </Button>
-      </div>
+      <PageShell showSecondSkyscraper>
+        <div className="flex flex-col items-center justify-center gap-4 py-20">
+          <p className="text-muted-foreground">Application not found.</p>
+          <Button variant="outline" onClick={() => navigate("/applications")}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          </Button>
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 md:px-8 pt-2.5 pb-4 md:pt-5 md:pb-8 space-y-6">
+    <PageShell showSecondSkyscraper>
+      <div className="px-4 md:px-8 pt-2.5 pb-4 md:pt-5 md:pb-8 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
@@ -212,7 +217,7 @@ const ApplicationDetail = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </PageShell>
   );
 };
 

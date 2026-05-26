@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,8 +60,8 @@ const Templates = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
+    <PageShell>
+      <div className="p-4 md:p-8 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
@@ -165,7 +166,7 @@ const Templates = () => {
           </div>
         )}
       </div>
-    </div>
+    </PageShell>
   );
 };
 

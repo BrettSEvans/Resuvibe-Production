@@ -15,9 +15,13 @@ type Resume = Tables<"user_resumes">;
 
 interface ResumeManagerProps {
   userId: string;
+  /** Called immediately after a PDF is successfully uploaded (before text extraction). */
+  onResumeUploaded?: () => void;
+  /** Called with the extracted plain text once background extraction finishes. */
+  onResumeTextExtracted?: (text: string) => void;
 }
 
-export default function ResumeManager({ userId }: ResumeManagerProps) {
+export default function ResumeManager({ userId, onResumeUploaded, onResumeTextExtracted }: ResumeManagerProps) {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -93,6 +97,7 @@ export default function ResumeManager({ userId }: ResumeManagerProps) {
 
       toast.success(`Uploaded ${file.name}`);
       invalidate();
+      onResumeUploaded?.();
 
       // Trigger text extraction in background
       if (dbErr === undefined) {
@@ -105,11 +110,23 @@ export default function ResumeManager({ userId }: ResumeManagerProps) {
         if (newResume) {
           supabase.functions.invoke("extract-resume-text", {
             body: { resumeId: newResume.id, storagePath },
-          }).then(({ error: extractErr }) => {
-            if (extractErr) console.warn("Resume text extraction failed:", extractErr);
-            else {
+          }).then(async ({ error: extractErr }) => {
+            if (extractErr) {
+              console.warn("Resume text extraction failed:", extractErr);
+            } else {
               toast.success("Resume text extracted");
               invalidate();
+              // Notify parent so it can populate the resume text field and enable Save
+              if (onResumeTextExtracted) {
+                const { data: updated } = await supabase
+                  .from("user_resumes")
+                  .select("resume_text")
+                  .eq("id", newResume.id)
+                  .single();
+                if (updated?.resume_text) {
+                  onResumeTextExtracted(updated.resume_text);
+                }
+              }
             }
           });
         }

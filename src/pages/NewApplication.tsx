@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,13 +13,11 @@ import {
   FileText,
   Sparkles,
   ArrowLeft,
-  Layers,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BatchJobInput from "@/components/BatchJobInput";
 import GenerationProgressBar, { type PipelineStage } from "@/components/GenerationProgressBar";
 import { backgroundGenerator } from "@/lib/backgroundGenerator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { GenerationAdGate } from "@/components/ads/GenerationAdGate";
 
 type Step = "input" | "analyzing";
 
@@ -38,6 +37,13 @@ const NewApplication = () => {
   const [applicationId, setApplicationId] = useState<string | null>(null);
   const [pipelineError, setPipelineError] = useState<string | undefined>();
 
+  // Ad-gate: shown once job reaches the Resume stage.
+  // Progress bar is frozen at "resume" until the ad completes.
+  const [adGateVisible, setAdGateVisible] = useState(false);
+  const adGateShownRef = useRef(false);   // have we ever shown the gate?
+  const adCompletedRef = useRef(false);   // has the ad been dismissed?
+  const jobReadyIdRef = useRef<string | null>(null); // appId when job finished
+
   // Generation selections
   const [genResume, setGenResume] = useState(true);
   const [genCoverLetter, setGenCoverLetter] = useState(true);
@@ -51,6 +57,18 @@ const NewApplication = () => {
       return !!u.hostname.includes('.');
     } catch { return false; }
   };
+
+  // Called by GenerationAdGate when the user skips or the ad plays to end.
+  const handleAdComplete = useCallback(() => {
+    adCompletedRef.current = true;
+    setAdGateVisible(false);
+    if (jobReadyIdRef.current) {
+      // Job already finished while ad was playing — navigate now.
+      setPipelineStage("complete");
+      navigate(`/applications/${jobReadyIdRef.current}`);
+    }
+    // If job isn't done yet, the subscriber below will navigate when it finishes.
+  }, [navigate]);
 
   // Subscribe to background job updates for navigation
   useEffect(() => {
@@ -68,19 +86,45 @@ const NewApplication = () => {
         "research": "research",
         "resume": "resume",
       };
-      
+
       if (statusToStage[job.status]) {
-        setPipelineStage(statusToStage[job.status]);
+        // Freeze the display at "resume" once the ad gate has opened
+        if (!adGateShownRef.current) {
+          setPipelineStage(statusToStage[job.status]);
+        }
+        // Show the ad gate as soon as the Resume stage begins
+        if (job.status === "resume" && !adGateShownRef.current) {
+          adGateShownRef.current = true;
+          setAdGateVisible(true);
+        }
       }
 
       if (job.status === "error") {
         setPipelineError(job.error || "Generation failed");
       }
 
-      // Navigate when resume is complete (or later stages)
-      if (job.status === "resume-complete" || job.status === "cover-letter" || job.status === "dashboard" || job.status === "complete") {
-        setPipelineStage("complete");
-        navigate(`/applications/${applicationId}`);
+      // Job is complete — gate navigation on ad completion
+      if (
+        job.status === "resume-complete" ||
+        job.status === "cover-letter" ||
+        job.status === "dashboard" ||
+        job.status === "complete"
+      ) {
+        // Show ad gate if it hasn't been shown yet (e.g. very fast generation)
+        if (!adGateShownRef.current) {
+          adGateShownRef.current = true;
+          setPipelineStage("resume"); // freeze bar at Resume
+          setAdGateVisible(true);
+        }
+
+        jobReadyIdRef.current = applicationId;
+
+        if (adCompletedRef.current) {
+          // Ad already dismissed — navigate immediately
+          setPipelineStage("complete");
+          navigate(`/applications/${applicationId}`);
+        }
+        // Otherwise wait: handleAdComplete will navigate when the ad finishes
       }
     });
     return () => { unsub(); };
@@ -119,8 +163,8 @@ const NewApplication = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-6">
+    <PageShell>
+      <div className="p-4 md:p-8 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate("/applications")}>
@@ -131,15 +175,7 @@ const NewApplication = () => {
 
         {/* Step: Input */}
         {step === "input" && (
-          <Tabs defaultValue="single" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="single">Single Application</TabsTrigger>
-              <TabsTrigger value="batch">
-                <Layers className="mr-1 h-4 w-4" /> Batch ({`up to ${10}`})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="single" className="space-y-4">
+          <div className="space-y-4">
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -239,12 +275,7 @@ const NewApplication = () => {
               >
                 <Sparkles className="mr-2 h-4 w-4" /> Analyze & Generate
               </Button>
-            </TabsContent>
-
-            <TabsContent value="batch">
-              <BatchJobInput />
-            </TabsContent>
-          </Tabs>
+          </div>
         )}
 
         {/* Step: Analyzing — shows progress bar while pipeline runs */}
@@ -265,11 +296,17 @@ const NewApplication = () => {
                   </Button>
                 </div>
               )}
+              {/* Ad gate — rendered below the progress message once the Resume
+                  stage begins.  Progress bar is frozen at Resume until onComplete
+                  fires (user skips or ad plays to end). */}
+              {adGateVisible && (
+                <GenerationAdGate onComplete={handleAdComplete} />
+              )}
             </CardContent>
           </Card>
         )}
       </div>
-    </div>
+    </PageShell>
   );
 };
 

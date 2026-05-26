@@ -36,6 +36,8 @@ import { buildFileName } from "@/lib/fileNaming";
 import type { DashboardData } from "@/lib/dashboard/schema";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { InterstitialAd } from "@/components/ads/InterstitialAd";
+import { useAdManager } from "@/hooks/useAdManager";
 
 interface GeneratedAsset {
   id: string;
@@ -262,6 +264,27 @@ export default function DynamicMaterialsSection({
     },
   });
   const candidateName = candidateProfile ? [candidateProfile.first_name, candidateProfile.middle_name, candidateProfile.last_name].filter(Boolean).join(" ") : "";
+
+  const { recordDocumentAction, recordInterstitialShown } = useAdManager();
+  const [interstitialOpen, setInterstitialOpen] = useState(false);
+  const pendingActionRef = useRef<(() => void) | null>(null);
+
+  const triggerWithInterstitial = (action: () => void) => {
+    const showAd = recordDocumentAction();
+    if (showAd) {
+      recordInterstitialShown();
+      pendingActionRef.current = action;
+      setInterstitialOpen(true);
+    } else {
+      action();
+    }
+  };
+
+  const handleInterstitialClose = () => {
+    setInterstitialOpen(false);
+    pendingActionRef.current?.();
+    pendingActionRef.current = null;
+  };
 
   const [generatedAssets, setGeneratedAssets] = useState<GeneratedAsset[]>([]);
   const [showDashboardWelcome, setShowDashboardWelcome] = useState(() => !localStorage.getItem("dashboard-welcome-dismissed"));
@@ -565,6 +588,8 @@ export default function DynamicMaterialsSection({
 
   return (
     <>
+      <InterstitialAd open={interstitialOpen} onClose={handleInterstitialClose} />
+
       {/* Dashboard Customization Dialog */}
       {bgJob?.status === "awaiting-dashboard-config" && (
         <DashboardCustomizationDialog
@@ -646,18 +671,18 @@ export default function DynamicMaterialsSection({
             </Button>
             {dashboardHtml && (
               <>
-                <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(previewHtml || dashboardHtml); toast({ title: "Copied!", description: "Dashboard HTML copied." }); }}>
+                <Button variant="outline" size="sm" onClick={() => triggerWithInterstitial(() => { navigator.clipboard.writeText(previewHtml || dashboardHtml); toast({ title: "Copied!", description: "Dashboard HTML copied." }); })}>
                   <Copy className="mr-2 h-4 w-4" /> Copy HTML
                 </Button>
                 <SaveAsTemplate dashboardHtml={previewHtml || dashboardHtml} applicationId={applicationId} defaultLabel={`${companyName} ${jobTitle} Dashboard`.trim()} defaultJobFunction={jobTitle} defaultDepartment="" />
                 {dashboardData ? (
-                  <Button variant="outline" size="sm" onClick={() => guardedDownload(!!previewHtml, handleDownloadZip)}><FolderArchive className="mr-2 h-4 w-4" /> Download ZIP</Button>
+                  <Button variant="outline" size="sm" onClick={() => guardedDownload(!!previewHtml, () => triggerWithInterstitial(handleDownloadZip))}><FolderArchive className="mr-2 h-4 w-4" /> Download ZIP</Button>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => guardedDownload(!!previewHtml, () => {
+                  <Button variant="outline" size="sm" onClick={() => guardedDownload(!!previewHtml, () => triggerWithInterstitial(() => {
                     downloadHtmlFile(previewHtml || dashboardHtml, buildFileName(candidateProfile?.first_name, candidateProfile?.last_name, "dashboard", companyName, "html"));
                     recordDownloadSignal(applicationId, "dashboard", jobTitle);
                     toast({ title: "Downloaded" });
-                  })}><Download className="mr-2 h-4 w-4" /> Download HTML</Button>
+                  }))}><Download className="mr-2 h-4 w-4" /> Download HTML</Button>
                 )}
               </>
             )}
@@ -809,14 +834,14 @@ export default function DynamicMaterialsSection({
                 <Button variant="outline" size="sm" onClick={() => {
                   const viewedHtml = assetPreviewHtml[asset.id] || asset.html;
                   const isOlder = !!assetPreviewHtml[asset.id];
-                  guardedDownload(isOlder, async () => {
+                  guardedDownload(isOlder, () => triggerWithInterstitial(async () => {
                     const pdfName = buildFileName(candidateProfile?.first_name, candidateProfile?.last_name, asset.asset_name, companyName, "pdf");
                     downloadMaterialPdf(viewedHtml, pdfName);
                     recordDownloadSignal(applicationId, asset.asset_name, jobTitle);
                     await supabase.from("generated_assets").update({ downloaded_at: new Date().toISOString() }).eq("id", asset.id);
                     setGeneratedAssets(prev => prev.map(a => a.id === asset.id ? { ...a, downloaded_at: new Date().toISOString() } : a));
                     toast({ title: "Printing PDF" });
-                  });
+                  }));
                 }}><Download className="mr-2 h-4 w-4" /> Download PDF</Button>
               )}
             </div>
@@ -898,11 +923,11 @@ export default function DynamicMaterialsSection({
           .map((legacy) => (
              <TabsContent key={`legacy-${legacy.field}`} value={`legacy-${legacy.field}`} className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={() => {
+                <Button variant="outline" size="sm" onClick={() => triggerWithInterstitial(() => {
                   downloadMaterialPdf(legacy.html, buildFileName(candidateProfile?.first_name, candidateProfile?.last_name, legacy.name, companyName, "pdf"));
                   recordDownloadSignal(applicationId, legacy.name, jobTitle);
                   toast({ title: "Printing PDF" });
-                }}><Download className="mr-2 h-4 w-4" /> Download PDF</Button>
+                })}><Download className="mr-2 h-4 w-4" /> Download PDF</Button>
               </div>
               <FitPagePreview html={legacy.html} title={legacy.name} />
             </TabsContent>

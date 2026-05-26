@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { ExtractedKeyword } from '@/lib/keywordMatcher';
+import { enforceVerbatimEducation } from '@/lib/resumeEducationEnforcer';
 
 export async function generateOptimizedResume({
   jobDescription,
@@ -23,5 +24,8 @@ export async function generateOptimizedResume({
   });
   if (error) throw new Error(error.message);
   if (!data?.success) throw new Error(data?.error || 'Resume generation failed');
-  return { resume_html: data.resume_html, keywords_injected: data.keywords_injected };
+  return {
+    resume_html: enforceVerbatimEducation(data.resume_html, resumeText),
+    keywords_injected: data.keywords_injected,
+  };
 }

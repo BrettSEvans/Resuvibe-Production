@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { enforceVerbatimEducation } from '@/lib/resumeEducationEnforcer';
 
 export async function generateClarityResume({
   jobDescription,
@@ -16,5 +17,5 @@ export async function generateClarityResume({
   });
   if (error) throw new Error(error.message);
   if (!data?.success) throw new Error(data?.error || 'Clarity resume generation failed');
-  return { resume_html: data.resume_html };
+  return { resume_html: enforceVerbatimEducation(data.resume_html, resumeText) };
 }

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { PageShell } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
@@ -136,7 +137,11 @@ export default function Admin() {
   });
 
   if (loading || (user && (roleLoading || typeof isAdmin === "undefined"))) {
-    return <div className="flex items-center justify-center h-[60vh]"><Skeleton className="w-48 h-8" /></div>;
+    return (
+      <PageShell>
+        <div className="flex items-center justify-center py-20"><Skeleton className="w-48 h-8" /></div>
+      </PageShell>
+    );
   }
 
   if (!user || isAdmin === false) {
@@ -144,7 +149,8 @@ export default function Admin() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 space-y-6">
+    <PageShell>
+    <div className="px-4 md:px-8 py-6 space-y-6">
       <div className="flex items-center gap-3">
         <Shield className="h-6 w-6 text-primary" />
         <h1 className="text-2xl font-heading font-bold text-foreground">Admin Panel</h1>
@@ -185,5 +191,6 @@ export default function Admin() {
         </TabsContent>
       </Tabs>
     </div>
+    </PageShell>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageShell } from "@/components/PageShell";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +51,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [baseline, setBaseline] = useState<string>("");
+  const [hasNewUpload, setHasNewUpload] = useState(false);
 
   const currentSnapshot = JSON.stringify({
     firstName,
@@ -61,7 +63,7 @@ export default function Profile() {
     tone,
     masterCoverLetter,
   });
-  const isDirty = initialized && currentSnapshot !== baseline;
+  const isDirty = initialized && (currentSnapshot !== baseline || hasNewUpload);
 
   // Initialize form from profile data
   if (profile && !initialized) {
@@ -121,21 +123,25 @@ export default function Profile() {
       toast.error("Failed to save: " + error.message);
     } else {
       setBaseline(currentSnapshot);
+      setHasNewUpload(false);
       toast.success("Profile saved!");
     }
   };
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </div>
+      <PageShell>
+        <div className="px-4 md:px-8 py-6 space-y-4">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 md:px-8 py-6 space-y-6">
+    <PageShell>
+    <div className="px-4 md:px-8 py-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-heading font-bold text-foreground flex items-center gap-2">
           <User className="h-6 w-6 text-primary" /> Profile
@@ -185,7 +191,42 @@ export default function Profile() {
       </Card>
 
       {/* Resume uploads */}
-      {user && <ResumeManager userId={user.id} />}
+      {user && (
+        <ResumeManager
+          userId={user.id}
+          onResumeUploaded={() => setHasNewUpload(true)}
+          onResumeTextExtracted={(text) => setResumeText(text)}
+        />
+      )}
+
+      {/* Resume text (paste or auto-populated from PDF upload) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileText className="h-4 w-4" /> Resume Text
+          </CardTitle>
+          <CardDescription>
+            Paste your resume text here, or upload a PDF above — it will be extracted automatically.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Textarea
+            placeholder="Paste your resume content here… We'll use this to personalise your generated materials."
+            value={resumeText}
+            onChange={(e) => setResumeText(e.target.value)}
+            rows={10}
+            className="font-mono text-xs"
+          />
+          <p className="text-xs text-muted-foreground">
+            Tip: Copy all text from your current resume and paste it here. This helps us tailor documents to your experience.
+          </p>
+          {!resumeText && (
+            <p className="text-xs text-amber-500">
+              💡 Add your resume text to improve the quality of generated materials
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Skills */}
       <Card>
@@ -245,5 +286,6 @@ export default function Profile() {
         </CardContent>
       </Card>
     </div>
+    </PageShell>
   );
 }

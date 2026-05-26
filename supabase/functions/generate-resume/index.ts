@@ -62,6 +62,11 @@ STRATEGY:
 5. Allocate more detail to the two most recent roles; condense older experience
 6. Include a 3-line professional summary mirroring the target job title and top requirements
 
+EDUCATION:
+- Copy the candidate's education entries EXACTLY as they appear in the source resume — institution name, degree, field of study, and dates must be reproduced verbatim
+- Do NOT add, infer, or embellish any degree, certification, GPA, honour, award, or coursework that is not explicitly stated in the candidate's resume
+- If the candidate's resume contains no education section, omit the section entirely — do NOT fabricate one
+
 ABSOLUTE RULES:
 - NEVER invent skills, certifications, degrees, or job titles the candidate doesn't have
 - NEVER fabricate metrics or achievements — only quantify what the candidate already states

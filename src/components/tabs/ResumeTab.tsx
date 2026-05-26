@@ -58,10 +58,49 @@ import { buildFileName } from "@/lib/fileNaming";
 import type { UserProfileSnapshot } from "@/types/models";
 
 /** Fit-to-page preview for resume */
+/**
+ * Inject font-normalisation styles and a postMessage height-reporter into
+ * the resume HTML so the preview iframe can tell its parent how tall it is.
+ * `allow-scripts` is set on the sandbox but NOT `allow-same-origin`, so
+ * reading contentDocument from the parent throws a security error — the only
+ * reliable way to measure height is a script running *inside* the iframe.
+ */
+function normaliseResumeFont(html: string, reportId?: string): string {
+  const style =
+    `<style>` +
+    `*{font-family:Arial,sans-serif!important;}` +
+    `body{font-size:11pt;}` +
+    `</style>`;
+  // After the page finishes loading, measure the full rendered height and post
+  // it to the parent.  We use a unique reportId so multiple previews on the
+  // same page don't clobber each other.
+  const script = reportId
+    ? `<script>` +
+      `window.addEventListener('load',function(){` +
+      `var h=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight);` +
+      `window.parent.postMessage({type:'rv-iframe-h',id:'${reportId}',h:h},'*');` +
+      `});` +
+      `<\/script>`
+    : "";
+  const inject = style + script;
+  if (/<head[^>]*>/i.test(html)) {
+    return html.replace(/(<head[^>]*>)/i, `$1${inject}`);
+  }
+  return inject + html;
+}
+
 function ResumePagePreview({ html }: { html: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  // Stable unique ID for this preview instance so postMessage events from
+  // sibling previews (ATS vs Clarity, both mounted in the DOM) don't
+  // interfere with each other.
+  const reportId = useRef(`rp-${Math.random().toString(36).slice(2)}`);
   const [scale, setScale] = useState(1);
+  // Defaults to one US-Letter page; updated via postMessage once the iframe
+  // has measured its own scrollHeight.
+  const [contentHeight, setContentHeight] = useState(1056);
 
+  // Scale iframe to fill container width.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -74,21 +113,46 @@ function ResumePagePreview({ html }: { html: string }) {
     return () => observer.disconnect();
   }, []);
 
+  // Listen for the height report posted by the injected script.
+  useEffect(() => {
+    const id = reportId.current;
+    const handler = (e: MessageEvent) => {
+      if (
+        e.data?.type === "rv-iframe-h" &&
+        e.data?.id === id &&
+        typeof e.data.h === "number"
+      ) {
+        // Add a small bottom margin so the last line isn't flush with the edge.
+        setContentHeight(Math.max(e.data.h + 32, 1056));
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
   return (
-    <Card className="overflow-hidden px-6">
-      <div ref={containerRef} className="w-full bg-white" style={{ height: `${1056 * scale}px`, overflow: "hidden" }}>
-        <iframe
-          srcDoc={html}
-          sandbox="allow-scripts"
-          title="Resume Preview"
-          style={{
-            width: "816px",
-            height: "1056px",
-            border: "none",
-            transform: `scale(${scale})`,
-            transformOrigin: "top left",
-          }}
-        />
+    <Card className="px-6 pb-0 overflow-hidden">
+      {/* Outer scroll wrapper — lets the user scroll through resumes longer
+          than one page without clipping any content at the bottom. */}
+      <div className="overflow-y-auto">
+        <div
+          ref={containerRef}
+          className="w-full bg-white"
+          style={{ height: `${contentHeight * scale}px`, overflow: "hidden" }}
+        >
+          <iframe
+            srcDoc={normaliseResumeFont(html, reportId.current)}
+            sandbox="allow-scripts"
+            title="Resume Preview"
+            style={{
+              width: "816px",
+              height: `${contentHeight}px`,
+              border: "none",
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+            }}
+          />
+        </div>
       </div>
     </Card>
   );
@@ -170,7 +234,7 @@ function ResumeDownloadButton({
       document.body.removeChild(iframe);
       return;
     }
-    const printStyles = `<style>@page{size:letter;margin:0}@media print{html{margin:0 !important;padding:0 !important}body{margin:0 !important;padding:0.5in !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>`;
+    const printStyles = `<style>@page{size:letter;margin:0}@media print{html{margin:0 !important;padding:0 !important}body{margin:0 !important;padding:0.5in !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}*{font-family:Arial,sans-serif!important;}body{font-size:11pt;}</style>`;
     const sourceDoc = new DOMParser().parseFromString(displayHtml, "text/html");
     const printDocument = `<!DOCTYPE html><html><head><meta charset="utf-8" /><title></title>${printStyles}${sourceDoc.head?.innerHTML || ""}</head><body>${sourceDoc.body?.innerHTML || displayHtml}</body></html>`;
     doc.open();
@@ -246,7 +310,7 @@ function ResumeVariantToolbar({
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full">
       <div />
-      <div className="flex items-center gap-2 w-[440px] max-w-full justify-self-center">
+      <div className="flex items-center gap-2 w-[220px] max-w-full justify-self-center">
         <Button
           type="button"
           variant="ghost"
@@ -260,7 +324,7 @@ function ResumeVariantToolbar({
           {chatVisible ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
         </Button>
         <Input
-          placeholder="Ask for changes (e.g. shorten the summary)"
+          placeholder="Ask for changes"
           value={askPrompt}
           onChange={(e) => setAskPrompt(e.target.value)}
           onKeyDown={(e) => {
