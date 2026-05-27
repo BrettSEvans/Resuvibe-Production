@@ -80,6 +80,8 @@ function AuthenticatedApp() {
   if (!profile?.onboarding_completed_at) {
     return (
       <Routes>
+        {/* Landing page is always accessible at / regardless of onboarding state */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/stories" element={<StoryBoard />} />
         <Route path="*" element={<Navigate to="/onboarding" replace />} />
