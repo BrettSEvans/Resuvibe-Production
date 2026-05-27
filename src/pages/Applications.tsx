@@ -57,7 +57,7 @@ import { Pagination } from "@/components/Pagination";
 type SortKey = "company_name" | "job_title" | "status" | "created_at" | "updated_at";
 type SortDir = "asc" | "desc";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 const Applications = () => {
   const { toast } = useToast();
