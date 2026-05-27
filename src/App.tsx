@@ -16,6 +16,7 @@ import Templates from "./pages/Templates";
 import StoryBoard from "./pages/StoryBoard";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
+import LandingPage from "./pages/LandingPage";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
 import Onboarding from "./pages/Onboarding";
@@ -66,9 +67,12 @@ function AuthenticatedApp() {
   if (!user) {
     return (
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login defaultTab="login" />} />
+        <Route path="/signup" element={<Login defaultTab="signup" />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Any other path sends unauthenticated visitors to the landing page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }

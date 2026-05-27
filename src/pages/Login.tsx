@@ -11,7 +11,12 @@ import { toast } from "sonner";
 import { Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 
-export default function Login() {
+interface LoginProps {
+  /** Which tab to show by default: "login" (Sign In) or "signup" (Sign Up). */
+  defaultTab?: "login" | "signup";
+}
+
+export default function Login({ defaultTab = "login" }: LoginProps) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -167,7 +172,7 @@ export default function Login() {
             <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Or continue with email</span></div>
           </div>
 
-          <Tabs defaultValue="login" className="space-y-4">
+          <Tabs defaultValue={defaultTab} className="space-y-4">
             <TabsList className="w-full">
               <TabsTrigger value="login" className="flex-1">Sign In</TabsTrigger>
               <TabsTrigger value="signup" className="flex-1">Sign Up</TabsTrigger>
