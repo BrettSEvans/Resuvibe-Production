@@ -1,0 +1,19 @@
+# ads.txt — Authorized Digital Sellers for resuvibe.ai
+# IAB Tech Lab spec: https://iabtechlab.com/ads-txt/
+# Format: <domain>, <publisher-id>, <relationship>, <certification-authority-id>
+
+# ── Google AdSense ────────────────────────────────────────────────────────────
+google.com, pub-9524682161824217, DIRECT, f08c47fec0942fa0
+
+# ── Google Ad Manager (GAM) ───────────────────────────────────────────────────
+# Uncomment and replace NETWORK_CODE with your 8-9 digit GAM network code
+# once your GAM account is set up and linked to AdSense.
+# Find it in GAM under Admin → Global settings → Network code.
+#
+# google.com, NETWORK_CODE, DIRECT, f08c47fec0942fa0
+
+# ── Prebid / Header Bidding Partners ─────────────────────────────────────────
+# Add demand partner lines here as each is onboarded (Phase 4).
+# Example format:
+# sovrn.com, 123456, DIRECT, fafdf38b16bf6b2b
+# openx.com, 123456789, DIRECT, 6a698e965052353d
