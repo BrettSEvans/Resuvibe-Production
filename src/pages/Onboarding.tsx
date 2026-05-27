@@ -58,6 +58,7 @@ export default function Onboarding() {
   const [skills, setSkills] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
   const [industries, setIndustries] = useState<string[]>([]);
+  const [industryInput, setIndustryInput] = useState("");
   const [extractedSkills, setExtractedSkills] = useState<string[]>([]);
   const [extractingSkills, setExtractingSkills] = useState(false);
   const [extractedFromText, setExtractedFromText] = useState<string>("");
@@ -82,6 +83,14 @@ export default function Onboarding() {
 
   const toggleIndustry = (ind: string) => {
     setIndustries((prev) => prev.includes(ind) ? prev.filter((i) => i !== ind) : [...prev, ind]);
+  };
+
+  const addCustomIndustry = () => {
+    const trimmed = industryInput.trim();
+    if (trimmed && !industries.includes(trimmed)) {
+      setIndustries((prev) => [...prev, trimmed]);
+      setIndustryInput("");
+    }
   };
 
   const handleNext = useCallback(async () => {
@@ -311,6 +320,25 @@ export default function Onboarding() {
                     </Badge>
                   ))}
                 </div>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    placeholder="Add custom industry..."
+                    value={industryInput}
+                    onChange={(e) => setIndustryInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomIndustry())}
+                    className="text-sm"
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={addCustomIndustry}>Add</Button>
+                </div>
+                {industries.filter((ind) => !COMMON_INDUSTRIES.includes(ind)).length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {industries.filter((ind) => !COMMON_INDUSTRIES.includes(ind)).map((ind) => (
+                      <Badge key={ind} variant="default" className="text-xs gap-1">
+                        {ind} <X className="h-2.5 w-2.5 cursor-pointer" onClick={() => toggleIndustry(ind)} />
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
