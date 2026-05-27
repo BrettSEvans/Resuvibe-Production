@@ -53,7 +53,7 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
   });
 
   const links = [
-    { to: "/", label: "Applications", icon: null, match: (p: string) => p === "/" || p === "/applications", tourId: "applications" },
+    { to: "/applications", label: "Applications", icon: null, match: (p: string) => p === "/applications" || p.startsWith("/applications/"), tourId: "applications" },
     ...(isAdmin ? [
       { to: "/stories", label: "Stories", icon: null, match: (p: string) => p === "/stories", tourId: undefined },
       { to: "/admin", label: "Admin", icon: <Shield className="h-3.5 w-3.5" />, match: (p: string) => p === "/admin", tourId: undefined },
@@ -71,7 +71,7 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-6xl mx-auto flex h-14 items-center justify-between px-4 md:px-8">
         <div className="flex items-center gap-6">
-          <button onClick={() => navigate("/")} className="focus:outline-none">
+          <button onClick={() => navigate("/applications")} className="focus:outline-none">
             <BrandLogo iconSize="2.2em" />
           </button>
 

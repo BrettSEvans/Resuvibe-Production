@@ -107,7 +107,9 @@ function AuthenticatedApp() {
       <HelpDrawer />
       <TutorialTour active={tour.active} onComplete={tour.complete} />
       <Routes>
-        <Route path="/" element={<Applications />} />
+        {/* Landing page — always public, even for authenticated users */}
+        <Route path="/" element={<LandingPage />} />
+        {/* App dashboard */}
         <Route path="/applications" element={<Applications />} />
         <Route path="/applications/new" element={<NewApplication />} />
         <Route path="/applications/:id" element={<ApplicationDetail />} />
@@ -116,8 +118,9 @@ function AuthenticatedApp() {
         <Route path="/stories" element={<StoryBoard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/onboarding" element={<Navigate to="/" replace />} />
-        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/onboarding" element={<Navigate to="/applications" replace />} />
+        <Route path="/login" element={<Navigate to="/applications" replace />} />
+        <Route path="/signup" element={<Navigate to="/applications" replace />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

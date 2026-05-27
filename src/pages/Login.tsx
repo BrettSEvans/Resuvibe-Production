@@ -49,7 +49,7 @@ export default function Login({ defaultTab = "login" }: LoginProps) {
       toast.error("This account has been deactivated. Contact support for assistance.");
       return;
     }
-    navigate("/");
+    navigate("/applications");
   };
 
   const handleEmailSignup = async (e: React.FormEvent) => {
