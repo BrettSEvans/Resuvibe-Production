@@ -52,9 +52,12 @@ import type { JobApplicationListItem } from "@/types/models";
 import { InterstitialAd } from "@/components/ads/InterstitialAd";
 import { useAdManager } from "@/hooks/useAdManager";
 import { PageShell } from "@/components/PageShell";
+import { Pagination } from "@/components/Pagination";
 
 type SortKey = "company_name" | "job_title" | "status" | "created_at" | "updated_at";
 type SortDir = "asc" | "desc";
+
+const PAGE_SIZE = 20;
 
 const Applications = () => {
   const { toast } = useToast();
@@ -79,6 +82,7 @@ const Applications = () => {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   // Story 1.2: Profile completeness check
@@ -127,7 +131,13 @@ const Applications = () => {
     if (!deleteTarget) return;
     try {
       await deleteJobApplication(deleteTarget.id);
-      setApplications((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+      setApplications((prev) => {
+        const next = prev.filter((a) => a.id !== deleteTarget.id);
+        // If deletion emptied the current page, step back one page
+        const newLastPage = Math.max(1, Math.ceil(next.length / PAGE_SIZE));
+        setCurrentPage((p) => Math.min(p, newLastPage));
+        return next;
+      });
       toast({ title: "Deleted", description: "Application removed." });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -188,6 +198,7 @@ const Applications = () => {
       setSortKey(key);
       setSortDir("asc");
     }
+    setCurrentPage(1);
   };
 
   const sorted = useMemo(() => {
@@ -198,6 +209,9 @@ const Applications = () => {
       return sortDir === "asc" ? cmp : -cmp;
     });
   }, [applications, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const paginated  = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
@@ -286,7 +300,7 @@ const Applications = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sorted.map((app) => (
+                  {paginated.map((app) => (
                     <TableRow
                       key={app.id}
                       className="cursor-pointer hover:bg-muted/50"
@@ -369,6 +383,15 @@ const Applications = () => {
                 </TableBody>
               </Table>
             </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={sorted.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setCurrentPage}
+              itemLabel="applications"
+            />
 
             {previewApp?.dashboard_html && (
               <Card className="overflow-hidden">
