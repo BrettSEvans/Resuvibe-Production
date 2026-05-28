@@ -38,6 +38,7 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { useAdConsent } from "@/hooks/useAdConsent";
 
 // ─── AdSense config ──────────────────────────────────────────────────────────
 
@@ -97,18 +98,19 @@ export function AdBanner({ size, className }: AdBannerProps) {
   const { w, h, label } = SIZE_MAP[size];
   const live = isLive(size);
   const insRef = useRef<HTMLModElement>(null);
+  const { hasConsent } = useAdConsent();
 
   useEffect(() => {
-    if (!live) return; // don't push until slot IDs are filled in
+    if (!live || !hasConsent) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
       // Silently ignored — ad blocker or AdSense script not yet loaded.
     }
-  }, []); // empty array = once per mount; re-fires naturally on remount
+  }, [live, hasConsent]); // re-fires when consent is granted
 
-  // ── Slot ID not yet configured → show wireframe placeholder ──────────────
-  if (!live) {
+  // ── No consent or slot ID not yet configured → show wireframe placeholder ──
+  if (!live || !hasConsent) {
     return (
       <div
         className={cn("flex items-center justify-center shrink-0", className)}

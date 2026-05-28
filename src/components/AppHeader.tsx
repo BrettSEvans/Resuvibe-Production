@@ -1,5 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { backgroundGenerator } from "@/lib/backgroundGenerator";
 import { Sparkles, Sun, Moon, Shield, LogOut, Menu } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -34,7 +36,14 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { signOut, user } = useAuth();
+  const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    queryClient.clear();
+    backgroundGenerator.clearAll();
+    await signOut();
+  };
 
   // Admin check using the shared user from useAuth — no nested useAuth call
   const { data: isAdmin } = useQuery({
@@ -157,7 +166,7 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={signOut}>Sign Out</AlertDialogAction>
+                <AlertDialogAction onClick={handleSignOut}>Sign Out</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -207,7 +216,7 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => { signOut(); setMobileOpen(false); }}>Sign Out</AlertDialogAction>
+                        <AlertDialogAction onClick={async () => { await handleSignOut(); setMobileOpen(false); }}>Sign Out</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>

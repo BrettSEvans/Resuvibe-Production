@@ -21,6 +21,7 @@ import { generateOptimizedResume } from "@/lib/api/resumeGeneration";
 import { generateClarityResume } from "@/lib/api/resumeGenerationClarity";
 import { supabase } from "@/integrations/supabase/client";
 import type { JDIntelligence } from "@/lib/api/jdIntelligence";
+import { sanitizeAiHtml } from "@/lib/sanitizeHtml";
 
 export type GenerationJobStatus =
   | "pending"
@@ -61,7 +62,7 @@ export type GenerationJob = {
     competitors: string[];
     customers: string[];
     products: string[];
-    jdIntelligence: any;
+    jdIntelligence: JDIntelligence | null;
     candidateName: string;
   };
 };
@@ -82,6 +83,14 @@ class BackgroundGenerationManager {
       };
       window.addEventListener("beforeunload", this.beforeUnloadHandler);
     } else if (!hasActive && this.beforeUnloadHandler) {
+      window.removeEventListener("beforeunload", this.beforeUnloadHandler);
+      this.beforeUnloadHandler = null;
+    }
+  }
+
+  clearAll() {
+    this.jobs.clear();
+    if (this.beforeUnloadHandler) {
       window.removeEventListener("beforeunload", this.beforeUnloadHandler);
       this.beforeUnloadHandler = null;
     }
@@ -153,7 +162,7 @@ class BackgroundGenerationManager {
         company_url: companyUrl,
         status: "generating",
         generation_status: "pending",
-      } as any);
+      });
       appId = saved.id;
     } else {
       await saveJobApplication({
@@ -161,7 +170,7 @@ class BackgroundGenerationManager {
         job_url: jobUrl,
         status: "generating",
         generation_status: "pending",
-      } as any);
+      });
     }
 
     const job: GenerationJob = {
@@ -191,7 +200,7 @@ class BackgroundGenerationManager {
       let markdown = manualDescription || "";
       if (!useManualInput && jobUrl) {
         this.updateJob(appId, { status: "reviewing-job", progress: "Reviewing job posting..." });
-        await saveJobApplication({ id: appId, job_url: jobUrl, generation_status: "reviewing-job" } as any);
+        await saveJobApplication({ id: appId, job_url: jobUrl, generation_status: "reviewing-job" });
         try {
           const result = await scrapeJob(jobUrl);
           markdown = result.markdown;
@@ -199,7 +208,7 @@ class BackgroundGenerationManager {
           if (scrapeErr?.blocked || scrapeErr?.message === 'BLOCKED_SITE') {
             const hostname = (() => { try { return new URL(jobUrl).hostname; } catch { return jobUrl; } })();
             this.updateJob(appId, { status: "error", progress: `This site (${hostname}) blocks automated scraping. Please use "Paste text instead" to manually enter the job description.` });
-            await saveJobApplication({ id: appId, job_url: jobUrl, generation_status: "error", generation_error: `Blocked site: ${hostname}. Use manual paste.` } as any);
+            await saveJobApplication({ id: appId, job_url: jobUrl, generation_status: "error", generation_error: `Blocked site: ${hostname}. Use manual paste.` });
             return;
           }
           throw scrapeErr;
@@ -209,7 +218,7 @@ class BackgroundGenerationManager {
 
       // ========== PHASE 2: Run branding, analysis, JD parse, and profile fetch ALL IN PARALLEL ==========
       this.updateJob(appId, { status: "analyzing", progress: "Analyzing job & company..." });
-      await saveJobApplication({ id: appId, job_url: jobUrl, generation_status: "analyzing" } as any);
+      await saveJobApplication({ id: appId, job_url: jobUrl, generation_status: "analyzing" });
 
       // Launch all independent tasks concurrently
       const brandingPromise = (sel.dashboard && companyUrl?.trim())
@@ -306,7 +315,7 @@ class BackgroundGenerationManager {
         products,
         jd_intelligence: jdIntelligence,
         generation_status: "resume",
-      } as any);
+      });
 
       // ========== PHASE 3: Generate resume (foreground phase end) ==========
       if (sel.resume) {
@@ -329,7 +338,7 @@ class BackgroundGenerationManager {
             }),
           ]);
 
-          const savePayload: any = {
+          const savePayload: Parameters<typeof saveJobApplication>[0] = {
             id: appId,
             job_url: jobUrl,
             generation_status: "resume-complete",
@@ -337,13 +346,13 @@ class BackgroundGenerationManager {
           };
 
           if (atsResult.status === "fulfilled") {
-            savePayload.resume_html = atsResult.value.resume_html;
+            savePayload.resume_html = sanitizeAiHtml(atsResult.value.resume_html);
           } else {
             console.warn("ATS resume generation failed:", atsResult.reason);
           }
 
           if (clarityResult.status === "fulfilled") {
-            savePayload.clarity_resume_html = clarityResult.value.resume_html;
+            savePayload.clarity_resume_html = sanitizeAiHtml(clarityResult.value.resume_html);
           } else {
             console.warn("Clarity resume generation failed:", clarityResult.reason);
           }
@@ -355,7 +364,7 @@ class BackgroundGenerationManager {
             job_url: jobUrl,
             generation_status: "resume-complete",
             status: "resume-complete",
-          } as any);
+          });
         }
       } else {
         await saveJobApplication({
@@ -363,7 +372,7 @@ class BackgroundGenerationManager {
           job_url: jobUrl,
           generation_status: "resume-complete",
           status: "resume-complete",
-        } as any);
+        });
       }
 
       // Build list of assets that will be generated in background
@@ -425,7 +434,7 @@ class BackgroundGenerationManager {
             job_url: jobUrl,
             cover_letter: coverLetter,
             generation_status: "cover-letter-complete",
-          } as any);
+          });
         } catch (e) {
           console.warn("Cover letter generation failed:", e);
         }
@@ -577,21 +586,29 @@ class BackgroundGenerationManager {
         });
 
         // Auto-resume with defaults after 5 minutes if user doesn't interact
-        setTimeout(() => {
+        setTimeout(async () => {
           const currentJob = this.jobs.get(appId);
-          if (currentJob?.status === "awaiting-dashboard-config") {
-            console.log("[Pipeline] Auto-resuming dashboard generation with defaults for", appId);
-            this.resumeDashboardGeneration(appId, {
-              selectedSections: researchedSections?.slice(0, 7),
-              selectedCfoScenarios: researchedCfoScenarios
-                ?.sort((a: any, b: any) => (a.relevanceRank || 99) - (b.relevanceRank || 99))
-                .slice(0, 3),
-            });
+          if (currentJob?.status !== "awaiting-dashboard-config") return;
+
+          // Abort if the user has signed out while the timer was running
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            console.log("[Pipeline] User no longer authenticated, aborting auto-resume for", appId);
+            this.jobs.delete(appId);
+            return;
           }
+
+          console.log("[Pipeline] Auto-resuming dashboard generation with defaults for", appId);
+          this.resumeDashboardGeneration(appId, {
+            selectedSections: researchedSections?.slice(0, 7),
+            selectedCfoScenarios: researchedCfoScenarios
+              ?.sort((a: any, b: any) => (a.relevanceRank || 99) - (b.relevanceRank || 99))
+              .slice(0, 3),
+          });
         }, 300_000);
       } else {
         this.updateJob(appId, { status: "complete", progress: "Done!" });
-        await saveJobApplication({ id: appId, job_url: jobUrl, status: "complete", generation_status: "complete" } as any);
+        await saveJobApplication({ id: appId, job_url: jobUrl, status: "complete", generation_status: "complete" });
       }
     } catch (err: any) {
       console.error("Background generation error:", err);
@@ -603,7 +620,7 @@ class BackgroundGenerationManager {
           status: "error",
           generation_status: "error",
           generation_error: err.message,
-        } as any);
+        });
       } catch {}
     }
   }
@@ -687,7 +704,7 @@ class BackgroundGenerationManager {
       const parsed = parseLlmJsonOutput(dashboardRaw);
       if (parsed) {
         dashboardData = parsed;
-        dashboardHtml = assembleDashboardHtml(parsed);
+        dashboardHtml = sanitizeAiHtml(assembleDashboardHtml(parsed));
 
         const alignmentReport = validateDashboardAlignment(parsed, jdIntelligence);
         console.log(
@@ -723,10 +740,17 @@ class BackgroundGenerationManager {
         const htmlEnd = dashboardHtml.lastIndexOf("</html>");
         if (htmlEnd !== -1) dashboardHtml = dashboardHtml.slice(0, htmlEnd + 7);
 
-        const dataMatch = dashboardHtml.match(/window\.__DASHBOARD_DATA__\s*=\s*({[\s\S]*?});?\s*<\/script>/);
+        // Bound the regex to 256 KB to prevent catastrophic backtracking on pathological LLM output
+        const MAX_DATA_BYTES = 256 * 1024;
+        const dataMatch = dashboardHtml.length < MAX_DATA_BYTES
+          ? dashboardHtml.match(/window\.__DASHBOARD_DATA__\s*=\s*(\{[^<]{0,65536}\});?\s*<\/script>/)
+          : null;
         if (dataMatch) {
           try {
             const embeddedData = JSON.parse(dataMatch[1]);
+            if (!embeddedData || typeof embeddedData !== "object") {
+              throw new Error("Embedded dashboard data is not an object");
+            }
             if (department && embeddedData?.meta) {
               embeddedData.meta.department = department;
               dashboardHtml = dashboardHtml.replace(
@@ -736,8 +760,10 @@ class BackgroundGenerationManager {
             }
             dashboardData = embeddedData;
           } catch (extractErr) {
-            console.warn("Failed to extract embedded dashboard data from HTML:", extractErr);
+            console.error("[DashboardPipeline] Failed to extract embedded dashboard data:", extractErr);
           }
+        } else if (dashboardHtml.length >= MAX_DATA_BYTES) {
+          console.error("[DashboardPipeline] Dashboard HTML exceeded size limit for data extraction");
         }
       }
 
@@ -748,7 +774,7 @@ class BackgroundGenerationManager {
         dashboard_data: dashboardData,
         status: "complete",
         generation_status: "complete",
-      } as any);
+      });
     } catch (e) {
       console.warn("Dashboard generation failed:", e);
       await saveJobApplication({
@@ -756,7 +782,7 @@ class BackgroundGenerationManager {
         job_url: jobUrl,
         status: "complete",
         generation_status: "complete",
-      } as any);
+      });
     }
 
     this.updateJob(appId, { status: "complete", progress: "Done!" });
@@ -832,7 +858,7 @@ class BackgroundGenerationManager {
       });
 
       const updatedHistory = [...chatHistory, { role: "assistant", content: "✅ Dashboard updated!" }];
-      const savePayload: Record<string, unknown> = {
+      const savePayload: Parameters<typeof saveJobApplication>[0] = {
         id: appId,
         job_url: jobUrl,
         dashboard_html: accumulated,
@@ -841,7 +867,7 @@ class BackgroundGenerationManager {
       if (parsedData) {
         savePayload.dashboard_data = parsedData;
       }
-      await saveJobApplication(savePayload as any);
+      await saveJobApplication(savePayload);
 
       this.updateJob(appId, { status: "complete", progress: "Refinement complete!" });
 

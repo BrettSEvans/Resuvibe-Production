@@ -12,8 +12,15 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Save, User, FileText, Zap, X } from "lucide-react";
+import { Save, User, FileText, Zap, X, Trash2 } from "lucide-react";
 import ResumeManager from "@/components/ResumeManager";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { backgroundGenerator } from "@/lib/backgroundGenerator";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const EXPERIENCE_OPTIONS = ["0-1", "2-4", "5-9", "10-14", "15+"];
 const COMMON_SKILLS = [
@@ -23,7 +30,10 @@ const COMMON_SKILLS = [
 const TONE_OPTIONS = ["professional", "conversational", "confident", "formal", "friendly"];
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [deleting, setDeleting] = useState(false);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -125,6 +135,36 @@ export default function Profile() {
       setBaseline(currentSnapshot);
       setHasNewUpload(false);
       toast.success("Profile saved!");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? "Deletion failed");
+      }
+      // Wipe all local state before navigating away
+      queryClient.clear();
+      backgroundGenerator.clearAll();
+      await signOut();
+    } catch (err: unknown) {
+      setDeleting(false);
+      toast.error("Could not delete account: " + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -283,6 +323,45 @@ export default function Profile() {
               💡 Add a master cover letter to improve the quality of generated cover letters
             </p>
           )}
+        </CardContent>
+      </Card>
+      {/* Danger Zone */}
+      <Card className="border-destructive/40">
+        <CardHeader>
+          <CardTitle className="text-base text-destructive flex items-center gap-2">
+            <Trash2 className="h-4 w-4" /> Danger Zone
+          </CardTitle>
+          <CardDescription>
+            Permanently delete your account and all associated data. This cannot be undone.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" disabled={deleting}>
+                {deleting ? "Deleting…" : "Delete My Account"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently erase your profile, all job applications, resumes, cover
+                  letters, and every generated asset. This action cannot be undone and satisfies
+                  your GDPR / CCPA right to erasure.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={handleDeleteAccount}
+                >
+                  Yes, permanently delete everything
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </div>

@@ -33,6 +33,7 @@ import { TutorialTour, useTourState } from "./components/TutorialTour";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "@/hooks/useTheme";
 import { AdBanner } from "./components/ads/AdBanner";
+import { CookieConsent } from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
@@ -140,6 +141,7 @@ function AuthenticatedApp() {
       </div>
       {/* Bottom padding so content clears sticky footer on mobile */}
       <div className="h-14 md:hidden" />
+      <CookieConsent />
     </>
   );
 }
