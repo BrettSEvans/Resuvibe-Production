@@ -266,7 +266,7 @@ export default function LandingPage() {
         .lp-hero-eyebrow { margin-bottom: 24px; }
         .lp-hero-headline {
           font-family: 'DM Serif Display', serif;
-          font-size: 58px;
+          font-size: 46px;
           font-weight: 400;
           line-height: 1.08;
           letter-spacing: -0.025em;
@@ -698,7 +698,7 @@ export default function LandingPage() {
         @media (max-width: 1024px) {
           .lp-hero-inner       { grid-template-columns: 1fr; gap: 48px; }
           .lp-hero-visual      { display: none; }
-          .lp-hero-headline    { font-size: 46px; }
+          .lp-hero-headline    { font-size: 38px; }
           .lp-reality-inner    { grid-template-columns: 1fr; gap: 56px; }
           .lp-reality-headline { font-size: 34px; }
           .lp-features-grid    { grid-template-columns: repeat(2, 1fr); }
@@ -709,7 +709,7 @@ export default function LandingPage() {
           .lp-container { padding: 0 16px; }
 
           .lp-hero              { padding: 72px 0 64px; }
-          .lp-hero-headline     { font-size: 38px; }
+          .lp-hero-headline     { font-size: 32px; }
           .lp-hero-subhead      { font-size: 17px; }
 
           .lp-section-title     { font-size: 32px; }
@@ -791,7 +791,7 @@ export default function LandingPage() {
                 </div>
 
                 <h1 className="lp-hero-headline" id="lp-hero-headline">
-                  The Recruiter<br />Has AI.<br /><em>Now You Do Too.</em>
+                  The Recruiter Has AI.<br /><em>Now You Do Too— For Free</em>
                 </h1>
 
                 <p className="lp-hero-subhead">
