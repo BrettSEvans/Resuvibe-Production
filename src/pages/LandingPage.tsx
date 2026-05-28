@@ -756,13 +756,9 @@ export default function LandingPage() {
           <nav className="lp-nav-inner" aria-label="Main navigation">
 
             <Link to="/" className="lp-nav-logo" aria-label="Resuvibe — home">
-              <div className="lp-nav-logomark" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 1.5 L10.8 6.3 L16 6.3 L11.9 9.3 L13.5 14.5 L9 11.7 L4.5 14.5 L6.1 9.3 L2 6.3 L7.2 6.3 Z" fill="white"/>
-                </svg>
-              </div>
-              <span className="lp-nav-wordmark">resu<em>vibe</em></span>
+              <BrandLogo iconSize="2em" />
             </Link>
+
 
             <div className="lp-nav-actions">
               <Link to="/login" className="lp-nav-signin">Sign In</Link>
