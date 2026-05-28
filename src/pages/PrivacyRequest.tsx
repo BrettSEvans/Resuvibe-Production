@@ -198,8 +198,13 @@ export default function PrivacyRequest() {
         </p>
       </div>
       <PrivacyRequestForm defaultEmail={defaultEmail} defaultName={defaultName} />
+      <p className="text-sm text-muted-foreground pt-4 border-t border-border">
+        <strong>Email:</strong>{" "}
+        <a href="mailto:privacy@resuvibe.ai" className="underline hover:text-foreground">privacy@resuvibe.ai</a>
+      </p>
     </div>
   );
+
 
   if (user) {
     return <PageShell>{inner}</PageShell>;
