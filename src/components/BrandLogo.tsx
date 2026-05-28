@@ -31,7 +31,7 @@ export default function BrandLogo({ showWordmark = true, className = "", iconSiz
           fontFamily="'DM Serif Display', serif"
           fontSize="36"
           fontWeight="400"
-          fill="hsl(36 90% 50%)"
+          fill="#f97316"
         >
           V
         </text>
