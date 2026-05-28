@@ -479,13 +479,9 @@ function content() {
         For all privacy-related enquiries, data subject access requests, or complaints:
       </P>
       <P>
-        <strong>Privacy Request form (preferred):</strong>{" "}
-        <Link to="/privacy-request" className="underline hover:text-foreground">resuvibe.ai/privacy-request</Link>
+        <Link to="/privacy-request" className="underline hover:text-foreground">Privacy Request form</Link>
       </P>
-      <P>
-        <strong>Email:</strong>{" "}
-        <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-foreground">{CONTACT_EMAIL}</a>
-      </P>
+
       <P>
         We aim to acknowledge all requests within <strong>72 hours</strong> and resolve them within 30 days (GDPR) or 45 days (CCPA).
       </P>
