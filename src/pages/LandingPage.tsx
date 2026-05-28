@@ -791,7 +791,7 @@ export default function LandingPage() {
                 </div>
 
                 <h1 className="lp-hero-headline" id="lp-hero-headline">
-                  The Recruiter Has AI.<br /><em>Now You Do Too— For Free</em>
+                  The Recruiter Has AI.<br /><em>Now You Do Too – For Free</em>
                 </h1>
 
                 <p className="lp-hero-subhead">
