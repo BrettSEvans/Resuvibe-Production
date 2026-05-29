@@ -50,17 +50,18 @@ const ADSENSE_CLIENT = "ca-pub-9524682161824217";
  * the grey wireframe box so layout stays intact during development.
  */
 const SLOT_IDS = {
-  "leaderboard":   "4313261046",
-  "mobile-banner": "MOBILE_BANNER_SLOT_ID", // TODO: paste slot ID
-  "skyscraper":    "SKYSCRAPER_SLOT_ID",    // TODO: paste slot ID
-  "sticky-footer": "STICKY_FOOTER_SLOT_ID", // TODO: paste slot ID
+  "leaderboard":   "2932200531",
+  "mobile-banner": "3738545974",
+  "skyscraper":    "1070500125",
+  "skyscraper-2":  "6196658124",
+  "sticky-footer": "9687356749",
 } as const;
 
 /**
  * Set to "on" during QA to serve test ads (no real impressions counted).
  * Remove or set to "" before shipping to production.
  */
-const AD_TEST_MODE = "" as ("on" | "");
+const AD_TEST_MODE = "on" as ("on" | "");
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -70,6 +71,7 @@ const SIZE_MAP: Record<AdSize, { w: number; h: number; label: string }> = {
   "leaderboard":   { w: 728, h: 90,  label: "728 × 90"  },
   "mobile-banner": { w: 320, h: 100, label: "320 × 100" },
   "skyscraper":    { w: 300, h: 600, label: "300 × 600" },
+  "skyscraper-2":  { w: 300, h: 600, label: "300 × 600" },
   "sticky-footer": { w: 320, h: 50,  label: "320 × 50"  },
 };
 

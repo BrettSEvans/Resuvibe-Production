@@ -230,7 +230,7 @@ const Applications = () => {
           pendingActionRef.current = null;
         }}
       />
-      <PageShell showSecondSkyscraper={applications.length > 5}>
+      <PageShell showSecondSkyscraper={applications.length >= 8}>
       <div className="p-4 md:p-8 space-y-6">
         {/* Story 1.2: Profile completeness nudge */}
         {profileIncomplete && !bannerDismissed && (

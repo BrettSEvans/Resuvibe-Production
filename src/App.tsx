@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useInactivityLogout } from "@/hooks/useInactivityLogout";
 import { useQuery } from "@tanstack/react-query";
@@ -62,6 +62,7 @@ function AuthenticatedApp() {
   const { user, loading, signOut } = useAuth();
   const [aiChatOpen, setAiChatOpen] = useState(false);
   const { data: profile, isLoading: profileLoading } = useProfileCheck(user?.id);
+  const location = useLocation();
   const tour = useTourState();
 
   useInactivityLogout();
@@ -106,11 +107,11 @@ function AuthenticatedApp() {
 
       {/* Leaderboard ad — desktop only, below header */}
       <div className="hidden md:flex w-full justify-center border-b border-border/40 bg-muted/20 py-1.5">
-        <AdBanner size="leaderboard" />
+        <AdBanner size="leaderboard" key={location.pathname} />
       </div>
       {/* Mobile banner — mobile only, below header */}
       <div className="flex md:hidden w-full justify-center border-b border-border/40 bg-muted/20 py-1">
-        <AdBanner size="mobile-banner" />
+        <AdBanner size="mobile-banner" key={location.pathname} />
       </div>
 
       <AiChat isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
@@ -141,7 +142,7 @@ function AuthenticatedApp() {
 
       {/* Sticky footer ad */}
       <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center bg-background/95 backdrop-blur border-t border-border/40 py-1 md:hidden">
-        <AdBanner size="sticky-footer" />
+        <AdBanner size="sticky-footer" key={location.pathname} />
       </div>
       {/* Bottom padding so content clears sticky footer on mobile */}
       <div className="h-14 md:hidden" />

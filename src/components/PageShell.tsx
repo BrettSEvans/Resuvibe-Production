@@ -17,7 +17,7 @@ export function PageShell({ children, showSecondSkyscraper = false }: PageShellP
         <aside className="hidden xl:block shrink-0 pl-4 pt-4">
           <div className="sticky top-[160px] flex flex-col gap-4">
             <AdBanner size="skyscraper" />
-            {showSecondSkyscraper && <AdBanner size="skyscraper" />}
+            {showSecondSkyscraper && <AdBanner size="skyscraper-2" />}
           </div>
         </aside>
       </div>
