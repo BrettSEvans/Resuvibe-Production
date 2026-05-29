@@ -16,14 +16,36 @@ export function AdDebugIndicator() {
   const [expanded, setExpanded] = useState(false);
   const [tick, setTick] = useState(0);
 
+  // Show in DEV builds, OR on any build when ?addebug=1 is in the URL
+  // (also persists via localStorage so it survives navigations / SPA route changes).
+  const enabled = (() => {
+    if (import.meta.env.DEV) return true;
+    try {
+      if (typeof window === "undefined") return false;
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("addebug") === "1") {
+        localStorage.setItem("addebug", "1");
+        return true;
+      }
+      if (params.get("addebug") === "0") {
+        localStorage.removeItem("addebug");
+        return false;
+      }
+      return localStorage.getItem("addebug") === "1";
+    } catch {
+      return false;
+    }
+  })();
+
   // Re-evaluate every 2s so we catch script load + unit fills.
   useEffect(() => {
-    if (!import.meta.env.DEV) return;
+    if (!enabled) return;
     const id = setInterval(() => setTick((t) => t + 1), 2000);
     return () => clearInterval(id);
-  }, []);
+  }, [enabled]);
 
-  if (!import.meta.env.DEV) return null;
+  if (!enabled) return null;
+
 
   const scriptInDom = !!document.getElementById("adsense-script");
   const adsbygoogleReady = typeof (window as unknown as { adsbygoogle?: unknown }).adsbygoogle !== "undefined";
