@@ -40,21 +40,31 @@ import { isSingleUserWorkflowEnabled } from "@/lib/featureFlags";
 import SingleUserHeader from "@/pages/single-user/SingleUserHeader";
 import SingleUserNewApplication from "@/pages/single-user/SingleUserNewApplication";
 import SingleUserSessionResult from "@/pages/single-user/SingleUserSessionResult";
+import SingleUserDemoApplication from "@/pages/single-user/SingleUserDemoApplication";
 
 const queryClient = new QueryClient();
+
+function SingleUserAppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <SingleUserHeader />
+      {children}
+    </>
+  );
+}
 
 function SingleUserApp() {
   useTheme();
 
   return (
     <>
-      <SingleUserHeader />
       <Routes>
-        <Route path="/" element={<Navigate to="/applications/new" replace />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/applications" element={<Navigate to="/applications/new" replace />} />
-        <Route path="/applications/new" element={<SingleUserNewApplication />} />
-        <Route path="/applications/session" element={<SingleUserSessionResult />} />
-        <Route path="*" element={<Navigate to="/applications/new" replace />} />
+        <Route path="/applications/new" element={<SingleUserAppShell><SingleUserNewApplication /></SingleUserAppShell>} />
+        <Route path="/applications/session" element={<SingleUserAppShell><SingleUserSessionResult /></SingleUserAppShell>} />
+        <Route path="/applications/demo" element={<SingleUserAppShell><SingleUserDemoApplication /></SingleUserAppShell>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <CookieConsent />
       <AdDebugIndicator />

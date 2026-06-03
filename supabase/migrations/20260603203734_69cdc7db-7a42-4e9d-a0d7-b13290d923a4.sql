@@ -1,0 +1,2 @@
+GRANT SELECT ON public.job_applications TO anon;
+CREATE POLICY "Public can view demo application" ON public.job_applications FOR SELECT TO anon USING (id = '889931c5-30b7-4a1c-828b-358d0a8d6d49'::uuid);
