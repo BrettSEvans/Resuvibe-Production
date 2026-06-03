@@ -36,8 +36,31 @@ import { useTheme } from "@/hooks/useTheme";
 import { AdBanner } from "./components/ads/AdBanner";
 import { AdDebugIndicator } from "./components/ads/AdDebugIndicator";
 import { CookieConsent } from "./components/CookieConsent";
+import { isSingleUserWorkflowEnabled } from "@/lib/featureFlags";
+import SingleUserHeader from "@/pages/single-user/SingleUserHeader";
+import SingleUserNewApplication from "@/pages/single-user/SingleUserNewApplication";
+import SingleUserSessionResult from "@/pages/single-user/SingleUserSessionResult";
 
 const queryClient = new QueryClient();
+
+function SingleUserApp() {
+  useTheme();
+
+  return (
+    <>
+      <SingleUserHeader />
+      <Routes>
+        <Route path="/" element={<Navigate to="/applications/new" replace />} />
+        <Route path="/applications" element={<Navigate to="/applications/new" replace />} />
+        <Route path="/applications/new" element={<SingleUserNewApplication />} />
+        <Route path="/applications/session" element={<SingleUserSessionResult />} />
+        <Route path="*" element={<Navigate to="/applications/new" replace />} />
+      </Routes>
+      <CookieConsent />
+      <AdDebugIndicator />
+    </>
+  );
+}
 
 function useProfileCheck(userId: string | undefined) {
   return useQuery({
@@ -160,9 +183,13 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <ErrorBoundary>
-            <AuthProvider>
-              <AuthenticatedApp />
-            </AuthProvider>
+            {isSingleUserWorkflowEnabled() ? (
+              <SingleUserApp />
+            ) : (
+              <AuthProvider>
+                <AuthenticatedApp />
+              </AuthProvider>
+            )}
           </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
