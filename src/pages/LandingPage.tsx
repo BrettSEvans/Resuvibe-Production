@@ -762,8 +762,8 @@ export default function LandingPage() {
 
 
             <div className="lp-nav-actions">
-              <Link to="/login" className="lp-nav-signin">Sign In</Link>
-              <Link to="/signup" className="lp-btn lp-btn-primary">Get Started — It's Free</Link>
+              <Link to="/applications/demo" className="lp-nav-signin">See Example</Link>
+              <Link to="/applications/demo" className="lp-btn lp-btn-primary">Get Started — It's Free</Link>
             </div>
 
           </nav>
@@ -796,7 +796,7 @@ export default function LandingPage() {
                 </p>
 
                 <div className="lp-hero-ctas">
-                  <Link to="/signup" className="lp-btn lp-btn-primary lp-btn-lg">Build My Resume Free</Link>
+                  <Link to="/applications/demo" className="lp-btn lp-btn-primary lp-btn-lg">Build My Resume Free</Link>
                   <a href="#lp-how-it-works" className="lp-btn lp-btn-secondary lp-btn-lg">See How It Works</a>
                 </div>
 
@@ -1112,8 +1112,8 @@ export default function LandingPage() {
                 Join thousands of job seekers bringing AI to their job search — and finally competing on a level playing field.
               </p>
               <div className="lp-cta-buttons">
-                <Link to="/signup" className="lp-btn lp-btn-primary lp-btn-lg">Get Started Free</Link>
-                <Link to="/login" className="lp-btn lp-btn-ghost-light lp-btn-lg">Sign In</Link>
+                <Link to="/applications/demo" className="lp-btn lp-btn-primary lp-btn-lg">Get Started Free</Link>
+                <Link to="/applications/demo" className="lp-btn lp-btn-ghost-light lp-btn-lg">See Example</Link>
               </div>
               <p className="lp-cta-footnote">Free forever · No credit card · No catch</p>
             </div>
