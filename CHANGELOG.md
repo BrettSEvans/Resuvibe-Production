@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Commit: 8506f77868919d47501e8329c3223c1f33b40792
+- Commit: 46cc7ea68a22448acd933eaccd5f1eeac584aba7
 - Branch runtime scope: run this branch across both the frontend app and backend/Supabase functions so the V2 UI and generation endpoints stay in sync.
 - Added the feature-flagged V2 single-user workflow, active by default through `FUTURE_FLAG_SINGLE_USER`.
 - Added a unified local-session application form for job details, base resume text, and base cover-letter text.
