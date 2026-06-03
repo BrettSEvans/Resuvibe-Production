@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Applications from "./pages/Applications";
 import NewApplication from "./pages/NewApplication";
 import ApplicationDetail from "./pages/ApplicationDetail";
+
 import Templates from "./pages/Templates";
 import StoryBoard from "./pages/StoryBoard";
 import Profile from "./pages/Profile";
