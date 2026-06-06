@@ -28,9 +28,9 @@ export default function SingleUserHeader() {
 
           <nav className="hidden md:flex items-center gap-1">
             {links.map((l) => (
-              <button
+              <a
                 key={l.to}
-                onClick={() => navigate(l.to)}
+                href={l.to}
                 className={cn(
                   "px-3 py-1.5 rounded-md text-sm font-medium transition-colors font-body",
                   l.match(pathname)
@@ -39,7 +39,7 @@ export default function SingleUserHeader() {
                 )}
               >
                 {l.label}
-              </button>
+              </a>
             ))}
           </nav>
         </div>
