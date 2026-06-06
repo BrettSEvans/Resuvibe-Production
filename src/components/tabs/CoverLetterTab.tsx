@@ -140,6 +140,11 @@ export function CoverLetterTab({
 
   return (
     <div className="space-y-4">
+      {/* Cover letter detail page ad */}
+      <div className="flex justify-center pb-2">
+        <AdBanner size="leaderboard" className="hidden md:flex" />
+        <AdBanner size="mobile-banner" className="flex md:hidden" />
+      </div>
       <VersionDownloadAlert
         open={!!versionAlert}
         onOpenChange={(open) => { if (!open) setVersionAlert(null); }}
