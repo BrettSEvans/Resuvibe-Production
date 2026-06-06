@@ -1,8 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FilePlus2, RefreshCw } from "lucide-react";
 import BrandLogo from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { clearSingleUserSessionResult } from "@/lib/singleUserSession";
+import { cn } from "@/lib/utils";
 
 export default function SingleUserHeader() {
   const navigate = useNavigate();
