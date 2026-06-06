@@ -42,6 +42,7 @@ import SingleUserHeader from "@/pages/single-user/SingleUserHeader";
 import SingleUserNewApplication from "@/pages/single-user/SingleUserNewApplication";
 import SingleUserSessionResult from "@/pages/single-user/SingleUserSessionResult";
 import SingleUserDemoApplication from "@/pages/single-user/SingleUserDemoApplication";
+import SingleUserApplications from "@/pages/single-user/SingleUserApplications";
 
 const queryClient = new QueryClient();
 
