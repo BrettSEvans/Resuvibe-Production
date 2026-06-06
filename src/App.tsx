@@ -62,7 +62,7 @@ function SingleUserApp() {
     <>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/applications" element={<Navigate to="/applications/new" replace />} />
+        <Route path="/applications" element={<SingleUserAppShell><SingleUserApplications /></SingleUserAppShell>} />
         <Route path="/applications/new" element={<SingleUserAppShell><SingleUserNewApplication /></SingleUserAppShell>} />
         <Route path="/applications/session" element={<SingleUserAppShell><SingleUserSessionResult /></SingleUserAppShell>} />
         <Route path="/applications/demo" element={<SingleUserAppShell><SingleUserDemoApplication /></SingleUserAppShell>} />
