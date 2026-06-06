@@ -30,6 +30,7 @@ import { downloadTextAsDocx } from "@/lib/docxExport";
 import { downloadHtmlAsPdf } from "@/lib/pdfDownload";
 import { buildFileName } from "@/lib/fileNaming";
 import VersionDownloadAlert from "@/components/VersionDownloadAlert";
+import { AdBanner } from "@/components/ads/AdBanner";
 import type { JobApplication, UserProfileSnapshot, ChatMessage, ToastFn } from "@/types/models";
 
 /** Convert plain text to minimal HTML for the editor */
