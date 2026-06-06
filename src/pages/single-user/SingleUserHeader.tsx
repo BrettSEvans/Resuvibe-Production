@@ -32,10 +32,8 @@ export default function SingleUserHeader() {
                 key={l.to}
                 href={l.to}
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-sm font-medium transition-colors font-body",
-                  l.match(pathname)
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                  "text-sm font-body underline-offset-4 hover:underline",
+                  l.match(pathname) ? "text-primary" : "text-foreground"
                 )}
               >
                 {l.label}
