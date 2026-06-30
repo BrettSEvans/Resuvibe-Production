@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { PageShell } from "@/components/PageShell";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -10,9 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Save, User, FileText, Zap, X, Trash2 } from "lucide-react";
+import { Save, User, FileText, Zap, X, Trash2, Upload, CheckCircle2 } from "lucide-react";
 import ResumeManager from "@/components/ResumeManager";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -23,10 +24,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const EXPERIENCE_OPTIONS = ["0-1", "2-4", "5-9", "10-14", "15+"];
-const COMMON_SKILLS = [
-  "JavaScript", "TypeScript", "React", "Node.js", "Python", "SQL", "AWS", "Docker",
-  "Project Management", "Data Analysis", "Marketing", "Sales", "Design", "Leadership",
-];
 const TONE_OPTIONS = ["professional", "conversational", "confident", "formal", "friendly"];
 
 export default function Profile() {
@@ -62,6 +59,30 @@ export default function Profile() {
   const [initialized, setInitialized] = useState(false);
   const [baseline, setBaseline] = useState<string>("");
   const [hasNewUpload, setHasNewUpload] = useState(false);
+  // Resume input mode — defaults to "upload", but switches to "paste" on init
+  // for users who already have resume text (returning users, or someone who
+  // just generated their first resume and is now completing their profile).
+  const [resumeTab, setResumeTab] = useState<"upload" | "paste">("upload");
+
+  // Master cover letter input mode — same pattern as the resume card.
+  const [coverLetterTab, setCoverLetterTab] = useState<"upload" | "paste">("upload");
+  const [coverLetterFileName, setCoverLetterFileName] = useState("");
+  const [coverLetterProcessing, setCoverLetterProcessing] = useState(false);
+  const coverLetterFileInputRef = useRef<HTMLInputElement>(null);
+
+  // How many PDF resumes the user has uploaded — used to decide whether to show
+  // the "Don't have a resume yet?" link (only for users with no resume at all).
+  const { data: resumeCount } = useQuery({
+    queryKey: ["user_resumes_count", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("user_resumes")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id);
+      return count ?? 0;
+    },
+  });
 
   const currentSnapshot = JSON.stringify({
     firstName,
@@ -93,6 +114,10 @@ export default function Profile() {
     setIndustries(ind);
     setTone(tn);
     setMasterCoverLetter(mcl);
+    // Users who already have resume text land on the Resume Text tab.
+    if (rt.trim()) setResumeTab("paste");
+    // Likewise, users with an existing cover letter land on the text tab.
+    if (mcl.trim()) setCoverLetterTab("paste");
     setBaseline(JSON.stringify({
       firstName: fn, lastName: ln, experience: exp, resumeText: rt,
       skills: [...sk].sort(), industries: [...ind].sort(), tone: tn, masterCoverLetter: mcl,
@@ -109,6 +134,37 @@ export default function Profile() {
     if (trimmed && !skills.includes(trimmed)) {
       setSkills((prev) => [...prev, trimmed]);
       setSkillInput("");
+    }
+  };
+
+  // Upload a cover letter file and extract its text into the master cover
+  // letter — mirrors the resume upload's extract-to-text behaviour.
+  const handleCoverLetterFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCoverLetterFileName(file.name);
+    setCoverLetterProcessing(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64 = (event.target?.result as string)?.split(",")[1];
+        const { data, error } = await supabase.functions.invoke("extract-resume-text", {
+          body: { fileName: file.name, fileType: file.type, fileData: base64 },
+        });
+        if (!error && data?.text) {
+          setMasterCoverLetter(data.text);
+          toast.success("Cover letter text extracted successfully!");
+        } else {
+          toast.error("Could not extract text from this file. Try pasting your cover letter instead.");
+        }
+        setCoverLetterProcessing(false);
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      toast.error("Failed to process file. Try pasting your cover letter instead.");
+      setCoverLetterProcessing(false);
+    } finally {
+      if (coverLetterFileInputRef.current) coverLetterFileInputRef.current.value = "";
     }
   };
 
@@ -200,18 +256,18 @@ export default function Profile() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>First Name</Label>
-              <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              <Input className="text-base md:text-sm" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label>Last Name</Label>
-              <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              <Input className="text-base md:text-sm" value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Years of Experience</Label>
               <Select value={experience} onValueChange={setExperience}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectTrigger className="text-base md:text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                 <SelectContent>
                   {EXPERIENCE_OPTIONS.map((o) => <SelectItem key={o} value={o}>{o} years</SelectItem>)}
                 </SelectContent>
@@ -220,7 +276,7 @@ export default function Profile() {
             <div className="space-y-1.5">
               <Label>Preferred Tone</Label>
               <Select value={tone} onValueChange={setTone}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-base md:text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {TONE_OPTIONS.map((t) => <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>)}
                 </SelectContent>
@@ -230,40 +286,68 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      {/* Resume uploads */}
-      {user && (
-        <ResumeManager
-          userId={user.id}
-          onResumeUploaded={() => setHasNewUpload(true)}
-          onResumeTextExtracted={(text) => setResumeText(text)}
-        />
-      )}
-
-      {/* Resume text (paste or auto-populated from PDF upload) */}
+      {/* Resume — upload a PDF or paste/edit resume text, combined in one card */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="h-4 w-4" /> Resume Text
+            <FileText className="h-4 w-4" /> Resume
           </CardTitle>
           <CardDescription>
-            Paste your resume text here, or upload a PDF above — it will be extracted automatically.
+            Upload a PDF resume or paste your resume text — we use this to tailor your generated materials.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <Textarea
-            placeholder="Paste your resume content here… We'll use this to personalise your generated materials."
-            value={resumeText}
-            onChange={(e) => setResumeText(e.target.value)}
-            rows={10}
-            className="font-mono text-xs"
-          />
-          <p className="text-xs text-muted-foreground">
-            Tip: Copy all text from your current resume and paste it here. This helps us tailor documents to your experience.
-          </p>
-          {!resumeText && (
-            <p className="text-xs text-amber-500">
-              💡 Add your resume text to improve the quality of generated materials
-            </p>
+        <CardContent className="space-y-3">
+          <Tabs value={resumeTab} onValueChange={(v) => setResumeTab(v as "upload" | "paste")}>
+            <TabsList className="w-full">
+              <TabsTrigger value="upload" className="flex-1 gap-1.5">
+                <Upload className="h-3.5 w-3.5" /> Upload Resume
+              </TabsTrigger>
+              <TabsTrigger value="paste" className="flex-1 gap-1.5">
+                <FileText className="h-3.5 w-3.5" /> Resume Text
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="upload" className="mt-3">
+              {user && (
+                <ResumeManager
+                  embedded
+                  userId={user.id}
+                  onResumeUploaded={() => setHasNewUpload(true)}
+                  onResumeTextExtracted={(text) => setResumeText(text)}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="paste" className="space-y-2 mt-3">
+              <Textarea
+                placeholder="Paste your resume content here… We'll use this to personalise your generated materials."
+                value={resumeText}
+                onChange={(e) => setResumeText(e.target.value)}
+                rows={10}
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground">
+                Tip: Copy all text from your current resume and paste it here. This helps us tailor documents to your experience.
+              </p>
+              {!resumeText && (
+                <p className="text-xs text-amber-500">
+                  💡 Add your resume text to improve the quality of generated materials
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
+
+          {/* Shown only for users with no resume at all, regardless of active tab */}
+          {!resumeText.trim() && (resumeCount ?? 0) === 0 && !hasNewUpload && (
+            <div className="text-center pt-1">
+              <button
+                type="button"
+                onClick={() => navigate("/build-my-resume")}
+                className="text-sm text-muted-foreground hover:text-primary underline underline-offset-2 transition-colors"
+              >
+                Don't have a resume yet?
+              </button>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -274,26 +358,22 @@ export default function Profile() {
           <CardTitle className="text-base flex items-center gap-2"><Zap className="h-4 w-4" /> Key Skills</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex flex-wrap gap-1.5">
-            {COMMON_SKILLS.map((s) => (
-              <Badge
-                key={s}
-                variant={skills.includes(s) ? "default" : "outline"}
-                className="cursor-pointer text-xs"
-                onClick={() => toggleSkill(s)}
-              >
-                {s}
-              </Badge>
-            ))}
-          </div>
-          {skills.filter((s) => !COMMON_SKILLS.includes(s)).map((s) => (
-            <Badge key={s} variant="default" className="text-xs gap-1 mr-1">
-              {s} <X className="h-2.5 w-2.5 cursor-pointer" onClick={() => toggleSkill(s)} />
-            </Badge>
-          ))}
+          {skills.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {skills.map((s) => (
+                <Badge key={s} variant="default" className="text-xs gap-1">
+                  {s} <X className="h-2.5 w-2.5 cursor-pointer" onClick={() => toggleSkill(s)} />
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              No skills added yet. Add them below — they're also filled in automatically from your resume.
+            </p>
+          )}
           <div className="flex gap-2">
             <Input
-              placeholder="Add custom skill..."
+              placeholder="Add a skill..."
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomSkill())}
@@ -304,23 +384,90 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      {/* Master Cover Letter */}
+      {/* Master Cover Letter — upload a file or paste/edit the text */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Master Cover Letter</CardTitle>
-          <CardDescription>A reusable base cover letter that gets tailored to each application</CardDescription>
+          <CardDescription>Add a master cover letter which will be tailored to each application</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Textarea
-            value={masterCoverLetter}
-            onChange={(e) => setMasterCoverLetter(e.target.value)}
-            rows={8}
-            placeholder="Write your master cover letter template here..."
-            className="text-sm"
+        <CardContent className="space-y-3">
+          <input
+            ref={coverLetterFileInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx"
+            className="hidden"
+            onChange={handleCoverLetterFileUpload}
           />
-          {!masterCoverLetter && (
-            <p className="text-xs text-amber-500 mt-2">
-              💡 Add a master cover letter to improve the quality of generated cover letters
+          <Tabs value={coverLetterTab} onValueChange={(v) => setCoverLetterTab(v as "upload" | "paste")}>
+            <TabsList className="w-full">
+              <TabsTrigger value="upload" className="flex-1 gap-1.5">
+                <Upload className="h-3.5 w-3.5" /> Upload Cover Letter
+              </TabsTrigger>
+              <TabsTrigger value="paste" className="flex-1 gap-1.5">
+                <FileText className="h-3.5 w-3.5" /> Cover Letter Text
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="upload" className="mt-3">
+              <div className="flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed rounded-lg border-muted-foreground/25 text-center">
+                {coverLetterFileName ? (
+                  <>
+                    {coverLetterProcessing ? (
+                      <Upload className="h-6 w-6 text-muted-foreground animate-pulse" />
+                    ) : masterCoverLetter ? (
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                    ) : (
+                      <FileText className="h-6 w-6 text-muted-foreground" />
+                    )}
+                    <p className="text-sm font-medium text-foreground">{coverLetterFileName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {coverLetterProcessing ? "Extracting text…" : masterCoverLetter ? "Text extracted successfully" : "Could not extract text"}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Upload your cover letter file</p>
+                  </>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => coverLetterFileInputRef.current?.click()}
+                  disabled={coverLetterProcessing}
+                  className="gap-1.5"
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  {coverLetterFileName ? "Choose Different File" : "Choose File"}
+                </Button>
+                <p className="text-xs text-muted-foreground">Supports PDF, DOC, and DOCX</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="paste" className="space-y-2 mt-3">
+              <Textarea
+                value={masterCoverLetter}
+                onChange={(e) => setMasterCoverLetter(e.target.value)}
+                rows={8}
+                placeholder="Write your master cover letter template here..."
+                className="text-sm"
+              />
+            </TabsContent>
+          </Tabs>
+
+          {/* Shown when the user has a resume but has never added a cover letter,
+              under either tab. "create one now" opens the guided builder. */}
+          {(!!resumeText.trim() || (resumeCount ?? 0) > 0 || hasNewUpload) && !masterCoverLetter.trim() && (
+            <p className="text-sm text-muted-foreground text-center pt-1">
+              Don't have a cover letter? No problem,{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/build-my-cover-letter")}
+                className="text-primary hover:underline underline-offset-2 font-medium"
+              >
+                create one now!
+              </button>
             </p>
           )}
         </CardContent>
