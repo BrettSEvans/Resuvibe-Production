@@ -70,6 +70,7 @@ function SingleUserApp() {
         <Route path="/applications/demo" element={<SingleUserAppShell><SingleUserDemoApplication /></SingleUserAppShell>} />
         <Route path="/applications/:id" element={<SingleUserAppShell><ApplicationDetail /></SingleUserAppShell>} />
         <Route path="/applications/:id/:tab" element={<SingleUserAppShell><ApplicationDetail /></SingleUserAppShell>} />
+        <Route path="/build-my-resume" element={<SingleUserAppShell><FirstTimeJobSeeker /></SingleUserAppShell>} />
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
