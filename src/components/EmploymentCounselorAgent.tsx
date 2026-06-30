@@ -190,7 +190,7 @@ export function EmploymentCounselorAgent({
 
       {/* Input Form — shown during active Q&A */}
       {!isConversationComplete && !isSynthesisPhase && (
-        <form ref={formRef} onSubmit={handleSendMessage} className="space-y-3">
+        <form onSubmit={handleSendMessage} className="space-y-3">
           <textarea
             ref={inputRef}
             value={clientInput}
