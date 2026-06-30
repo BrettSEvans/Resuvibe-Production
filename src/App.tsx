@@ -205,7 +205,9 @@ const App = () => {
         <BrowserRouter>
           <ErrorBoundary>
             {isSingleUserWorkflowEnabled() ? (
-              <SingleUserApp />
+              <AuthProvider>
+                <SingleUserApp />
+              </AuthProvider>
             ) : (
               <AuthProvider>
                 <AuthenticatedApp />
