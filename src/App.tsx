@@ -26,6 +26,8 @@ import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
 import PrivacyRequest from "./pages/PrivacyRequest";
 import Onboarding from "./pages/Onboarding";
+import FirstTimeJobSeeker from "./pages/FirstTimeJobSeeker";
+import BuildMyCoverLetter from "./pages/BuildMyCoverLetter";
 import NotFound from "./pages/NotFound";
 import BackgroundJobsBanner from "./components/BackgroundJobsBanner";
 import AppHeader from "./components/AppHeader";
@@ -166,6 +168,8 @@ function AuthenticatedApp() {
         <Route path="/stories" element={<StoryBoard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/build-my-resume" element={<FirstTimeJobSeeker />} />
+        <Route path="/build-my-cover-letter" element={<BuildMyCoverLetter />} />
         <Route path="/onboarding" element={<Navigate to="/applications" replace />} />
         <Route path="/login" element={<Navigate to="/applications" replace />} />
         <Route path="/signup" element={<Navigate to="/applications" replace />} />

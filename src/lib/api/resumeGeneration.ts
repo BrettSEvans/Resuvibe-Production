@@ -10,6 +10,7 @@ export async function generateOptimizedResume({
   companyName,
   jobTitle,
   sourceResumeId,
+  skipVerbatimEducation,
 }: {
   jobDescription: string;
   resumeText: string;
@@ -18,6 +19,7 @@ export async function generateOptimizedResume({
   companyName?: string;
   jobTitle?: string;
   sourceResumeId?: string;
+  skipVerbatimEducation?: boolean;
 }): Promise<{ resume_html: string; keywords_injected: string[] }> {
   const { data, error } = await supabase.functions.invoke('generate-resume', {
     body: { jobDescription, resumeText, missingKeywords, userPrompt, companyName, jobTitle },
@@ -25,7 +27,9 @@ export async function generateOptimizedResume({
   if (error) throw new Error(error.message);
   if (!data?.success) throw new Error(data?.error || 'Resume generation failed');
   return {
-    resume_html: enforceVerbatimEducation(data.resume_html, resumeText),
+    resume_html: skipVerbatimEducation
+      ? data.resume_html
+      : enforceVerbatimEducation(data.resume_html, resumeText),
     keywords_injected: data.keywords_injected,
   };
 }

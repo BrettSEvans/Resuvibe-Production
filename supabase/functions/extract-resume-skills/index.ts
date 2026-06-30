@@ -25,26 +25,29 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: `Extract the candidate's key professional skills from the resume. Return 8-20 concise skill names (e.g., "JavaScript", "Project Management", "Data Analysis"). Prefer specific tools, technologies, and methodologies over generic soft skills. Use Title Case. Do not include duplicates.`,
+          content: `Extract the candidate's key professional skills and target industries from the resume.
+Skills: Return 8-20 concise skill names (e.g., "JavaScript", "Project Management", "Data Analysis"). Prefer specific tools, technologies, and methodologies over generic soft skills. Use Title Case. No duplicates.
+Industries: Return 1-5 industries the candidate has worked in or is targeting (e.g., "Technology", "Healthcare", "Finance"). Use Title Case. No duplicates.`,
         },
-        { role: "user", content: `Extract key skills from this resume:\n\n${resumeText.slice(0, 12000)}` },
+        { role: "user", content: `Extract skills and industries from this resume:\n\n${resumeText.slice(0, 12000)}` },
       ],
       tools: [{
         type: "function",
         function: {
-          name: "extract_skills",
-          description: "Return the extracted skills",
+          name: "extract_skills_and_industries",
+          description: "Return the extracted skills and industries",
           parameters: {
             type: "object",
             properties: {
               skills: { type: "array", items: { type: "string" } },
+              industries: { type: "array", items: { type: "string" } },
             },
-            required: ["skills"],
+            required: ["skills", "industries"],
             additionalProperties: false,
           },
         },
       }],
-      tool_choice: { type: "function", function: { name: "extract_skills" } },
+      tool_choice: { type: "function", function: { name: "extract_skills_and_industries" } },
     });
 
     if (!response.ok) {
@@ -57,10 +60,11 @@ Deno.serve(async (req) => {
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    const result = toolCall ? JSON.parse(toolCall.function.arguments) : { skills: [] };
+    const result = toolCall ? JSON.parse(toolCall.function.arguments) : { skills: [], industries: [] };
     const skills: string[] = Array.from(new Set((result.skills ?? []).map((s: string) => s.trim()).filter(Boolean)));
+    const industries: string[] = Array.from(new Set((result.industries ?? []).map((i: string) => i.trim()).filter(Boolean)));
 
-    return new Response(JSON.stringify({ success: true, skills }), {
+    return new Response(JSON.stringify({ success: true, skills, industries }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

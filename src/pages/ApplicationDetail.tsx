@@ -1,8 +1,11 @@
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Loader2, ChevronLeft, ChevronRight as ChevronRightIcon } from "lucide-react";
+import { ArrowLeft, Loader2, ChevronLeft, ChevronRight as ChevronRightIcon, User, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useApplicationDetail } from "@/hooks/useApplicationDetail";
 import { useCoverLetterEditor } from "@/hooks/useCoverLetterEditor";
 import { useDashboardEditor } from "@/hooks/useDashboardEditor";
@@ -17,6 +20,96 @@ import { PageShell } from "@/components/PageShell";
 /** Valid tab slugs — must match the route segment and the Tabs value prop. */
 const VALID_TABS = ["resume", "cover-letter", "jd-analysis", "materials", "details"] as const;
 type TabSlug = typeof VALID_TABS[number];
+
+/**
+ * Convert generated resume HTML into the plain text stored in
+ * `profiles.resume_text` — mirroring the text that resume-upload extraction
+ * produces, so a generated resume can populate the profile the same way an
+ * uploaded one does.
+ */
+function htmlToPlainText(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
+  doc
+    .querySelectorAll("p, div, li, h1, h2, h3, h4, h5, tr")
+    .forEach((el) => el.append("\n"));
+  const text = doc.body.textContent || "";
+  return text
+    .replace(/^[ \t]+/gm, "")   // strip source-HTML indentation per line
+    .replace(/[ \t]+$/gm, "")   // strip trailing whitespace per line
+    .replace(/\n{3,}/g, "\n\n") // collapse runs of blank lines
+    .trim();
+}
+
+/**
+ * Pull the candidate's name from the generated resume header (the leading
+ * <h1>, falling back to the first text line) and split it into first / last.
+ */
+function extractCandidateName(html: string): {
+  firstName: string | null;
+  lastName: string | null;
+} {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  let name = (doc.querySelector("h1")?.textContent || "").trim();
+  if (!name) {
+    const lines = (doc.body.textContent || "")
+      .split(/\n+/)
+      .map((l) => l.trim())
+      .filter(Boolean);
+    name = lines[0] || "";
+  }
+  const parts = name.split(/\s+/).filter(Boolean);
+  // Guard against placeholders ("[Candidate Name]") or section text.
+  if (!name || /[[\]]/.test(name) || parts.length === 0 || parts.length > 5) {
+    return { firstName: null, lastName: null };
+  }
+  return {
+    firstName: parts[0],
+    lastName: parts.length > 1 ? parts.slice(1).join(" ") : null,
+  };
+}
+
+/**
+ * Derive a Key Skills list from the resume's Skills section — the bullet
+ * items under the first heading matching "Skills", with a comma-separated
+ * fallback for resumes that render skills as inline text.
+ */
+function extractSkillsFromHtml(html: string): string[] {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const headings = [...doc.querySelectorAll("h1,h2,h3")];
+  const idx = headings.findIndex((h) => /\bskills\b/i.test(h.textContent || ""));
+  if (idx === -1) return [];
+
+  const start = headings[idx];
+  const next = headings[idx + 1] || null;
+  const inRegion = (el: Element) => {
+    const afterStart = !!(
+      start.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    const beforeNext =
+      !next ||
+      !!(next.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING);
+    return afterStart && beforeNext;
+  };
+
+  let skills = [...doc.querySelectorAll("li")]
+    .filter(inRegion)
+    .map((li) => (li.textContent || "").trim())
+    .filter(Boolean);
+
+  if (skills.length === 0) {
+    const regionText = [...doc.querySelectorAll("p,div,span")]
+      .filter(inRegion)
+      .map((el) => el.textContent || "")
+      .join(", ");
+    skills = regionText
+      .split(/[,••\n]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length >= 2 && s.length <= 40);
+  }
+
+  return Array.from(new Set(skills)).slice(0, 30);
+}
 
 const ApplicationDetail = () => {
   const detail = useApplicationDetail();
@@ -43,6 +136,13 @@ const ApplicationDetail = () => {
     saveField, handleCopy, handleAcceptFabrication, handleRevertFabrication,
   } = detail;
 
+  // Profile-completeness nudge: shown once a resume is generated but the user's
+  // profile still has no resume text. "Go to Profile" incorporates this resume
+  // into the profile (same end state as an uploaded resume) before navigating.
+  const [profileBannerDismissed, setProfileBannerDismissed] = useState(false);
+  const [addingToProfile, setAddingToProfile] = useState(false);
+  const queryClient = useQueryClient();
+
   const clEditor = useCoverLetterEditor({
     id, coverLetter, setCoverLetter,
     coverLetterRevisionTrigger, setCoverLetterRevisionTrigger,
@@ -60,6 +160,51 @@ const ApplicationDetail = () => {
     id, app, setApp, jobDescription, companyName, jobTitle,
     userResumes, resumeRevisionTrigger, setResumeRevisionTrigger, toast,
   });
+
+  // Profile incomplete = no resume text on the profile (same gate as the
+  // Applications list nudge). Show only once a resume has actually generated.
+  const showProfileNudge =
+    !!app?.resume_html && !resumeText && !profileBannerDismissed;
+
+  const handleAddResumeToProfile = async () => {
+    if (!app?.resume_html) return;
+    setAddingToProfile(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Please sign in to update your profile.", variant: "destructive" });
+        return;
+      }
+      const plainText = htmlToPlainText(app.resume_html);
+      const { firstName, lastName } = extractCandidateName(app.resume_html);
+      const derivedSkills = extractSkillsFromHtml(app.resume_html);
+
+      // Populate the profile the same way an uploaded resume would: resume text,
+      // the candidate's name, and Key Skills derived from the resume.
+      const updates: Record<string, unknown> = { resume_text: plainText };
+      if (firstName) updates.first_name = firstName;
+      if (lastName) updates.last_name = lastName;
+      if (derivedSkills.length > 0) updates.key_skills = derivedSkills;
+
+      const { error } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("id", user.id);
+      if (error) throw error;
+      // Ensure the Profile page reads the freshly written values rather than a
+      // stale cached profile (it locks form state in on first load).
+      await queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+      navigate("/profile");
+    } catch (e: any) {
+      toast({
+        title: "Couldn't add this resume to your profile.",
+        description: e?.message ?? "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingToProfile(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -87,6 +232,22 @@ const ApplicationDetail = () => {
   return (
     <PageShell showSecondSkyscraper>
       <div className="px-4 md:px-8 pt-2.5 pb-4 md:pt-5 md:pb-8 space-y-6">
+        {/* Profile completeness nudge — incorporate this resume into the profile */}
+        {showProfileNudge && (
+          <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/20 bg-primary/5">
+            <User className="h-5 w-5 text-primary flex-shrink-0" />
+            <div className="flex-1 text-sm">
+              Use this resume to complete your profile, to make searching for additional positions easier in the future.
+            </div>
+            <Button variant="outline" size="sm" disabled={addingToProfile} onClick={handleAddResumeToProfile}>
+              {addingToProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : "Go to Profile"}
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setProfileBannerDismissed(true)}>
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
@@ -123,20 +284,27 @@ const ApplicationDetail = () => {
 
         <Tabs
           value={activeTab}
-          onValueChange={(val) => navigate(`/applications/${id}/${val}`)}
+          onValueChange={(val) => {
+            // No cover letter yet → launch the guided cover letter creation flow.
+            if (val === "cover-letter" && !app.cover_letter && !isBgGenerating) {
+              navigate(`/build-my-cover-letter?app=${id}`);
+              return;
+            }
+            navigate(`/applications/${id}/${val}`);
+          }}
           className="space-y-4"
         >
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <TabsList className="justify-start flex-wrap">
               <TabsTrigger value="resume">Resume</TabsTrigger>
-              {(!!app.cover_letter || isBgGenerating) && (
-                <TabsTrigger value="cover-letter" className="flex items-center gap-1.5">
-                  Cover Letter
-                  {app?.generation_status && !["idle", "complete", "error"].includes(app.generation_status) && !app?.cover_letter && (
-                    <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
-                  )}
-                </TabsTrigger>
-              )}
+              {/* Cover Letter tab is always present. When no cover letter exists
+                  yet, selecting it opens the guided creation flow (handled above). */}
+              <TabsTrigger value="cover-letter" className="flex items-center gap-1.5">
+                Cover Letter
+                {app?.generation_status && !["idle", "complete", "error"].includes(app.generation_status) && !app?.cover_letter && (
+                  <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
+                )}
+              </TabsTrigger>
               {(!!app.jd_intelligence || isBgGenerating) && (
                 <TabsTrigger value="jd-analysis">JD Analysis</TabsTrigger>
               )}

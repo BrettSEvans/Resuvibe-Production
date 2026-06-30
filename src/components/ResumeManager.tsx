@@ -19,9 +19,11 @@ interface ResumeManagerProps {
   onResumeUploaded?: () => void;
   /** Called with the extracted plain text once background extraction finishes. */
   onResumeTextExtracted?: (text: string) => void;
+  /** When true, render only the inner content (drop zone + list) without the surrounding Card. */
+  embedded?: boolean;
 }
 
-export default function ResumeManager({ userId, onResumeUploaded, onResumeTextExtracted }: ResumeManagerProps) {
+export default function ResumeManager({ userId, onResumeUploaded, onResumeTextExtracted, embedded }: ResumeManagerProps) {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -175,6 +177,9 @@ export default function ResumeManager({ userId, onResumeUploaded, onResumeTextEx
   };
 
   if (isLoading) {
+    if (embedded) {
+      return <Skeleton className="h-24 w-full" />;
+    }
     return (
       <Card>
         <CardHeader><Skeleton className="h-5 w-40" /></CardHeader>
@@ -185,17 +190,8 @@ export default function ResumeManager({ userId, onResumeUploaded, onResumeTextEx
 
   const activeResume = resumes.find((r) => r.is_active);
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <FileText className="h-4 w-4" /> Resumes
-        </CardTitle>
-        <CardDescription>
-          Upload PDF resumes. The primary resume is used for generation unless overridden per application.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+  const inner = (
+    <div className="space-y-4">
         {/* Drop zone */}
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -285,7 +281,22 @@ export default function ResumeManager({ userId, onResumeUploaded, onResumeTextEx
             </div>
           ))}
         </div>
-      </CardContent>
+    </div>
+  );
+
+  if (embedded) return inner;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <FileText className="h-4 w-4" /> Resumes
+        </CardTitle>
+        <CardDescription>
+          Upload PDF resumes. The primary resume is used for generation unless overridden per application.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>{inner}</CardContent>
     </Card>
   );
 }
