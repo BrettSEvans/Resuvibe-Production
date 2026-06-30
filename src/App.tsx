@@ -63,7 +63,8 @@ function SingleUserApp() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<SingleUserAppShell><FirstTimeJobSeeker /></SingleUserAppShell>} />
+        <Route path="/home" element={<LandingPage />} />
         <Route path="/applications" element={<SingleUserAppShell><SingleUserApplications /></SingleUserAppShell>} />
         <Route path="/applications/new" element={<SingleUserAppShell><SingleUserNewApplication /></SingleUserAppShell>} />
         <Route path="/applications/session" element={<SingleUserAppShell><SingleUserSessionResult /></SingleUserAppShell>} />
