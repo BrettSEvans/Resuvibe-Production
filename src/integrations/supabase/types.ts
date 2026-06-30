@@ -749,6 +749,7 @@ export type Database = {
         Row: {
           approval_status: string
           avatar_url: string | null
+          counselor_conversation: Json | null
           created_at: string
           display_name: string | null
           email: string | null
@@ -772,6 +773,7 @@ export type Database = {
         Insert: {
           approval_status?: string
           avatar_url?: string | null
+          counselor_conversation?: Json | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -795,6 +797,7 @@ export type Database = {
         Update: {
           approval_status?: string
           avatar_url?: string | null
+          counselor_conversation?: Json | null
           created_at?: string
           display_name?: string | null
           email?: string | null

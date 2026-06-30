@@ -14,8 +14,8 @@ export function EmploymentCounselorAgent({
 }: EmploymentCounselorAgentProps) {
   const [clientInput, setClientInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const {
     messages,
@@ -190,7 +190,7 @@ export function EmploymentCounselorAgent({
 
       {/* Input Form — shown during active Q&A */}
       {!isConversationComplete && !isSynthesisPhase && (
-        <form ref={formRef} onSubmit={handleSendMessage} className="space-y-3">
+        <form onSubmit={handleSendMessage} className="space-y-3">
           <textarea
             ref={inputRef}
             value={clientInput}
