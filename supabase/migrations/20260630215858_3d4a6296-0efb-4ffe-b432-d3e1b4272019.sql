@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS counselor_conversation jsonb, ADD COLUMN IF NOT EXISTS master_cover_letter text;
