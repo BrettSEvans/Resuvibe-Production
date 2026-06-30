@@ -14,8 +14,8 @@ export function EmploymentCounselorAgent({
 }: EmploymentCounselorAgentProps) {
   const [clientInput, setClientInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const {
     messages,
