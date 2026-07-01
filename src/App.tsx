@@ -39,47 +39,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { AdBanner } from "./components/ads/AdBanner";
 import { AdDebugIndicator } from "./components/ads/AdDebugIndicator";
 import { CookieConsent } from "./components/CookieConsent";
-import { isSingleUserWorkflowEnabled } from "@/lib/featureFlags";
-import SingleUserHeader from "@/pages/single-user/SingleUserHeader";
-import SingleUserNewApplication from "@/pages/single-user/SingleUserNewApplication";
-import SingleUserSessionResult from "@/pages/single-user/SingleUserSessionResult";
-import SingleUserDemoApplication from "@/pages/single-user/SingleUserDemoApplication";
-import SingleUserApplications from "@/pages/single-user/SingleUserApplications";
-
 const queryClient = new QueryClient();
-
-function SingleUserAppShell({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <SingleUserHeader />
-      {children}
-    </>
-  );
-}
-
-function SingleUserApp() {
-  useTheme();
-
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<SingleUserAppShell><FirstTimeJobSeeker /></SingleUserAppShell>} />
-        <Route path="/home" element={<LandingPage />} />
-        <Route path="/applications" element={<SingleUserAppShell><SingleUserApplications /></SingleUserAppShell>} />
-        <Route path="/applications/new" element={<SingleUserAppShell><SingleUserNewApplication /></SingleUserAppShell>} />
-        <Route path="/applications/session" element={<SingleUserAppShell><SingleUserSessionResult /></SingleUserAppShell>} />
-        <Route path="/applications/demo" element={<SingleUserAppShell><SingleUserDemoApplication /></SingleUserAppShell>} />
-        <Route path="/applications/:id" element={<SingleUserAppShell><ApplicationDetail /></SingleUserAppShell>} />
-        <Route path="/applications/:id/:tab" element={<SingleUserAppShell><ApplicationDetail /></SingleUserAppShell>} />
-        <Route path="/build-my-resume" element={<SingleUserAppShell><FirstTimeJobSeeker /></SingleUserAppShell>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-
-      </Routes>
-      <CookieConsent />
-      <AdDebugIndicator />
-    </>
-  );
-}
 
 function useProfileCheck(userId: string | undefined) {
   return useQuery({
@@ -161,7 +121,7 @@ function AuthenticatedApp() {
       <TutorialTour active={tour.active} onComplete={tour.complete} />
       <Routes>
         {/* Logged-in users hitting / go straight to the app */}
-        <Route path="/" element={<Navigate to="/applications" replace />} />
+        <Route path="/" element={<Applications />} />
         <Route path="/applications" element={<Applications />} />
         <Route path="/applications/new" element={<NewApplication />} />
         <Route path="/applications/:id" element={<ApplicationDetail />} />
@@ -204,15 +164,9 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <ErrorBoundary>
-            {isSingleUserWorkflowEnabled() ? (
-              <AuthProvider>
-                <SingleUserApp />
-              </AuthProvider>
-            ) : (
-              <AuthProvider>
-                <AuthenticatedApp />
-              </AuthProvider>
-            )}
+            <AuthProvider>
+              <AuthenticatedApp />
+            </AuthProvider>
           </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
