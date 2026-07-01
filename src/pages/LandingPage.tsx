@@ -6,9 +6,9 @@
  * to avoid collisions with the app's Tailwind / shadcn CSS vars and class names.
  *
  * CTA routing:
- *   Sign In link          → /login  (Login page, sign-in tab)
- *   "Get Started – Free" nav CTA  → /signup (Login page, sign-up tab)
- *   "Build My Resume Free" hero   → /signup
+ *   Sign In link                  → /login  (Login page, sign-in tab)
+ *   "Get Started – Free" nav CTA  → /login
+ *   "Build My Resume Free" hero   → /login
  *   "Get Started Free" final CTA  → /signup
  *   "Sign In" final CTA           → /login
  */
