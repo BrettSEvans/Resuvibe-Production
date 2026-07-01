@@ -796,7 +796,7 @@ export default function LandingPage() {
                 </p>
 
                 <div className="lp-hero-ctas">
-                  <Link to="/applications/889931c5-30b7-4a1c-828b-358d0a8d6d49" className="lp-btn lp-btn-primary lp-btn-lg">Build My Resume Free</Link>
+                  <Link to="/login" className="lp-btn lp-btn-primary lp-btn-lg">Build My Resume Free</Link>
                   <a href="#lp-how-it-works" className="lp-btn lp-btn-secondary lp-btn-lg">See How It Works</a>
                 </div>
 
