@@ -94,11 +94,29 @@ function AuthenticatedApp() {
 
   if (!profile?.onboarding_completed_at) {
     return (
-      <Routes>
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/stories" element={<StoryBoard />} />
-        <Route path="*" element={<Navigate to="/onboarding" replace />} />
-      </Routes>
+      <>
+        <AppHeader aiChatOpen={aiChatOpen} onAiChatToggle={() => setAiChatOpen((o) => !o)} />
+        <AiChat isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
+        <Routes>
+          <Route path="/" element={<Navigate to="/build-my-resume" replace />} />
+          <Route path="/build-my-resume" element={<FirstTimeJobSeeker />} />
+          <Route path="/build-my-cover-letter" element={<BuildMyCoverLetter />} />
+          <Route path="/applications" element={<Applications />} />
+          <Route path="/applications/new" element={<NewApplication />} />
+          <Route path="/applications/:id" element={<ApplicationDetail />} />
+          <Route path="/applications/:id/:tab" element={<ApplicationDetail />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/stories" element={<StoryBoard />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/privacy-request" element={<PrivacyRequest />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="*" element={<Navigate to="/build-my-resume" replace />} />
+        </Routes>
+        <CookieConsent />
+      </>
     );
   }
 
