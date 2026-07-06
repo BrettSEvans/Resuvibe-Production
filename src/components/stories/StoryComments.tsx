@@ -38,12 +38,12 @@ export function StoryComments({ storyId }: StoryCommentsProps) {
             <div key={c.id} className={`rounded-md border border-border p-2.5 ${isSystem ? "bg-muted/30 border-dashed" : "bg-secondary/50"}`}>
               <div className="flex items-center gap-2 mb-1">
                 {isSystem && <Bot className="h-3 w-3 text-muted-foreground" />}
-                <span className={`text-xs font-medium ${isSystem ? "text-muted-foreground italic" : "text-foreground"}`}>{c.author_name}</span>
+                <span className={`text-xs font-medium ${isSystem ? "text-muted-foreground italic" : "text-foreground"}`}>{isSystem ? "System" : c.author_name}</span>
                 <span className="text-[10px] text-muted-foreground">
                   {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
                 </span>
               </div>
-              <p className={`text-sm whitespace-pre-wrap ${isSystem ? "text-muted-foreground italic" : "text-foreground/90"}`}>{c.content}</p>
+              <p className={`text-sm whitespace-pre-wrap ${isSystem ? "text-muted-foreground italic" : "text-foreground/90"}`}>{displayContent}</p>
             </div>
           );
         })}
