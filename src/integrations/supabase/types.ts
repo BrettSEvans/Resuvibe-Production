@@ -1629,7 +1629,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_marketing_attribution: {
+        Row: {
+          approval_status: string | null
+          created_at: string | null
+          id: string | null
+          referral_source: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          created_at?: string | null
+          id?: string | null
+          referral_source?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          created_at?: string | null
+          id?: string | null
+          referral_source?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_soft_delete_user: {

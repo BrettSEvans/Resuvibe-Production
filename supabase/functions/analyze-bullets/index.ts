@@ -1,4 +1,5 @@
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 
 Deno.serve(async (req) => {
   const corsHeaders = makeCorsHeaders(req.headers.get('Origin'));
@@ -7,6 +8,9 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "analyze-bullets", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const body = await req.json();
     const { mode } = body;
 

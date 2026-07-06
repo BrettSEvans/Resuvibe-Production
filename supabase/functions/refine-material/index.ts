@@ -1,10 +1,14 @@
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 
 Deno.serve(async (req) => {
   const corsHeaders = makeCorsHeaders(req.headers.get('Origin'));
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "refine-material", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const { currentContent, contentType, assetName, userMessage, chatHistory } = await req.json();
 
     if (!userMessage || !currentContent) {

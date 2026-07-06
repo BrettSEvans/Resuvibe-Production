@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { aiFetchWithRetry } from "../_shared/aiRetry.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
 Deno.serve(async (req) => {
@@ -9,6 +10,11 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth: caller must own the resume row before we touch storage or DB
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "extract-resume-text", limitPerHour: 30 });
+    if (guard instanceof Response) return guard;
+    const { user } = guard;
+
     const { resumeId, storagePath } = await req.json();
     if (!resumeId || !storagePath) {
       return new Response(JSON.stringify({ error: "resumeId and storagePath required" }), {
@@ -20,6 +26,20 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Ownership check: the resume row must belong to the authenticated user
+    const { data: resumeRow, error: ownerErr } = await supabase
+      .from("user_resumes")
+      .select("id, user_id, storage_path")
+      .eq("id", resumeId)
+      .maybeSingle();
+
+    if (ownerErr || !resumeRow || resumeRow.user_id !== user.id || resumeRow.storage_path !== storagePath) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Download PDF from storage
     const { data: fileData, error: downloadErr } = await supabase.storage

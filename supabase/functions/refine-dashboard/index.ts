@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 serve(async (req) => {
   const corsHeaders = makeCorsHeaders(req.headers.get('Origin'));
   if (req.method === 'OPTIONS') {
@@ -8,6 +9,9 @@ serve(async (req) => {
   }
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "refine-dashboard", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const { currentDashboardData, currentHtml, userMessage, chatHistory } = await req.json();
 
     if (!userMessage) {

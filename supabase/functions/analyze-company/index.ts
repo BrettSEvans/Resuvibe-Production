@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { aiFetchWithRetry } from "../_shared/aiRetry.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 serve(async (req) => {
   const corsHeaders = makeCorsHeaders(req.headers.get('Origin'));
   if (req.method === 'OPTIONS') {
@@ -9,6 +10,9 @@ serve(async (req) => {
   }
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "analyze-company", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const { companyMarkdown, jobDescription, companyName } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
