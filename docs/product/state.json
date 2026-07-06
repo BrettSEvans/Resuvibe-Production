@@ -8,7 +8,7 @@
   "description": "Resume & career platform with PII handling. Full-stack React + Supabase application requiring comprehensive architectural, code, and security reviews.",
   "criticalNotes": "⚠️ Handles PII — security review is mandatory. Must assess auth, encryption, data access controls, and audit logging.",
   "createdAt": "2026-07-06T00:00:00Z",
-  "updatedAt": "2026-07-06T14:15:00Z",
+  "updatedAt": "2026-07-06T15:45:00Z",
   "stages": {
     "pm": {
       "status": "approved-complete",
@@ -41,7 +41,7 @@
       "criticPasses": 0
     },
     "qa": {
-      "status": "in-progress",
+      "status": "approved-complete",
       "checkpoint": null,
       "revisions": 0,
       "criticPasses": 0

@@ -403,6 +403,16 @@ function ResumeVariantContent({
   const [isRefining, setIsRefining] = useState(false);
   const [chatHistory, setChatHistory] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [chatVisible, setChatVisible] = useState(false);
+  const [toolbarTarget, setToolbarTarget] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const find = () => setToolbarTarget(document.getElementById("resume-variant-actions"));
+    find();
+    if (!document.getElementById("resume-variant-actions")) {
+      const raf = requestAnimationFrame(find);
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [variant]);
 
   const handleAskForChanges = async () => {
     if (!askPrompt.trim() || !html) return;
@@ -512,15 +522,6 @@ function ResumeVariantContent({
     );
   }
 
-  const [toolbarTarget, setToolbarTarget] = useState<HTMLElement | null>(null);
-  useEffect(() => {
-    const find = () => setToolbarTarget(document.getElementById("resume-variant-actions"));
-    find();
-    if (!document.getElementById("resume-variant-actions")) {
-      const raf = requestAnimationFrame(find);
-      return () => cancelAnimationFrame(raf);
-    }
-  }, [variant]);
   const toolbar = (
     <ResumeVariantToolbar
       isRegenerating={isRegenerating}

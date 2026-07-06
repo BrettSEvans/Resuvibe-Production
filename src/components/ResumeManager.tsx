@@ -43,7 +43,9 @@ export default function ResumeManager({ userId, onResumeUploaded, onResumeTextEx
     },
   });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["user_resumes", userId] });
+  const invalidate = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: ["user_resumes", userId] });
+  }, [queryClient, userId]);
 
   // Backfill: extract text for any resumes missing resume_text
   const [backfillRan, setBackfillRan] = useState(false);
@@ -139,7 +141,7 @@ export default function ResumeManager({ userId, onResumeUploaded, onResumeTextEx
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
     }
-  }, [userId, resumes.length]);
+  }, [userId, resumes.length, invalidate, onResumeUploaded, onResumeTextExtracted]);
 
   // Set primary
   const setPrimary = useMutation({

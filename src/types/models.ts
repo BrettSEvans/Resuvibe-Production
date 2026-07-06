@@ -82,3 +82,22 @@ export interface FabricationChange {
   tailored_text?: string;
   baseline_text?: string;
 }
+
+// ── Company branding data ──
+export interface CompanyBranding {
+  colors?: { primary?: string; secondary?: string };
+  extractedColors?: { primary?: string; secondary?: string };
+  [key: string]: unknown;
+}
+
+// ── Dashboard customization data ──
+export interface ResearchedSection {
+  id: string;
+  [key: string]: unknown;
+}
+
+export interface CfoScenario {
+  id: string;
+  relevanceRank?: number;
+  [key: string]: unknown;
+}

@@ -29,21 +29,20 @@ export default function GeneratedAssetRevisions({
 
   useEffect(() => {
     if (assetId) {
+      const loadRevisions = async () => {
+        setLoading(true);
+        try {
+          const data = await getGeneratedAssetRevisions(assetId);
+          setRevisions(data);
+        } catch (err) {
+          console.error('Failed to load asset revisions:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
       loadRevisions();
     }
   }, [assetId, refreshTrigger]);
-
-  const loadRevisions = async () => {
-    setLoading(true);
-    try {
-      const data = await getGeneratedAssetRevisions(assetId);
-      setRevisions(data);
-    } catch (err) {
-      console.error('Failed to load asset revisions:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDownload = (html: string, revisionNumber: number) => {
     const blob = new Blob([html], { type: "text/html" });

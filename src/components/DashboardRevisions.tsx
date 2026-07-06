@@ -26,20 +26,19 @@ export default function DashboardRevisions({
   const { toast } = useToast();
 
   useEffect(() => {
+    const loadRevisions = async () => {
+      setLoading(true);
+      try {
+        const data = await getDashboardRevisions(applicationId);
+        setRevisions(data);
+      } catch (err: any) {
+        toast({ title: "Error", description: err.message, variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+    };
     loadRevisions();
-  }, [applicationId, refreshTrigger]);
-
-  const loadRevisions = async () => {
-    setLoading(true);
-    try {
-      const data = await getDashboardRevisions(applicationId);
-      setRevisions(data);
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [applicationId, refreshTrigger, toast]);
 
   const handleDownload = (html: string, label: string, revisionNumber: number) => {
     const blob = new Blob([html], { type: "text/html" });

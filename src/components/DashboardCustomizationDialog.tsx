@@ -12,17 +12,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Palette, LayoutGrid, TrendingUp } from "lucide-react";
+import type { ResearchedSection, CfoScenario, CompanyBranding } from "@/types/models";
 
 interface DashboardCustomizationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  researchedSections: any[];
-  researchedCfoScenarios: any[];
-  scrapedBranding: any;
+  researchedSections: ResearchedSection[];
+  researchedCfoScenarios: CfoScenario[];
+  scrapedBranding: CompanyBranding;
   onConfirm: (choices: {
     colors: { primary: string; secondary: string };
-    selectedSections: any[];
-    selectedCfoScenarios: any[];
+    selectedSections: ResearchedSection[];
+    selectedCfoScenarios: CfoScenario[];
   }) => void;
   onSkip: () => void;
 }
@@ -44,15 +45,15 @@ export default function DashboardCustomizationDialog({
 
   // Sections — pre-select first 6
   const [selectedSectionIds, setSelectedSectionIds] = useState<Set<string>>(
-    () => new Set(researchedSections.slice(0, 6).map((s: any) => s.id))
+    () => new Set(researchedSections.slice(0, 6).map((s) => s.id))
   );
 
   // CFO scenarios — sort by rank, pre-select top 3
   const sortedScenarios = [...(researchedCfoScenarios || [])].sort(
-    (a: any, b: any) => (a.relevanceRank || 99) - (b.relevanceRank || 99)
+    (a, b) => (a.relevanceRank || 99) - (b.relevanceRank || 99)
   );
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<Set<string>>(
-    () => new Set(sortedScenarios.slice(0, 3).map((s: any) => s.id))
+    () => new Set(sortedScenarios.slice(0, 3).map((s) => s.id))
   );
 
   const toggleSection = (id: string) => {
@@ -76,8 +77,8 @@ export default function DashboardCustomizationDialog({
   const handleConfirm = () => {
     onConfirm({
       colors: { primary: primaryColor, secondary: secondaryColor },
-      selectedSections: researchedSections.filter((s: any) => selectedSectionIds.has(s.id)),
-      selectedCfoScenarios: sortedScenarios.filter((s: any) => selectedScenarioIds.has(s.id)),
+      selectedSections: researchedSections.filter((s) => selectedSectionIds.has(s.id)),
+      selectedCfoScenarios: sortedScenarios.filter((s) => selectedScenarioIds.has(s.id)),
     });
   };
 

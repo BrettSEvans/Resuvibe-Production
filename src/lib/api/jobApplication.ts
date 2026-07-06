@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { CompanyBranding } from '@/types/models';
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -75,7 +76,7 @@ export async function streamDashboardGeneration({
   onDone,
 }: {
   jobDescription: string;
-  branding?: any;
+  branding?: CompanyBranding;
   companyName?: string;
   jobTitle?: string;
   competitors?: string[];
@@ -83,8 +84,8 @@ export async function streamDashboardGeneration({
   products?: string[];
   department?: string;
   templateHtml?: string;
-  researchedSections?: any[];
-  selectedCfoScenarios?: any[];
+  researchedSections?: string[];
+  selectedCfoScenarios?: string[];
   userColors?: { primary: string; secondary: string };
   onDelta: (text: string) => void;
   onDone: () => void;

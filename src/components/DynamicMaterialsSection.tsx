@@ -333,7 +333,7 @@ export default function DynamicMaterialsSection({
     if (bgJob?.status === "awaiting-dashboard-config" && bgJob.researchedSections?.length) {
       setShowDashboardConfig(true);
     }
-  }, [bgJob?.status]);
+  }, [bgJob]);
 
   // Also check legacy columns for backward compat
   const legacyAssets: { name: string; html: string; field: string }[] = [];
