@@ -1,6 +1,7 @@
 import { aiFetchWithRetry } from "../_shared/aiRetry.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 Deno.serve(async (req) => {
   const corsHeaders = makeCorsHeaders(req.headers.get('Origin'));
   if (req.method === 'OPTIONS') {
@@ -8,6 +9,9 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "resume-diff", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const { baselineText, tailoredHtml, jobDescriptionMarkdown } = await req.json();
 
     if (!baselineText || baselineText.trim().length < 30) {

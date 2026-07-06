@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { aiFetchWithRetry } from "../_shared/aiRetry.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 const SYSTEM_PROMPT = `You are a senior business analyst and dashboard architect. Given a company name, company URL, job title, department, and job description, determine the 8-12 most strategically important dashboard sections for someone in this role at this company. Also generate 7 CFO what-if scenarios ranked by relevance.
 
 For each section, specify:
@@ -79,6 +80,9 @@ serve(async (req) => {
   }
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "research-company", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const { jobUrl, companyUrl, jobTitle, companyName, department, jobDescription } = await req.json();
 
     if (!jobDescription && !jobTitle) {

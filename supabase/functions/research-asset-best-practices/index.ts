@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { aiFetchWithRetry } from "../_shared/aiRetry.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 function normalizeAssetType(name: string): string {
   return name.trim().toLowerCase().replace(/[\s-]+/g, '_');
 }
@@ -11,6 +12,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "research-asset-best-practices", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const { asset_type } = await req.json();
     if (!asset_type) {
       return new Response(JSON.stringify({ error: 'asset_type is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

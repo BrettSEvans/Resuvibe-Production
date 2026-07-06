@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 function buildSystemPrompt(branding: any, competitors: string[], customers: string[], products: string[], department: string, companyName: string, jobTitle: string, researchedSections?: any[]): string {
   const brandingContext = branding ? `
 Company Branding (derive Material You tonal palette from these colors):
@@ -164,6 +165,9 @@ serve(async (req) => {
   }
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "generate-dashboard", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const { jobDescription, branding, companyName, jobTitle, competitors, customers, products, department, templateHtml, researchedSections, selectedCfoScenarios, userColors } = await req.json();
 
     if (!jobDescription) {

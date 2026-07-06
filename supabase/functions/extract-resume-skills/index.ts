@@ -1,11 +1,15 @@
 import { aiFetchWithRetry } from "../_shared/aiRetry.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 Deno.serve(async (req) => {
   const corsHeaders = makeCorsHeaders(req.headers.get('Origin'));
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "extract-resume-skills", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
     const { resumeText } = await req.json();
     if (!resumeText || resumeText.trim().length < 50) {
       return new Response(JSON.stringify({ success: false, error: "Resume text too short" }), {

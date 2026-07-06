@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { aiFetchWithRetry } from "../_shared/aiRetry.ts";
 
 import { makeCorsHeaders } from "../_shared/cors.ts";
+import { requireUser } from "../_shared/authGuard.ts";
 function normalizeAssetType(name: string): string {
   return name.trim().toLowerCase().replace(/[\s-]+/g, '_');
 }
@@ -496,6 +497,9 @@ async function reviewPipeline(
 
     // Step 3: AI review
     try {
+    const guard = await requireUser(req, corsHeaders, { edgeFunction: "generate-material", limitPerHour: 60 });
+    if (guard instanceof Response) return guard;
+
       let violationContext = '';
       if (lastViolations.length > 0) {
         violationContext = `\n\nDETERMINISTIC AUDIT VIOLATIONS FOUND (you MUST fix these):\n${lastViolations.slice(0, 5).join('\n')}\n\nFix ALL of these by removing overflow:hidden from text containers, removing fixed heights, and using height:auto + overflow:visible instead.`;
