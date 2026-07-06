@@ -133,8 +133,7 @@ export function useUpdateStory() {
         if (changes.length > 0) {
           await supabase.from("story_comments").insert({
             story_id: variables.id,
-            content: changes.join(". "),
-            author_name: "System",
+            content: `[System] ${changes.join(". ")}`,
           });
         }
       }

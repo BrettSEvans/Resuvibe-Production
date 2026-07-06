@@ -46,10 +46,11 @@ export function useComments(storyId: string | undefined) {
 export function useCreateComment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (comment: { story_id: string; content: string; author_name?: string }) => {
+    mutationFn: async (comment: { story_id: string; content: string }) => {
+      // author_name and user_id are set server-side via trigger to prevent spoofing.
       const { data, error } = await supabase
         .from("story_comments")
-        .insert(comment)
+        .insert({ story_id: comment.story_id, content: comment.content })
         .select()
         .single();
       if (error) throw error;
