@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAuthError } from "@/lib/logger";
 import type { User, Session } from "@supabase/supabase-js";
 import React from "react";
 
@@ -40,12 +41,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(existingSession);
       setUser(existingSession?.user ?? null);
       if (existingSession?.user) {
-        // Track last sign-in (fire and forget)
+        // Track last sign-in with error logging
         supabase
           .from("profiles")
           .update({ last_sign_in_at: new Date().toISOString() })
           .eq("id", existingSession.user.id)
-          .then(() => {});
+          .then(({ error }) => {
+            if (error) {
+              logAuthError("update_last_sign_in", error, existingSession.user.id);
+            }
+          });
       }
       initialized.current = true;
       setLoading(false);

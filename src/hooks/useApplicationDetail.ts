@@ -10,7 +10,7 @@ import type { DashboardData } from "@/lib/dashboard/schema";
 import { supabase } from "@/integrations/supabase/client";
 import { useBackgroundJob } from "@/hooks/useBackgroundJob";
 import { useQuery } from "@tanstack/react-query";
-import type { JobApplication, UserProfileSnapshot, UserResumePickerItem, ChatMessage, FabricationChange } from "@/types/models";
+import type { JobApplication, UserProfileSnapshot, UserResumePickerItem, ChatMessage, FabricationChange, JobApplicationIdRow } from "@/types/models";
 
 export function useApplicationDetail() {
   const { id } = useParams<{ id: string }>();
@@ -55,7 +55,7 @@ export function useApplicationDetail() {
   const [siblingIds, setSiblingIds] = useState<string[]>([]);
   useEffect(() => {
     supabase.from("job_applications").select("id").order("created_at", { ascending: false }).then(({ data }) => {
-      if (data) setSiblingIds(data.map((d: any) => d.id));
+      if (data) setSiblingIds((data as JobApplicationIdRow[]).map((d) => d.id));
     });
   }, []);
   const currentIndex = id ? siblingIds.indexOf(id) : -1;

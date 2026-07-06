@@ -27,6 +27,11 @@ export interface JobApplicationListItem {
   updated_at: string;
 }
 
+/** Sibling navigation row (id only, for prev/next). */
+export interface JobApplicationIdRow {
+  id: string;
+}
+
 export type UserProfile = Tables<"profiles">;
 
 /** Subset of profile fields used in generation hooks. */

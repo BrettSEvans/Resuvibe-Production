@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Save, User, FileText, Zap, X, Trash2, Upload, CheckCircle2 } from "lucide-react";
 import ResumeManager from "@/components/ResumeManager";
+import { AccountLinking } from "@/components/AccountLinking";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { backgroundGenerator } from "@/lib/backgroundGenerator";
@@ -285,6 +286,9 @@ export default function Profile() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Linked Accounts */}
+      <AccountLinking />
 
       {/* Resume — upload a PDF or paste/edit resume text, combined in one card */}
       <Card>
