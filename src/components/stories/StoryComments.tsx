@@ -32,7 +32,8 @@ export function StoryComments({ storyId }: StoryCommentsProps) {
           </div>
         )}
         {comments?.map((c) => {
-          const isSystem = c.author_name === "System";
+          const isSystem = c.content.startsWith("[System]");
+          const displayContent = isSystem ? c.content.replace(/^\[System\]\s*/, "") : c.content;
           return (
             <div key={c.id} className={`rounded-md border border-border p-2.5 ${isSystem ? "bg-muted/30 border-dashed" : "bg-secondary/50"}`}>
               <div className="flex items-center gap-2 mb-1">
