@@ -1,5 +1,16 @@
 # Product Backlog
 
+## Agent-C System Improvements
+
+### Auto-detect shipped status (Bug fix)
+- **Issue:** state.json doesn't automatically recognize when final stage (QA) is approved-complete
+- **Root cause:** currentStage points to final stage, but no flag distinguishes "in-progress" vs "fully-shipped"
+- **Fix applied:** Added `stageOrder`, `_computed` fields to enable automatic shipped detection
+- **Prevention:** Dashboard should check if all stages are `approved-complete` and auto-set status to "shipped"
+- **Status:** Fixed in this project; should be applied to agent-c system
+
+---
+
 ## Security & Compliance (High Priority)
 
 ### TypeScript Type Safety (Deferred APPLY items from architect review)
