@@ -1,0 +1,61 @@
+{
+  "id": "resuvibe-production",
+  "name": "Resuvibe Production",
+  "type": "product",
+  "productType": "web-app",
+  "path": "/Users/brettevanssf/Code/Saasless/Resuvibe-Production",
+  "currentStage": "architect",
+  "description": "Resume & career platform with PII handling. Full-stack Next.js application requiring comprehensive architectural, code, and security reviews.",
+  "criticalNotes": "⚠️ Handles PII — security review is mandatory. Must assess auth, encryption, data access controls, and audit logging.",
+  "createdAt": "2026-07-06T00:00:00Z",
+  "updatedAt": "2026-07-06T00:00:00Z",
+  "stages": {
+    "pm": {
+      "status": "approved-complete",
+      "checkpoint": null,
+      "revisions": 0,
+      "criticPasses": 0
+    },
+    "ux": {
+      "status": "approved-complete",
+      "checkpoint": null,
+      "revisions": 0,
+      "criticPasses": 0
+    },
+    "ui": {
+      "status": "approved-complete",
+      "checkpoint": null,
+      "revisions": 0,
+      "criticPasses": 0
+    },
+    "architect": {
+      "status": "in-progress",
+      "checkpoint": null,
+      "revisions": 0,
+      "criticPasses": 0
+    },
+    "engineer": {
+      "status": "not-started",
+      "checkpoint": null,
+      "revisions": 0,
+      "criticPasses": 0
+    },
+    "qa": {
+      "status": "not-started",
+      "checkpoint": null,
+      "revisions": 0,
+      "criticPasses": 0
+    }
+  },
+  "pendingFeedback": {
+    "stage": "architect",
+    "source": "critic",
+    "text": "9 APPLY findings: TypeScript strictness, XSS defense audit, test coverage gaps, auth guard documentation, data retention policy, env var validation, observability/logging, account linking UI, admin docs. 6 DEFER items for backlog.",
+    "reportPath": "docs/product/critic-reports/2026-07-06-architect-p1.md"
+  },
+  "reviewScope": {
+    "architecture": "System design, security patterns, PII data flows",
+    "code": "Implementation quality, refactoring, efficiency",
+    "security": "Auth mechanisms, encryption, access controls, compliance, audit logging"
+  }
+}
