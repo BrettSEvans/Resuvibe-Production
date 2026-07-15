@@ -291,7 +291,19 @@ export function InterviewPrepTab({
               <div className="space-y-4">
                 <FeedbackView feedback={state.currentFeedback} />
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" onClick={() => dispatch({ type: "RETRY_QUESTION" })}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      // Prefill with the most recent attempt for this question
+                      // so the user can edit/expand it instead of retyping.
+                      const priorForQuestion = state.attempts.filter(
+                        (a) => a.questionId === currentQuestion.id,
+                      );
+                      const last = priorForQuestion[priorForQuestion.length - 1];
+                      setAnswer(last?.answerText ?? "");
+                      dispatch({ type: "RETRY_QUESTION" });
+                    }}
+                  >
                     <RotateCcw className="mr-2 h-4 w-4" /> Try Responding Again
                   </Button>
                   <Button onClick={() => dispatch({ type: "NEXT_QUESTION" })}>
