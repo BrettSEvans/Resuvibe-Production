@@ -256,9 +256,8 @@ export function InterviewPrepTab({
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="text-xs text-muted-foreground">
           <span>Question {state.currentIndex + 1} of {state.questions.length}</span>
-          <Badge variant="outline">{currentQuestion.modality}</Badge>
         </div>
         <Progress value={progress} className="h-1.5" />
       </div>
