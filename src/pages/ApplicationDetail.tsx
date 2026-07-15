@@ -8,7 +8,7 @@ import { ArrowLeft, Loader2, ChevronLeft, ChevronRight as ChevronRightIcon, User
 import { supabase } from "@/integrations/supabase/client";
 import { useApplicationDetail } from "@/hooks/useApplicationDetail";
 import { useCoverLetterEditor } from "@/hooks/useCoverLetterEditor";
-import { useDashboardEditor } from "@/hooks/useDashboardEditor";
+
 import { useResumeEditor } from "@/hooks/useResumeEditor";
 import { ResumeTab } from "@/components/tabs/ResumeTab";
 import { CoverLetterTab } from "@/components/tabs/CoverLetterTab";
@@ -16,11 +16,11 @@ import { JDAnalysisTab } from "@/components/tabs/JDAnalysisTab";
 import { DetailsTab } from "@/components/tabs/DetailsTab";
 import { InterviewPrepTab } from "@/components/tabs/InterviewPrepTab";
 import { InterviewPrepTabTrigger } from "@/components/tabs/InterviewPrepTabTrigger";
-import DynamicMaterialsSection from "@/components/DynamicMaterialsSection";
+
 import { PageShell } from "@/components/PageShell";
 
 /** Valid tab slugs — must match the route segment and the Tabs value prop. */
-const VALID_TABS = ["resume", "cover-letter", "jd-analysis", "materials", "details", "interview-prep"] as const;
+const VALID_TABS = ["resume", "cover-letter", "jd-analysis", "details", "interview-prep"] as const;
 type TabSlug = typeof VALID_TABS[number];
 
 /**
@@ -126,12 +126,9 @@ const ApplicationDetail = () => {
     jobDescription, setJobDescription, editingJobDescription, setEditingJobDescription,
     companyUrl, setCompanyUrl, jobUrl, setJobUrl, companyName, setCompanyName, jobTitle, setJobTitle,
     editingMeta, setEditingMeta,
-    dashboardHtml, setDashboardHtml, dashboardData, setDashboardData,
-    chatHistory, setChatHistory,
-    revisionTrigger, setRevisionTrigger,
     coverLetterRevisionTrigger, setCoverLetterRevisionTrigger,
     resumeRevisionTrigger, setResumeRevisionTrigger,
-    previewHtml, setPreviewHtml, previewCoverLetter, setPreviewCoverLetter,
+    previewCoverLetter, setPreviewCoverLetter,
     previewResumeHtml, setPreviewResumeHtml,
     bgJob, isBgGenerating, prevId, nextId,
     resumeText, userProfile, userResumes,
@@ -149,13 +146,6 @@ const ApplicationDetail = () => {
     id, coverLetter, setCoverLetter,
     coverLetterRevisionTrigger, setCoverLetterRevisionTrigger,
     userProfile, jobDescription, saveField, toast,
-  });
-
-  const dashEditor = useDashboardEditor({
-    id, app, jobDescription, companyName, jobTitle,
-    dashboardHtml, setDashboardHtml, dashboardData, setDashboardData,
-    chatHistory, setChatHistory, revisionTrigger, setRevisionTrigger,
-    saveField, toast,
   });
 
   const resumeEditor = useResumeEditor({
@@ -184,20 +174,8 @@ const ApplicationDetail = () => {
       !!app.cover_letter ||
       (!!isBgGenerating &&
         ["cover-letter", "generating-materials", "awaiting-dashboard-config", "dashboard"].includes(status ?? ""));
-    const hasMaterials =
-      !!(
-        app.dashboard_html ||
-        app.executive_report_html ||
-        app.architecture_diagram_html ||
-        app.raid_log_html ||
-        app.roadmap_html
-      ) ||
-      (!!isBgGenerating &&
-        ["generating-materials", "awaiting-dashboard-config", "dashboard"].includes(status ?? ""));
-
     if (hasResume) tabs.push("resume");
     if (hasCoverLetter) tabs.push("cover-letter");
-    if (hasMaterials) tabs.push("materials");
     tabs.push("interview-prep");
     return tabs;
   }, [app, bgJob?.status, isBgGenerating]);
@@ -351,14 +329,6 @@ const ApplicationDetail = () => {
                   )}
                 </TabsTrigger>
               )}
-              {visibleTabs.includes("materials") && (
-                <TabsTrigger value="materials" className="flex items-center gap-1.5">
-                  Materials
-                  {isBgGenerating && bgJob && ["generating-materials", "awaiting-dashboard-config", "dashboard"].includes(bgJob.status) && (
-                    <Loader2 className="h-3 w-3 animate-spin text-yellow-500" />
-                  )}
-                </TabsTrigger>
-              )}
               {/* Interview Prep: always visible, inactive until a resume exists
                   (guarantees JD + tailored resume for question grounding). */}
               <InterviewPrepTabTrigger app={app} />
@@ -406,28 +376,6 @@ const ApplicationDetail = () => {
                resumeText={resumeText} saving={saving}
                saveField={saveField} handleCopy={handleCopy} toast={toast}
                jobUrl={jobUrl} setJobUrl={setJobUrl}
-            />
-          </TabsContent>
-
-          <TabsContent value="materials" className="space-y-4">
-            <DynamicMaterialsSection
-              applicationId={id!} app={app}
-              jobDescription={jobDescription} companyName={companyName} jobTitle={jobTitle}
-              isBgGenerating={isBgGenerating} bgJob={bgJob}
-              dashboardHtml={dashboardHtml} dashboardData={dashboardData}
-              setDashboardHtml={setDashboardHtml} setDashboardData={setDashboardData}
-              chatOpen={dashEditor.chatOpen} setChatOpen={dashEditor.setChatOpen}
-              chatInput={dashEditor.chatInput} setChatInput={dashEditor.setChatInput}
-              chatHistory={chatHistory} setChatHistory={setChatHistory}
-              isRefining={dashEditor.isRefining} setIsRefining={dashEditor.setIsRefining}
-              isRegenerating={dashEditor.isRegenerating} setIsRegenerating={dashEditor.setIsRegenerating}
-              previewHtml={previewHtml} setPreviewHtml={setPreviewHtml}
-              revisionTrigger={revisionTrigger} setRevisionTrigger={setRevisionTrigger}
-              iframeRef={dashEditor.iframeRef}
-              handleRegenerateDashboard={dashEditor.handleRegenerateDashboard}
-              handleSendChat={dashEditor.handleSendChat}
-              handleDownloadZip={dashEditor.handleDownloadZip}
-              saveField={saveField} toast={toast}
             />
           </TabsContent>
 
