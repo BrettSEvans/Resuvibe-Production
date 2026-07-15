@@ -8,7 +8,7 @@ import { ArrowLeft, Loader2, ChevronLeft, ChevronRight as ChevronRightIcon, User
 import { supabase } from "@/integrations/supabase/client";
 import { useApplicationDetail } from "@/hooks/useApplicationDetail";
 import { useCoverLetterEditor } from "@/hooks/useCoverLetterEditor";
-import { useDashboardEditor } from "@/hooks/useDashboardEditor";
+
 import { useResumeEditor } from "@/hooks/useResumeEditor";
 import { ResumeTab } from "@/components/tabs/ResumeTab";
 import { CoverLetterTab } from "@/components/tabs/CoverLetterTab";
@@ -126,12 +126,9 @@ const ApplicationDetail = () => {
     jobDescription, setJobDescription, editingJobDescription, setEditingJobDescription,
     companyUrl, setCompanyUrl, jobUrl, setJobUrl, companyName, setCompanyName, jobTitle, setJobTitle,
     editingMeta, setEditingMeta,
-    dashboardHtml, setDashboardHtml, dashboardData, setDashboardData,
-    chatHistory, setChatHistory,
-    revisionTrigger, setRevisionTrigger,
     coverLetterRevisionTrigger, setCoverLetterRevisionTrigger,
     resumeRevisionTrigger, setResumeRevisionTrigger,
-    previewHtml, setPreviewHtml, previewCoverLetter, setPreviewCoverLetter,
+    previewCoverLetter, setPreviewCoverLetter,
     previewResumeHtml, setPreviewResumeHtml,
     bgJob, isBgGenerating, prevId, nextId,
     resumeText, userProfile, userResumes,
@@ -149,13 +146,6 @@ const ApplicationDetail = () => {
     id, coverLetter, setCoverLetter,
     coverLetterRevisionTrigger, setCoverLetterRevisionTrigger,
     userProfile, jobDescription, saveField, toast,
-  });
-
-  const dashEditor = useDashboardEditor({
-    id, app, jobDescription, companyName, jobTitle,
-    dashboardHtml, setDashboardHtml, dashboardData, setDashboardData,
-    chatHistory, setChatHistory, revisionTrigger, setRevisionTrigger,
-    saveField, toast,
   });
 
   const resumeEditor = useResumeEditor({
