@@ -265,7 +265,7 @@ export function InterviewPrepTab({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{currentQuestion.question}</CardTitle>
+          <p className="text-base font-normal text-card-foreground">{currentQuestion.question}</p>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-xs text-muted-foreground">
