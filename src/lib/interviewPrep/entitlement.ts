@@ -18,11 +18,10 @@ export type GateDecision =
  * `trialApplicationId` once claimed.
  */
 export function decideEntitlement(
-  e: Entitlement,
-  applicationId: string,
+  _e: Entitlement,
+  _applicationId: string,
 ): GateDecision {
-  if (e.subscriptionTier === "paid") return { kind: "allow" };
-  if (e.trialUsedAt === null) return { kind: "claim" };
-  if (e.trialApplicationId === applicationId) return { kind: "allow" };
-  return { kind: "paywall" };
+  // TEMP: Premium gating disabled for Interview Prep during feature dev/QA.
+  // Restore original logic when re-enabling the paywall.
+  return { kind: "allow" };
 }
