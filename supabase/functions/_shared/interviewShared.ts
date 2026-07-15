@@ -54,11 +54,33 @@ export async function callGateway(
   };
 }
 
-/** Parse a JSON object from a model response, tolerating ```json fences. */
+/** Parse a JSON object from a model response, tolerating ```json fences and trailing text. */
 export function extractJson<T = unknown>(text: string): T {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   const raw = (fenced ? fenced[1] : text).trim();
-  return JSON.parse(raw) as T;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    const start = raw.search(/[\{\[]/);
+    if (start === -1) throw new Error("No JSON found in AI response");
+    const open = raw[start];
+    const close = open === "{" ? "}" : "]";
+    let depth = 0, inStr = false, esc = false;
+    for (let i = start; i < raw.length; i++) {
+      const ch = raw[i];
+      if (inStr) {
+        if (esc) esc = false;
+        else if (ch === "\\") esc = true;
+        else if (ch === '"') inStr = false;
+      } else if (ch === '"') inStr = true;
+      else if (ch === open) depth++;
+      else if (ch === close) {
+        depth--;
+        if (depth === 0) return JSON.parse(raw.slice(start, i + 1)) as T;
+      }
+    }
+    throw new Error("Malformed JSON in AI response");
+  }
 }
 
 /**
