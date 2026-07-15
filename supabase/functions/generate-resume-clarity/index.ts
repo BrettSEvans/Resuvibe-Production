@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     const guard = await requireUser(req, corsHeaders, { edgeFunction: "generate-resume-clarity", limitPerHour: 60 });
     if (guard instanceof Response) return guard;
 
-    const { jobDescription, resumeText, companyName, jobTitle, jdIntelligence } = await req.json();
+    const { jobDescription, resumeText, companyName, jobTitle, jdIntelligence, verbatimEducation } = await req.json();
 
     if (!jobDescription || jobDescription.trim().length < 50) {
       return new Response(
