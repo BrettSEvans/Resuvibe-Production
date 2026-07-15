@@ -61,36 +61,11 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
-    let allowed = false;
-    if (ent?.subscription_tier === "paid") {
-      allowed = true;
-    } else if (ent?.trial_used_at == null) {
-      // Atomic claim: only succeeds if still unclaimed (race-safe).
-      const { data: claimed } = await service
-        .from("user_entitlements")
-        .update({
-          trial_used_at: new Date().toISOString(),
-          trial_application_id: applicationId,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id)
-        .eq("subscription_tier", "free")
-        .is("trial_used_at", null)
-        .select("trial_application_id");
-      if (claimed && claimed.length > 0) {
-        allowed = true;
-      } else {
-        // Lost the race — re-read and allow only if it landed on THIS application.
-        const { data: reread } = await service
-          .from("user_entitlements")
-          .select("trial_application_id")
-          .eq("user_id", user.id)
-          .single();
-        allowed = reread?.trial_application_id === applicationId;
-      }
-    } else if (ent?.trial_application_id === applicationId) {
-      allowed = true;
-    }
+    // TEMP: Premium gating disabled for Interview Prep during feature dev/QA.
+    // The entitlement check + atomic trial claim below is intentionally bypassed
+    // and MUST be restored when re-enabling the paywall.
+    const allowed = true;
+    void ent;
 
     if (!allowed) return json({ allowed: false, code: "upgrade_required" });
 
