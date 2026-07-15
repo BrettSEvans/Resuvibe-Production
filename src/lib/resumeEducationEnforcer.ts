@@ -196,34 +196,8 @@ function findEducationH2(
  * lines extracted from `resumeText`.  If no Education section can be found in
  * the source text or the generated HTML, the HTML is returned unchanged.
  */
-export function enforceVerbatimEducation(
-  html: string,
-  resumeText: string,
-): string {
-  const verbatim = extractResumeEducation(resumeText);
-
-  // If the source resume has no education section we still want to prevent
-  // hallucination: remove any Education section the AI invented.
-  const hasSourceEducation = verbatim !== null;
-
-  const h2Info = findEducationH2(html);
-  if (!h2Info) return html; // AI didn't emit an Education heading — nothing to fix
-
-  const afterHeading = html.slice(h2Info.headingEnd);
-
-  // Find where the next <h2> (or end of document) starts — that delimits the
-  // education section's content.
-  const nextH2Match = /<h2[\s>]/i.exec(afterHeading);
-  const tail = nextH2Match ? afterHeading.slice(nextH2Match.index) : "";
-
-  if (!hasSourceEducation) {
-    // No education in source resume → remove the entire section (heading + content)
-    return html.slice(0, h2Info.index) + tail;
-  }
-
-  // Convert verbatim plain-text lines into minimal inline-styled paragraphs
-  // that match the ATS/Clarity font rules already applied by the preview layer.
-  const educationHtml = verbatim
+function buildEducationSectionHtml(verbatim: string): string {
+  const body = verbatim
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
@@ -232,12 +206,65 @@ export function enforceVerbatimEducation(
         `<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 3px 0;line-height:1.2;">${escapeHtml(line)}</p>`,
     )
     .join("\n");
+  const heading =
+    `<h2 style="font-family:Arial,sans-serif;font-size:11pt;margin:8px 0 4px 0;line-height:1.3;">Education</h2>`;
+  return `${heading}\n${body}`;
+}
 
-  return (
-    html.slice(0, h2Info.headingEnd) +
-    "\n" +
-    educationHtml +
-    "\n" +
-    tail
-  );
+export function enforceVerbatimEducation(
+  html: string,
+  resumeText: string,
+): string {
+  const verbatim = extractResumeEducation(resumeText);
+  const hasSourceEducation = verbatim !== null;
+
+  const h2Info = findEducationH2(html);
+
+  // Case 1: AI emitted an Education heading — replace its content verbatim,
+  // or strip the entire section if the source resume has none (anti-hallucination).
+  if (h2Info) {
+    const afterHeading = html.slice(h2Info.headingEnd);
+    const nextH2Match = /<h2[\s>]/i.exec(afterHeading);
+    const tail = nextH2Match ? afterHeading.slice(nextH2Match.index) : "";
+
+    if (!hasSourceEducation) {
+      return html.slice(0, h2Info.index) + tail;
+    }
+
+    const educationHtml = verbatim
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map(
+        (line) =>
+          `<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 3px 0;line-height:1.2;">${escapeHtml(line)}</p>`,
+      )
+      .join("\n");
+
+    return (
+      html.slice(0, h2Info.headingEnd) +
+      "\n" +
+      educationHtml +
+      "\n" +
+      tail
+    );
+  }
+
+  // Case 2: AI did NOT emit an Education heading. If the source resume has
+  // one, inject a verbatim section so the candidate's real Education always
+  // appears in the generated resume.
+  if (!hasSourceEducation) return html;
+
+  const section = buildEducationSectionHtml(verbatim);
+  const bodyCloseMatch = /<\/body\s*>/i.exec(html);
+  if (bodyCloseMatch) {
+    return (
+      html.slice(0, bodyCloseMatch.index) +
+      "\n" +
+      section +
+      "\n" +
+      html.slice(bodyCloseMatch.index)
+    );
+  }
+  return html + "\n" + section;
 }
