@@ -581,6 +581,173 @@ export type Database = {
         }
         Relationships: []
       }
+      interview_questions: {
+        Row: {
+          application_id: string
+          competency: string
+          created_at: string
+          id: string
+          is_active: boolean
+          leadership_principle: string | null
+          modality: string
+          order_index: number
+          question: string
+          rubric_anchors: Json
+          source_fingerprint: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id: string
+          competency?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          leadership_principle?: string | null
+          modality?: string
+          order_index?: number
+          question: string
+          rubric_anchors?: Json
+          source_fingerprint?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string
+          competency?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          leadership_principle?: string | null
+          modality?: string
+          order_index?: number
+          question?: string
+          rubric_anchors?: Json
+          source_fingerprint?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_questions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_sessions: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          overall_score: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          overall_score?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          overall_score?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_sessions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_turns: {
+        Row: {
+          answer_text: string
+          attempt_number: number
+          created_at: string
+          dimensions: Json
+          feedback: Json
+          id: string
+          is_counted: boolean
+          order_index: number
+          prior_turn_id: string | null
+          question_id: string
+          question_text: string
+          score: number
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          answer_text: string
+          attempt_number?: number
+          created_at?: string
+          dimensions?: Json
+          feedback?: Json
+          id?: string
+          is_counted?: boolean
+          order_index?: number
+          prior_turn_id?: string | null
+          question_id: string
+          question_text: string
+          score?: number
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          answer_text?: string
+          attempt_number?: number
+          created_at?: string
+          dimensions?: Json
+          feedback?: Json
+          id?: string
+          is_counted?: boolean
+          order_index?: number
+          prior_turn_id?: string | null
+          question_id?: string
+          question_text?: string
+          score?: number
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_turns_prior_turn_id_fkey"
+            columns: ["prior_turn_id"]
+            isOneToOne: false
+            referencedRelation: "interview_turns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_turns_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "interview_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_turns_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_applications: {
         Row: {
           architecture_diagram_html: string | null
@@ -1501,6 +1668,33 @@ export type Database = {
           target_industries?: string[] | null
           updated_at?: string
           years_experience?: string | null
+        }
+        Relationships: []
+      }
+      user_entitlements: {
+        Row: {
+          created_at: string
+          subscription_tier: string
+          trial_application_id: string | null
+          trial_used_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          subscription_tier?: string
+          trial_application_id?: string | null
+          trial_used_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          subscription_tier?: string
+          trial_application_id?: string | null
+          trial_used_at?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
