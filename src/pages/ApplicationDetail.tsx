@@ -168,6 +168,48 @@ const ApplicationDetail = () => {
   const showProfileNudge =
     !!app?.resume_html && !resumeText && !profileBannerDismissed;
 
+  // Only show tabs for assets that have actually been generated for this
+  // application, plus Interview Prep. While a background job is generating a
+  // particular asset, its tab is surfaced so the user can watch progress.
+  const visibleTabs = useMemo<TabSlug[]>(() => {
+    if (!app) return [];
+    const status = bgJob?.status;
+    const tabs: TabSlug[] = [];
+
+    const hasResume =
+      !!app.resume_html ||
+      (!!isBgGenerating &&
+        ["pending", "reviewing-job", "analyzing", "research", "resume", "resume-complete"].includes(status ?? ""));
+    const hasCoverLetter =
+      !!app.cover_letter ||
+      (!!isBgGenerating &&
+        ["cover-letter", "generating-materials", "awaiting-dashboard-config", "dashboard"].includes(status ?? ""));
+    const hasMaterials =
+      !!(
+        app.dashboard_html ||
+        app.executive_report_html ||
+        app.architecture_diagram_html ||
+        app.raid_log_html ||
+        app.roadmap_html
+      ) ||
+      (!!isBgGenerating &&
+        ["generating-materials", "awaiting-dashboard-config", "dashboard"].includes(status ?? ""));
+
+    if (hasResume) tabs.push("resume");
+    if (hasCoverLetter) tabs.push("cover-letter");
+    if (hasMaterials) tabs.push("materials");
+    tabs.push("interview-prep");
+    return tabs;
+  }, [app, bgJob?.status, isBgGenerating]);
+
+  // If the URL points to a hidden tab, redirect to the first visible one.
+  useEffect(() => {
+    if (loading || !app || visibleTabs.length === 0) return;
+    if (!visibleTabs.includes(activeTab)) {
+      navigate(`/applications/${id}/${visibleTabs[0]}`, { replace: true });
+    }
+  }, [loading, app, visibleTabs, activeTab, id, navigate]);
+
   const handleAddResumeToProfile = async () => {
     if (!app?.resume_html) return;
     setAddingToProfile(true);
