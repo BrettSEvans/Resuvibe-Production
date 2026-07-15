@@ -762,7 +762,7 @@ export default function LandingPage() {
 
 
             <div className="lp-nav-actions">
-              <Link to="/applications/889931c5-30b7-4a1c-828b-358d0a8d6d49" className="lp-nav-signin">See Example</Link>
+              <Link to="/login" className="lp-nav-signin">Sign In</Link>
               <Link to="/login" className="lp-btn lp-btn-primary">Get Started — It's Free</Link>
             </div>
 
