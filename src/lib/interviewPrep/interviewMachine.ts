@@ -34,7 +34,12 @@ export function interviewReducer(
     case "ANSWER_SCORED":
       return {
         ...state,
-        attempts: [...state.attempts, event.attempt],
+        // Attach the scored feedback to the attempt so it can be revisited
+        // later via the subway progress indicator.
+        attempts: [
+          ...state.attempts,
+          { ...event.attempt, feedback: event.feedback },
+        ],
         currentFeedback: event.feedback,
         awaitingChoice: true,
       };
