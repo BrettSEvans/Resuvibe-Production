@@ -61,6 +61,28 @@ export function interviewReducer(
       };
     }
 
+    case "JUMP_TO_QUESTION": {
+      const target = event.index;
+      if (
+        target < 0 ||
+        target >= state.questions.length ||
+        target === state.currentIndex
+      ) {
+        return state;
+      }
+      // Only allow jumping to a question the user has already answered at
+      // least once — the subway indicator only exposes those as links.
+      const targetQuestionId = state.questions[target].id;
+      const hasAttempt = state.attempts.some((a) => a.questionId === targetQuestionId);
+      if (!hasAttempt) return state;
+      return {
+        ...state,
+        currentIndex: target,
+        awaitingChoice: false,
+        currentFeedback: null,
+      };
+    }
+
     case "ERROR":
       return { ...state, status: "error", error: event.message };
 

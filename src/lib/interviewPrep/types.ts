@@ -74,6 +74,7 @@ export type InterviewEvent =
   | { type: "ANSWER_SCORED"; attempt: TurnAttempt; feedback: Feedback }
   | { type: "RETRY_QUESTION" }
   | { type: "NEXT_QUESTION" }
+  | { type: "JUMP_TO_QUESTION"; index: number }
   | { type: "ERROR"; message: string }
   | { type: "RESET" }
   | {
