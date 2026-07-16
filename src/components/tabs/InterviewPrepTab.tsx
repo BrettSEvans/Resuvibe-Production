@@ -356,3 +356,73 @@ function FeedbackView({ feedback }: { feedback: import("@/lib/interviewPrep/type
     </div>
   );
 }
+
+/**
+ * Subway-stop style progress indicator. Each stop is a question; answered
+ * stops are clickable (jump back to review/revise), unanswered stops are
+ * inert. The current stop is emphasized with a ring.
+ */
+function SubwayProgress({
+  total,
+  currentIndex,
+  answeredIndices,
+  onJump,
+}: {
+  total: number;
+  currentIndex: number;
+  answeredIndices: Set<number>;
+  onJump: (index: number) => void;
+}) {
+  return (
+    <ol className="flex items-center gap-0 py-1" aria-label="Interview progress">
+      {Array.from({ length: total }, (_, i) => {
+        const isCurrent = i === currentIndex;
+        const isAnswered = answeredIndices.has(i);
+        const canJump = isAnswered && !isCurrent;
+        const stopClasses = [
+          "flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-colors",
+          isCurrent
+            ? "border-primary bg-primary text-primary-foreground ring-2 ring-primary/30"
+            : isAnswered
+              ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
+              : "border-muted-foreground/30 bg-background text-muted-foreground",
+          canJump ? "cursor-pointer" : "cursor-default",
+        ].join(" ");
+        const label = `Question ${i + 1}${isAnswered ? " (answered)" : ""}${isCurrent ? " (current)" : ""}`;
+        return (
+          <li key={i} className="flex flex-1 items-center last:flex-none">
+            {canJump ? (
+              <button
+                type="button"
+                onClick={() => onJump(i)}
+                aria-label={`Go back to ${label}`}
+                className={stopClasses}
+              >
+                {isAnswered ? <Check className="h-3.5 w-3.5" /> : i + 1}
+              </button>
+            ) : (
+              <span aria-label={label} className={stopClasses}>
+                {isCurrent ? (
+                  i + 1
+                ) : isAnswered ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <Circle className="h-2 w-2 fill-current" />
+                )}
+              </span>
+            )}
+            {i < total - 1 && (
+              <div
+                className={`h-0.5 flex-1 ${
+                  answeredIndices.has(i) && (answeredIndices.has(i + 1) || i + 1 === currentIndex)
+                    ? "bg-primary/60"
+                    : "bg-muted-foreground/20"
+                }`}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
