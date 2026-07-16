@@ -11,7 +11,7 @@ import {
 } from "@/lib/interviewPrep/interviewMachine";
 import { overallScore, countedAttemptIds } from "@/lib/interviewPrep/bestAttempt";
 import { decideEntitlement } from "@/lib/interviewPrep/entitlement";
-import type { InterviewQuestion } from "@/lib/interviewPrep/types";
+import type { InterviewQuestion, TurnAttempt } from "@/lib/interviewPrep/types";
 import {
   getInterviewEntitlement,
   startInterviewSession,
