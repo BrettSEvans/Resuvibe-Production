@@ -53,7 +53,10 @@ Deno.serve(async (req) => {
     }
 
     const jd = appRow.job_description_markdown || "";
-    const fingerprint = sourceFingerprint(appRow.resume_html, jd);
+    // Bump the version suffix to force cache regeneration when the prompt
+    // contract changes (e.g. resume-mapping questions added at the end).
+    const fingerprint = sourceFingerprint(appRow.resume_html, jd) + ":v2-resume-mapping";
+
     const service = createClient(supabaseUrl, serviceKey);
 
     // Cache check — only the ACTIVE question set.
