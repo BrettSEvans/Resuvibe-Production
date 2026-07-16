@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
-import { Loader2, Lock, RotateCcw, ArrowRight, Sparkles } from "lucide-react";
+import { Loader2, Lock, RotateCcw, ArrowRight, Sparkles, Check, Circle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   interviewReducer,
@@ -251,7 +250,7 @@ export function InterviewPrepTab({
 
   // phase === "interview"
   if (!currentQuestion) return null;
-  const progress = ((state.currentIndex + 1) / state.questions.length) * 100;
+  const answeredQuestionIds = new Set(state.attempts.map((a) => a.questionId));
 
   return (
     <div className="space-y-4">
@@ -259,7 +258,18 @@ export function InterviewPrepTab({
         <div className="text-xs text-muted-foreground">
           <span>Question {state.currentIndex + 1} of {state.questions.length}</span>
         </div>
-        <Progress value={progress} className="h-1.5" />
+        <SubwayProgress
+          total={state.questions.length}
+          currentIndex={state.currentIndex}
+          answeredIndices={
+            new Set(
+              state.questions
+                .map((q, i) => (answeredQuestionIds.has(q.id) ? i : -1))
+                .filter((i) => i >= 0),
+            )
+          }
+          onJump={(i) => dispatch({ type: "JUMP_TO_QUESTION", index: i })}
+        />
       </div>
 
       <Card>
