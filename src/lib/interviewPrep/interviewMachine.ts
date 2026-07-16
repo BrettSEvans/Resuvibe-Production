@@ -34,7 +34,12 @@ export function interviewReducer(
     case "ANSWER_SCORED":
       return {
         ...state,
-        attempts: [...state.attempts, event.attempt],
+        // Attach the scored feedback to the attempt so it can be revisited
+        // later via the subway progress indicator.
+        attempts: [
+          ...state.attempts,
+          { ...event.attempt, feedback: event.feedback },
+        ],
         currentFeedback: event.feedback,
         awaitingChoice: true,
       };
@@ -75,11 +80,18 @@ export function interviewReducer(
       const targetQuestionId = state.questions[target].id;
       const hasAttempt = state.attempts.some((a) => a.questionId === targetQuestionId);
       if (!hasAttempt) return state;
+      // Enter review mode for the target question so the component renders
+      // the prior answer + feedback (rather than an empty input state). The
+      // component drives which specific attempt is currently being viewed.
+      const priorAttempts = state.attempts.filter(
+        (a) => a.questionId === targetQuestionId,
+      );
+      const latest = priorAttempts[priorAttempts.length - 1];
       return {
         ...state,
         currentIndex: target,
-        awaitingChoice: false,
-        currentFeedback: null,
+        awaitingChoice: true,
+        currentFeedback: latest?.feedback ?? null,
       };
     }
 

@@ -11,7 +11,7 @@ import {
 } from "@/lib/interviewPrep/interviewMachine";
 import { overallScore, countedAttemptIds } from "@/lib/interviewPrep/bestAttempt";
 import { decideEntitlement } from "@/lib/interviewPrep/entitlement";
-import type { InterviewQuestion } from "@/lib/interviewPrep/types";
+import type { InterviewQuestion, TurnAttempt } from "@/lib/interviewPrep/types";
 import {
   getInterviewEntitlement,
   startInterviewSession,
@@ -282,7 +282,19 @@ export function InterviewPrepTab({
             {currentQuestion.leadershipPrinciple ? ` · ${currentQuestion.leadershipPrinciple}` : ""}
           </p>
 
-          {!state.awaitingChoice ? (
+          {state.awaitingChoice ? (
+            <ReviewPanel
+              questionAttempts={state.attempts.filter(
+                (a) => a.questionId === currentQuestion.id,
+              )}
+              fallbackFeedback={state.currentFeedback}
+              onRetry={(prefill) => {
+                setAnswer(prefill);
+                dispatch({ type: "RETRY_QUESTION" });
+              }}
+              onNext={() => dispatch({ type: "NEXT_QUESTION" })}
+            />
+          ) : (
             <>
               <Textarea
                 value={answer}
@@ -295,35 +307,83 @@ export function InterviewPrepTab({
                 {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…</> : "Submit answer"}
               </Button>
             </>
-          ) : (
-            state.currentFeedback && (
-              <div className="space-y-4">
-                <FeedbackView feedback={state.currentFeedback} />
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      // Prefill with the most recent attempt for this question
-                      // so the user can edit/expand it instead of retyping.
-                      const priorForQuestion = state.attempts.filter(
-                        (a) => a.questionId === currentQuestion.id,
-                      );
-                      const last = priorForQuestion[priorForQuestion.length - 1];
-                      setAnswer(last?.answerText ?? "");
-                      dispatch({ type: "RETRY_QUESTION" });
-                    }}
-                  >
-                    <RotateCcw className="mr-2 h-4 w-4" /> Try Responding Again
-                  </Button>
-                  <Button onClick={() => dispatch({ type: "NEXT_QUESTION" })}>
-                    Next Question <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+/**
+ * Review panel shown after a question has been scored or when the user
+ * navigates back to a previously answered question. Renders the (final)
+ * answer in a read-only textarea, a row of "Answer #N" links to browse
+ * earlier attempts, and the feedback the system produced for whichever
+ * attempt is currently selected.
+ */
+function ReviewPanel({
+  questionAttempts,
+  fallbackFeedback,
+  onRetry,
+  onNext,
+}: {
+  questionAttempts: TurnAttempt[];
+  fallbackFeedback: import("@/lib/interviewPrep/types").Feedback | null;
+  onRetry: (prefill: string) => void;
+  onNext: () => void;
+}) {
+  const latest = questionAttempts[questionAttempts.length - 1];
+  const [viewingId, setViewingId] = useState<string | null>(null);
+
+  // Reset the selection whenever the set of attempts for the current
+  // question changes (e.g. the user navigated to a different question).
+  useEffect(() => {
+    setViewingId(latest?.id ?? null);
+  }, [latest?.id, questionAttempts.length]);
+
+  const viewing =
+    questionAttempts.find((a) => a.id === viewingId) ?? latest;
+  const viewingFeedback = viewing?.feedback ?? fallbackFeedback;
+
+  if (!viewing) return null;
+
+  return (
+    <div className="space-y-3">
+      <Textarea value={viewing.answerText} readOnly rows={7} />
+      {questionAttempts.length > 1 && (
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          <span className="text-xs text-muted-foreground">Attempts:</span>
+          {questionAttempts.map((a, i) => {
+            const isActive = a.id === viewing.id;
+            return (
+              <span key={a.id} className="flex items-center gap-2">
+                {i > 0 && <span className="text-muted-foreground">|</span>}
+                <button
+                  type="button"
+                  onClick={() => setViewingId(a.id)}
+                  className={`underline-offset-2 hover:underline ${
+                    isActive ? "font-semibold text-primary underline" : "text-primary/80"
+                  }`}
+                >
+                  Answer #{i + 1}
+                </button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {viewingFeedback && <FeedbackView feedback={viewingFeedback} />}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          onClick={() => onRetry(latest.answerText)}
+        >
+          <RotateCcw className="mr-2 h-4 w-4" /> Try Responding Again
+        </Button>
+        <Button onClick={onNext}>
+          Next Question <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
