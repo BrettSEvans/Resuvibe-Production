@@ -95,9 +95,10 @@ Return ONLY JSON of this exact shape:
 }
 
 Rules:
-- Extract 4–6 core competencies from the JD; produce exactly one question per competency (max 6).
-- Choose the most PREDICTIVE modality per competency for THIS role: TPM/Manager → situational for coordination/leadership; Designer/Architect → cognitive-task for design/systems thinking; ICs → behavioral for past examples.
-- Ground questions in specifics from the candidate's resume (probe real claims), not generic prompts.
+- Produce EXACTLY 5 questions in total, in this order:
+  * Questions 1–3: cover 3 distinct core competencies extracted from the JD. Choose the most PREDICTIVE modality per competency for THIS role (TPM/Manager → situational for coordination/leadership; Designer/Architect → cognitive-task for design/systems thinking; ICs → behavioral for past examples).
+  * Questions 4 and 5: RESUME-GROUNDED experience questions. Each must reference a SPECIFIC item from the candidate's resume (a named role, project, employer, achievement, or skill quoted or clearly paraphrased) and ask the candidate to explain that experience AND explicitly map it to a concrete need, responsibility, or requirement stated in the job description. Use modality "behavioral" for these two. Set competency to something like "Resume ↔ JD Fit" or the specific area being mapped (e.g. "Stakeholder Management ↔ JD Requirement"). These two questions MUST come last.
+- Ground every question in specifics from the candidate's resume (probe real claims), not generic prompts.
 - leadershipPrinciple may be null unless the JD is clearly Amazon-style.`;
 
     const userPrompt = `JOB TITLE: ${appRow.job_title || "(unknown)"}
@@ -112,7 +113,8 @@ ${appRow.cover_letter ? `COVER LETTER:\n${String(appRow.cover_letter).slice(0, 2
 
     const ai = await callGateway(LOVABLE_API_KEY, system, userPrompt);
     const parsed = extractJson<{ roleType?: string; questions?: any[] }>(ai.text);
-    const questions = Array.isArray(parsed.questions) ? parsed.questions.slice(0, 6) : [];
+    const questions = Array.isArray(parsed.questions) ? parsed.questions.slice(0, 5) : [];
+
     if (questions.length === 0) throw new Error("Model returned no questions");
 
     // Deactivate the stale set (do NOT delete — historical turns reference these
