@@ -53,6 +53,14 @@ export interface TurnAttempt {
   attemptNumber: number; // 1..k
   answerText: string;
   score: number; // 0..100
+  /**
+   * The scoring feedback the user received for this attempt. Attached
+   * client-side when ANSWER_SCORED is dispatched so the user can revisit
+   * historical feedback when navigating back through the subway indicator.
+   * Optional because snapshots rehydrated from persisted turns may not include
+   * the full feedback payload.
+   */
+  feedback?: Feedback;
 }
 
 export type InterviewStatus = "initial" | "inProgress" | "complete" | "error";
