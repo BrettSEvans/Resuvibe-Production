@@ -1,4 +1,5 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,7 @@ import {
   initialState,
 } from "@/lib/interviewPrep/interviewMachine";
 import { overallScore, countedAttemptIds } from "@/lib/interviewPrep/bestAttempt";
-import { decideEntitlement } from "@/lib/interviewPrep/entitlement";
+import { decideEntitlement, type GateDecision } from "@/lib/interviewPrep/entitlement";
 import type { InterviewQuestion, TurnAttempt } from "@/lib/interviewPrep/types";
 import {
   getInterviewEntitlement,
