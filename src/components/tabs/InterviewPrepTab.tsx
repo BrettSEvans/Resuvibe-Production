@@ -38,14 +38,21 @@ export function InterviewPrepTab({
   app: { company_name?: string | null };
 }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [phase, setPhase] = useState<Phase>("loading");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [plan, setPlan] = useState<InterviewPlan | null>(null);
+  const [decision, setDecision] = useState<GateDecision | null>(null);
   const [state, dispatch] = useReducer(interviewReducer, initialState);
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
+
+  /** True when this is a free-tier user on their one free trial. */
+  const isTrial = decision?.kind === "claim";
+  /** Maximum answer attempts allowed on the first question during the free trial. */
+  const TRIAL_MAX_ATTEMPTS = 5;
 
   // On open: READ-ONLY entitlement check → plan. No trial is claimed and no
   // session is created here — that only happens when the user clicks "Begin"
