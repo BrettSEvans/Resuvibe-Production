@@ -63,7 +63,9 @@ export function InterviewPrepTab({
       try {
         const entitlement = await getInterviewEntitlement();
         if (cancelled) return;
-        if (decideEntitlement(entitlement, applicationId).kind === "paywall") {
+        const d = decideEntitlement(entitlement, applicationId);
+        setDecision(d);
+        if (d.kind === "paywall") {
           setPhase("paywall");
           return;
         }
