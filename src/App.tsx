@@ -87,6 +87,7 @@ function AuthenticatedApp() {
         <Route path="/privacy-request" element={<PrivacyRequest />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/premium" element={<Premium />} />
         {/* Any other path sends unauthenticated visitors to the landing page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
