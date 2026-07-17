@@ -29,6 +29,7 @@ import Onboarding from "./pages/Onboarding";
 import FirstTimeJobSeeker from "./pages/FirstTimeJobSeeker";
 import BuildMyCoverLetter from "./pages/BuildMyCoverLetter";
 import NotFound from "./pages/NotFound";
+import Premium from "./pages/Premium";
 import BackgroundJobsBanner from "./components/BackgroundJobsBanner";
 import AppHeader from "./components/AppHeader";
 import AiChat from "./components/AiChat";
