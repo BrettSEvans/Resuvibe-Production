@@ -452,13 +452,18 @@ function ReviewPanel({
         </div>
       )}
       {viewingFeedback && <FeedbackView feedback={viewingFeedback} />}
+      {retryHint && (
+        <p className="text-xs text-muted-foreground">{retryHint}</p>
+      )}
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          onClick={() => onRetry(latest.answerText)}
-        >
-          <RotateCcw className="mr-2 h-4 w-4" /> Try Responding Again
-        </Button>
+        {!hideRetry && (
+          <Button
+            variant="outline"
+            onClick={() => onRetry(latest.answerText)}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" /> Try Responding Again
+          </Button>
+        )}
         <Button onClick={onNext}>
           Next Question <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
