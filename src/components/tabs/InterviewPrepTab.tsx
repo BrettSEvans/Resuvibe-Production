@@ -216,8 +216,26 @@ export function InterviewPrepTab({
               ))}
             </div>
           )}
+          {isTrial && (
+            <div className="rounded-md border border-primary/30 bg-primary/5 p-3 space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                <Sparkles className="h-4 w-4" /> A Resuvibe Premium feature — free to try
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Interview Prep is part of Resuvibe Premium. Try it now for free — you'll get
+                the first question with up to {TRIAL_MAX_ATTEMPTS} attempts to refine your
+                answer with AI feedback. Upgrade any time to unlock the full interview.
+              </p>
+            </div>
+          )}
           <Button onClick={handleBegin} disabled={starting}>
-            {starting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Starting…</> : <>Begin interview <ArrowRight className="ml-2 h-4 w-4" /></>}
+            {starting ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Starting…</>
+            ) : isTrial ? (
+              <>Try Interview Prep now for free! <ArrowRight className="ml-2 h-4 w-4" /></>
+            ) : (
+              <>Begin interview <ArrowRight className="ml-2 h-4 w-4" /></>
+            )}
           </Button>
         </CardContent>
       </Card>
