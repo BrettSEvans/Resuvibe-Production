@@ -162,6 +162,7 @@ function AuthenticatedApp() {
         <Route path="/privacy-request" element={<PrivacyRequest />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/premium" element={<Premium />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
 
