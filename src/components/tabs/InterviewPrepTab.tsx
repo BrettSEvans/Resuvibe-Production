@@ -276,15 +276,52 @@ export function InterviewPrepTab({
     );
   }
 
+  if (phase === "trial-upsell") {
+    return (
+      <Card className="border-primary/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" /> Continue with Resuvibe Premium
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Nice work — you've completed the free preview of Interview Prep. To
+            continue with the rest of your tailored interview (plus unlimited
+            practice across every application), sign up for Resuvibe Premium.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => navigate("/premium")}>
+              <Sparkles className="mr-2 h-4 w-4" /> Sign up for Resuvibe Premium
+            </Button>
+            <Button variant="outline" onClick={() => setPhase("interview")}>
+              Back
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // phase === "interview"
   if (!currentQuestion) return null;
   const answeredQuestionIds = new Set(state.attempts.map((a) => a.questionId));
+  const currentQuestionAttempts = state.attempts.filter(
+    (a) => a.questionId === currentQuestion.id,
+  );
+  const trialAttemptsExhausted =
+    isTrial && state.currentIndex === 0 && currentQuestionAttempts.length >= TRIAL_MAX_ATTEMPTS;
 
   return (
     <div className="space-y-4">
       <div className="space-y-1">
         <div className="text-xs text-muted-foreground">
           <span>Question {state.currentIndex + 1} of {state.questions.length}</span>
+          {isTrial && state.currentIndex === 0 && (
+            <span className="ml-2 text-primary">
+              · Free preview · Attempt {Math.min(currentQuestionAttempts.length, TRIAL_MAX_ATTEMPTS)}/{TRIAL_MAX_ATTEMPTS}
+            </span>
+          )}
         </div>
         <SubwayProgress
           total={state.questions.length}
@@ -312,15 +349,25 @@ export function InterviewPrepTab({
 
           {state.awaitingChoice ? (
             <ReviewPanel
-              questionAttempts={state.attempts.filter(
-                (a) => a.questionId === currentQuestion.id,
-              )}
+              questionAttempts={currentQuestionAttempts}
               fallbackFeedback={state.currentFeedback}
+              hideRetry={trialAttemptsExhausted}
+              retryHint={
+                trialAttemptsExhausted
+                  ? `You've used all ${TRIAL_MAX_ATTEMPTS} free attempts for this question.`
+                  : undefined
+              }
               onRetry={(prefill) => {
                 setAnswer(prefill);
                 dispatch({ type: "RETRY_QUESTION" });
               }}
-              onNext={() => dispatch({ type: "NEXT_QUESTION" })}
+              onNext={() => {
+                if (isTrial && state.currentIndex === 0) {
+                  setPhase("trial-upsell");
+                  return;
+                }
+                dispatch({ type: "NEXT_QUESTION" });
+              }}
             />
           ) : (
             <>
