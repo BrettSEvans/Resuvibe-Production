@@ -1,4 +1,5 @@
 import { useEffect, useReducer, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,7 @@ import {
   initialState,
 } from "@/lib/interviewPrep/interviewMachine";
 import { overallScore, countedAttemptIds } from "@/lib/interviewPrep/bestAttempt";
-import { decideEntitlement } from "@/lib/interviewPrep/entitlement";
+import { decideEntitlement, type GateDecision } from "@/lib/interviewPrep/entitlement";
 import type { InterviewQuestion, TurnAttempt } from "@/lib/interviewPrep/types";
 import {
   getInterviewEntitlement,
@@ -20,7 +21,7 @@ import {
   type InterviewPlan,
 } from "@/lib/api/interviewPrep";
 
-type Phase = "loading" | "paywall" | "plan" | "interview" | "complete" | "error";
+type Phase = "loading" | "paywall" | "plan" | "interview" | "trial-upsell" | "complete" | "error";
 
 /**
  * Interview Prep tab. Reached only when the tab is unlocked (a resume exists —
@@ -37,14 +38,21 @@ export function InterviewPrepTab({
   app: { company_name?: string | null };
 }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [phase, setPhase] = useState<Phase>("loading");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [plan, setPlan] = useState<InterviewPlan | null>(null);
+  const [decision, setDecision] = useState<GateDecision | null>(null);
   const [state, dispatch] = useReducer(interviewReducer, initialState);
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
+
+  /** True when this is a free-tier user on their one free trial. */
+  const isTrial = decision?.kind === "claim";
+  /** Maximum answer attempts allowed on the first question during the free trial. */
+  const TRIAL_MAX_ATTEMPTS = 5;
 
   // On open: READ-ONLY entitlement check → plan. No trial is claimed and no
   // session is created here — that only happens when the user clicks "Begin"
@@ -55,7 +63,9 @@ export function InterviewPrepTab({
       try {
         const entitlement = await getInterviewEntitlement();
         if (cancelled) return;
-        if (decideEntitlement(entitlement, applicationId).kind === "paywall") {
+        const d = decideEntitlement(entitlement, applicationId);
+        setDecision(d);
+        if (d.kind === "paywall") {
           setPhase("paywall");
           return;
         }
@@ -206,8 +216,26 @@ export function InterviewPrepTab({
               ))}
             </div>
           )}
+          {isTrial && (
+            <div className="rounded-md border border-primary/30 bg-primary/5 p-3 space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                <Sparkles className="h-4 w-4" /> A Resuvibe Premium feature — free to try
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Interview Prep is part of Resuvibe Premium. Try it now for free — you'll get
+                the first question with up to {TRIAL_MAX_ATTEMPTS} attempts to refine your
+                answer with AI feedback. Upgrade any time to unlock the full interview.
+              </p>
+            </div>
+          )}
           <Button onClick={handleBegin} disabled={starting}>
-            {starting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Starting…</> : <>Begin interview <ArrowRight className="ml-2 h-4 w-4" /></>}
+            {starting ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Starting…</>
+            ) : isTrial ? (
+              <>Try Interview Prep now for free! <ArrowRight className="ml-2 h-4 w-4" /></>
+            ) : (
+              <>Begin interview <ArrowRight className="ml-2 h-4 w-4" /></>
+            )}
           </Button>
         </CardContent>
       </Card>
@@ -248,15 +276,52 @@ export function InterviewPrepTab({
     );
   }
 
+  if (phase === "trial-upsell") {
+    return (
+      <Card className="border-primary/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" /> Continue with Resuvibe Premium
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Nice work — you've completed the free preview of Interview Prep. To
+            continue with the rest of your tailored interview (plus unlimited
+            practice across every application), sign up for Resuvibe Premium.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => navigate("/premium")}>
+              <Sparkles className="mr-2 h-4 w-4" /> Sign up for Resuvibe Premium
+            </Button>
+            <Button variant="outline" onClick={() => setPhase("interview")}>
+              Back
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // phase === "interview"
   if (!currentQuestion) return null;
   const answeredQuestionIds = new Set(state.attempts.map((a) => a.questionId));
+  const currentQuestionAttempts = state.attempts.filter(
+    (a) => a.questionId === currentQuestion.id,
+  );
+  const trialAttemptsExhausted =
+    isTrial && state.currentIndex === 0 && currentQuestionAttempts.length >= TRIAL_MAX_ATTEMPTS;
 
   return (
     <div className="space-y-4">
       <div className="space-y-1">
         <div className="text-xs text-muted-foreground">
           <span>Question {state.currentIndex + 1} of {state.questions.length}</span>
+          {isTrial && state.currentIndex === 0 && (
+            <span className="ml-2 text-primary">
+              · Free preview · Attempt {Math.min(currentQuestionAttempts.length, TRIAL_MAX_ATTEMPTS)}/{TRIAL_MAX_ATTEMPTS}
+            </span>
+          )}
         </div>
         <SubwayProgress
           total={state.questions.length}
@@ -284,15 +349,25 @@ export function InterviewPrepTab({
 
           {state.awaitingChoice ? (
             <ReviewPanel
-              questionAttempts={state.attempts.filter(
-                (a) => a.questionId === currentQuestion.id,
-              )}
+              questionAttempts={currentQuestionAttempts}
               fallbackFeedback={state.currentFeedback}
+              hideRetry={trialAttemptsExhausted}
+              retryHint={
+                trialAttemptsExhausted
+                  ? `You've used all ${TRIAL_MAX_ATTEMPTS} free attempts for this question.`
+                  : undefined
+              }
               onRetry={(prefill) => {
                 setAnswer(prefill);
                 dispatch({ type: "RETRY_QUESTION" });
               }}
-              onNext={() => dispatch({ type: "NEXT_QUESTION" })}
+              onNext={() => {
+                if (isTrial && state.currentIndex === 0) {
+                  setPhase("trial-upsell");
+                  return;
+                }
+                dispatch({ type: "NEXT_QUESTION" });
+              }}
             />
           ) : (
             <>
@@ -324,11 +399,15 @@ export function InterviewPrepTab({
 function ReviewPanel({
   questionAttempts,
   fallbackFeedback,
+  hideRetry = false,
+  retryHint,
   onRetry,
   onNext,
 }: {
   questionAttempts: TurnAttempt[];
   fallbackFeedback: import("@/lib/interviewPrep/types").Feedback | null;
+  hideRetry?: boolean;
+  retryHint?: string;
   onRetry: (prefill: string) => void;
   onNext: () => void;
 }) {
@@ -373,13 +452,18 @@ function ReviewPanel({
         </div>
       )}
       {viewingFeedback && <FeedbackView feedback={viewingFeedback} />}
+      {retryHint && (
+        <p className="text-xs text-muted-foreground">{retryHint}</p>
+      )}
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          onClick={() => onRetry(latest.answerText)}
-        >
-          <RotateCcw className="mr-2 h-4 w-4" /> Try Responding Again
-        </Button>
+        {!hideRetry && (
+          <Button
+            variant="outline"
+            onClick={() => onRetry(latest.answerText)}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" /> Try Responding Again
+          </Button>
+        )}
         <Button onClick={onNext}>
           Next Question <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
