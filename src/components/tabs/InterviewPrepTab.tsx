@@ -21,7 +21,7 @@ import {
   type InterviewPlan,
 } from "@/lib/api/interviewPrep";
 
-type Phase = "loading" | "paywall" | "plan" | "interview" | "complete" | "error";
+type Phase = "loading" | "paywall" | "plan" | "interview" | "trial-upsell" | "complete" | "error";
 
 /**
  * Interview Prep tab. Reached only when the tab is unlocked (a resume exists —
