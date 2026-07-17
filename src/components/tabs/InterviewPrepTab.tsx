@@ -399,11 +399,15 @@ export function InterviewPrepTab({
 function ReviewPanel({
   questionAttempts,
   fallbackFeedback,
+  hideRetry = false,
+  retryHint,
   onRetry,
   onNext,
 }: {
   questionAttempts: TurnAttempt[];
   fallbackFeedback: import("@/lib/interviewPrep/types").Feedback | null;
+  hideRetry?: boolean;
+  retryHint?: string;
   onRetry: (prefill: string) => void;
   onNext: () => void;
 }) {
