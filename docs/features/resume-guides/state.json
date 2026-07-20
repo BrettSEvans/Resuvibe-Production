@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "track": {
+    "type": "feature",
+    "name": "Resume Guides & FAQ",
+    "slug": "resume-guides",
+    "productType": "GUI web app",
+    "scopeMode": "conform"
+  },
+  "currentStage": "qc",
+  "stages": {
+    "kickoff": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": null,
+      "artifactHash": null
+    },
+    "pm": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": null,
+      "artifactHash": null
+    },
+    "ux": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": null,
+      "artifactHash": null
+    },
+    "ui": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": null,
+      "artifactHash": null
+    },
+    "architect": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "/Users/brettevanssf/Code/Saasless/Resuvibe-Production/docs/features/resume-guides/04-feature-architecture.md",
+      "artifactHash": null
+    },
+    "engineer": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "/Users/brettevanssf/Code/Saasless/Resuvibe-Production/docs/features/resume-guides/05-implementation.md",
+      "artifactHash": null
+    },
+    "qa": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "/Users/brettevanssf/Code/Saasless/Resuvibe-Production/docs/features/resume-guides/qa-report.md",
+      "artifactHash": null
+    },
+    "qc": {
+      "status": "approved-complete",
+      "revisions": 0,
+      "criticPasses": 0,
+      "checkpoint": null,
+      "artifactPath": "/Users/brettevanssf/Code/Saasless/Resuvibe-Production/docs/features/resume-guides/qc-report.md",
+      "artifactHash": null
+    }
+  },
+  "pendingFeedback": null,
+  "backlog": [],
+  "beastMode": null,
+  "updatedAt": "2026-07-20T21:37:34.173Z"
+}

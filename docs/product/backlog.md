@@ -1,5 +1,15 @@
 # Product Backlog
 
+## pSEO Resume Guides + FAQ (deferred from 02-ux-workflow.md, 2026-07-20)
+
+- [ ] Decide whether the `/resume-guides` directory needs pagination at 105
+      roles, or whether category grouping + search is sufficient on its own
+- [ ] Validate source-file data integrity (missing/malformed frontmatter in
+      `SinglePages/*.md`) at build time — not handled as a runtime UX state
+- [ ] Confirm the exact mechanism for passing "role" context into the sign-up
+      flow (query param vs. route state vs. session storage) — left to
+      Architect stage
+
 ## Agent-C System Improvements
 
 ### Auto-detect shipped status (Bug fix)

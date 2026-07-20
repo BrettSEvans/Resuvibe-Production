@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Engineer Resume Guide | ResuVibe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: hsl(36, 90%, 50%);
+            --accent: hsl(234, 45%, 52%);
+            --bg-light: hsl(40, 25%, 97%);
+            --fg-dark: hsl(0, 0%, 20%);
+            --border: hsl(0, 0%, 85%);
+            --text-secondary: hsl(0, 0%, 50%);
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--fg-dark);
+            line-height: 1.7;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            color: var(--fg-dark);
+            line-height: 1.2;
+        }
+
+        .meta {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-number {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 1.125rem;
+            color: var(--primary);
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+
+        .section h2 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 1.75rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: var(--fg-dark);
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            color: var(--fg-dark);
+        }
+
+        .section ul {
+            margin: 1.5rem 0 1.5rem 2rem;
+        }
+
+        .section li {
+            margin-bottom: 0.75rem;
+        }
+
+        .section strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 3rem 0;
+        }
+
+        /* FAQ Accordion */
+        .faq-section {
+            margin-top: 4rem;
+        }
+
+        .faq-section h2 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 1.75rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            color: var(--fg-dark);
+        }
+
+        .accordion {
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .accordion-item:last-child {
+            border-bottom: none;
+        }
+
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 1.25rem;
+            background: white;
+            border: none;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            text-align: left;
+            color: var(--fg-dark);
+            font-weight: 500;
+            transition: background-color 150ms ease;
+        }
+
+        .accordion-header:hover {
+            background-color: hsl(40, 25%, 99%);
+        }
+
+        .accordion-header.open {
+            background-color: hsl(40, 25%, 99%);
+        }
+
+        .accordion-chevron {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-left: 1rem;
+            transition: transform 200ms ease;
+        }
+
+        .accordion-header.open .accordion-chevron {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 0 1.25rem 1.25rem 1.25rem;
+            background: white;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .accordion-content.visible {
+            display: block;
+        }
+
+        .accordion-content p {
+            margin-bottom: 1rem;
+        }
+
+        /* CTA Button */
+        .cta-section {
+            margin-top: 4rem;
+            padding: 2.5rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            text-align: center;
+        }
+
+        .cta-text {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--fg-dark);
+            font-weight: 500;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--primary);
+            color: var(--fg-dark);
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 200ms ease;
+        }
+
+        .cta-button:hover {
+            background-color: hsl(36, 85%, 45%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 176, 59, 0.2);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .section h2 {
+                font-size: 1.375rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem;
+            }
+
+            .cta-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">ResuVibe</div>
+        </div>
+    </header>
+
+    <main>
+        <h1>How to Tailor Your Resume for a Software Engineer Position</h1>
+        <div class="meta">Get ATS-optimized resume tips, interview prep, and cover letter strategies for Software Engineer roles.</div>
+
+        <!-- Section 1 -->
+        <section class="section">
+            <div class="section-number">1. Top ATS Keywords and Skills</div>
+            <h2>ATS Keywords You Need to Include</h2>
+            <p>When tailoring your resume for Software Engineer roles, ensure these exact skills and terms are naturally integrated into your experience and core competencies sections:</p>
+            <ul>
+                <li><strong>Python</strong> — Critical for passing automated parser screening</li>
+                <li><strong>Java</strong> — Widely used in enterprise and backend systems</li>
+                <li><strong>Git</strong> — Version control is fundamental to modern development</li>
+                <li><strong>System Design</strong> — Senior roles expect this expertise</li>
+                <li><strong>REST APIs</strong> — Core skill for backend and full-stack engineers</li>
+                <li><strong>Agile</strong> — Standard in most engineering teams</li>
+            </ul>
+            <p>The key: ATS systems scan for exact keyword matches. If the job description lists "Python," use the word "Python," not just "general programming."</p>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Section 2 -->
+        <section class="section">
+            <div class="section-number">2. Optimizing Your Resume Bullets</div>
+            <h2>From Passive to Impact-Driven</h2>
+            <p>Weak bullets like "Responsible for software development tasks" tell hiring managers nothing. Strong bullets show scale, impact, and measurable outcomes.</p>
+            <p><strong>Before:</strong> Completed tasks related to software engineer responsibilities.</p>
+            <p><strong>After:</strong> Architected and deployed a microservices platform (Python, Kubernetes) serving 5M+ daily requests, reducing server latency by 40% and cutting infrastructure costs by $120K annually.</p>
+            <p>The difference: numbers, technologies, and business impact. Hiring managers spend 6-7 seconds scanning each bullet. Make yours count.</p>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Section 3 -->
+        <section class="section">
+            <div class="section-number">3. Designing a Tailored Cover Letter</div>
+            <h2>The Three-Paragraph Formula</h2>
+            <p>A strong cover letter mirrors your resume to the specific job description:</p>
+            <ul>
+                <li><strong>The Hook:</strong> Open with why you're excited about this company (reference their recent product, mission, or news)</li>
+                <li><strong>The Proof:</strong> Align 2–3 core achievements with the top requirements from the job posting</li>
+                <li><strong>The CTA:</strong> Close with enthusiasm and a call to discuss your fit in an interview</li>
+            </ul>
+            <p>Key: use their language. If the posting emphasizes "system design" and "scalability," show those in your proof section.</p>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Section 4 -->
+        <section class="section">
+            <div class="section-number">4. Interview Prep: STAR Method Practice</div>
+            <h2>Practice with Real Scenarios</h2>
+            <p>Behavioral interviews follow a pattern. Use the STAR method (Situation, Task, Action, Result) to structure your answers:</p>
+            <ul>
+                <li><strong>Situation:</strong> Set the context—what was the challenge or opportunity?</li>
+                <li><strong>Task:</strong> What was your responsibility in this situation?</li>
+                <li><strong>Action:</strong> What specific steps did you take? (Include tools, methodologies, and technologies)</li>
+                <li><strong>Result:</strong> What was the measurable outcome? (Metrics, impact, lessons learned)</li>
+            </ul>
+            <p>This structure works for any behavioral question and helps interviewers understand your thinking and impact.</p>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Section 5 -->
+        <section class="section">
+            <div class="section-number">5. Automate Your Job Applications</div>
+            <h2>Why ResuVibe Saves You Hours</h2>
+            <p>Tailoring your application assets shouldn't take hours of manual editing. With ResuVibe, you can:</p>
+            <ul>
+                <li>Build your baseline resume once, tailored to any job description in seconds</li>
+                <li>Generate role-specific cover letters that highlight your relevant experience</li>
+                <li>Run a keyword gap analysis to see which ATS keywords you're missing</li>
+                <li>Practice interview questions and get feedback on your STAR method structure</li>
+            </ul>
+            <p>The result: 10 minutes per application instead of 2 hours, with more targeted, higher-quality submissions.</p>
+        </section>
+
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Q1: Why are Python, Java, and Git critical for my Software Engineer resume?</span>
+                        <span class="accordion-chevron">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p><strong>Short answer:</strong> Hiring managers and ATS systems screen resumes first by skill match. If keywords aren't on your resume — even if you have the experience — your application gets filtered out.</p>
+                        <p>Studies show that 40–70% of qualified resumes are rejected by ATS systems before recruiters see them, simply because keywords weren't present or clearly stated. Mirror the job description's exact language in your skills section, professional summary, and bullet points.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Q2: How do I know if my resume is actually ATS-optimized?</span>
+                        <span class="accordion-chevron">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>You can audit your resume against the job description by comparing the skills listed in "Required Qualifications" with what appears on your resume. Look for exact matches, not just synonyms.</p>
+                        <p>Also check your formatting: ATS systems struggle with headers, sidebars, graphics, and unusual fonts. Stick to a clean, single-column layout with standard fonts.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Q3: What's the actual difference between passive and quantified bullets?</span>
+                        <span class="accordion-chevron">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>A passive bullet tells hiring managers almost nothing. A quantified bullet shows scale, impact, and business outcomes.</p>
+                        <p>Numbers stick in people's minds. A hiring manager spends 6–7 seconds on the first pass. A vague bullet gets skipped. A strong, quantified bullet gets read and remembered, becoming the jumping-off point for interview questions.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Q4: How long will it take me to be interview-ready?</span>
+                        <span class="accordion-chevron">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p><strong>Honest timeline:</strong></p>
+                        <ul style="margin: 1rem 0 1rem 2rem;">
+                            <li><strong>Resume:</strong> 30–60 minutes to decide what accomplishments to highlight and refine your bullets</li>
+                            <li><strong>Cover letters:</strong> 10–15 minutes per application once your baseline is done</li>
+                            <li><strong>Interview prep:</strong> 1–2 hours of practice, split across a few days using the STAR method</li>
+                        </ul>
+                        <p>Total: 2–4 hours over 1–2 weeks if you're disciplined. "Interview-ready" means walking in with a strong resume, a compelling narrative, and a structured way to answer behavioral questions.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Q5: Can I use the same resume for different Software Engineer roles?</span>
+                        <span class="accordion-chevron">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>Yes, as long as you tailor it for each role. Every good job seeker tailors their resume and cover letter to each application. Hiring managers expect this.</p>
+                        <p>The key: tailor genuinely, not just syntactically. A senior architect resume should look different from a junior developer resume because the seniority level is different. Use ResuVibe to efficiently tailor the same base material to different opportunities.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Q6: How is ResuVibe's interview prep different from Glassdoor or ChatGPT?</span>
+                        <span class="accordion-chevron">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p><strong>Glassdoor</strong> gives past interview questions, but doesn't help you practice or improve.</p>
+                        <p><strong>ChatGPT</strong> can generate questions and feedback, but it's generic and doesn't know your resume or the role-specific context.</p>
+                        <p><strong>ResuVibe</strong> tailors questions to Software Engineer roles based on your actual resume, provides feedback on your STAR method structure, and tracks improvement over time. You're learning a transferable pattern, not memorizing answers.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Q7: What makes your approach different from resume templates?</span>
+                        <span class="accordion-chevron">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p>Templates are generic. ResuVibe tailors your resume to the specific job posting, pulling relevant accomplishments from your baseline resume and emphasizing skills the hiring manager cares about.</p>
+                        <p>You're not starting from scratch for every application. You're efficiently adapting your real experience to match what each company is looking for. The result feels authentic because it <em>is</em> — it's built from your actual achievements.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-section">
+            <div class="cta-text">Ready to land your Software Engineer position?</div>
+            <button class="cta-button">Start your free trial with ResuVibe</button>
+        </div>
+    </main>
+
+    <script>
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const isOpen = button.classList.contains('open');
+
+            // Close all other accordion items
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                if (header !== button) {
+                    header.classList.remove('open');
+                    header.nextElementSibling.classList.remove('visible');
+                }
+            });
+
+            // Toggle current item
+            if (isOpen) {
+                button.classList.remove('open');
+                content.classList.remove('visible');
+            } else {
+                button.classList.add('open');
+                content.classList.add('visible');
+            }
+        }
+    </script>
+</body>
+</html>

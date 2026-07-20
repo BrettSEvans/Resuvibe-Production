@@ -18,6 +18,7 @@ import StoryBoard from "./pages/StoryBoard";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import LandingPage from "./pages/LandingPage";
+import { ResumeGuidesDirectory, ResumeGuidesDetail } from "./pages/ResumeGuides";
 import ResetPassword from "./pages/ResetPassword";
 import Admin from "./pages/Admin";
 import About from "./pages/About";
@@ -86,6 +87,8 @@ function AuthenticatedApp() {
         <Route path="/privacy-request" element={<PrivacyRequest />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
+        <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
         {/* Any other path sends unauthenticated visitors to the landing page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -113,6 +116,8 @@ function AuthenticatedApp() {
           <Route path="/privacy-request" element={<PrivacyRequest />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
+          <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
           <Route path="*" element={<Navigate to="/build-my-resume" replace />} />
         </Routes>
         <CookieConsent />
@@ -159,6 +164,8 @@ function AuthenticatedApp() {
         <Route path="/privacy-request" element={<PrivacyRequest />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
+        <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
 
