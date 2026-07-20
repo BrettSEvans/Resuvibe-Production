@@ -60,7 +60,7 @@ export function useDashboardEditor({
       let accumulated = "";
       await streamDashboardGeneration({
         jobDescription,
-        branding: app?.branding,
+        branding: (app?.branding as unknown as import("@/types/models").CompanyBranding) || undefined,
         companyName,
         jobTitle,
         competitors: (app?.competitors as unknown as string[]) || [],

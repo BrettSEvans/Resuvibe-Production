@@ -30,6 +30,7 @@ import Onboarding from "./pages/Onboarding";
 import FirstTimeJobSeeker from "./pages/FirstTimeJobSeeker";
 import BuildMyCoverLetter from "./pages/BuildMyCoverLetter";
 import NotFound from "./pages/NotFound";
+import Premium from "./pages/Premium";
 import BackgroundJobsBanner from "./components/BackgroundJobsBanner";
 import AppHeader from "./components/AppHeader";
 import AiChat from "./components/AiChat";
@@ -89,6 +90,7 @@ function AuthenticatedApp() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
         <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
+        <Route path="/premium" element={<Premium />} />
         {/* Any other path sends unauthenticated visitors to the landing page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -116,8 +118,12 @@ function AuthenticatedApp() {
           <Route path="/privacy-request" element={<PrivacyRequest />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
+<<<<<<< HEAD
           <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
           <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
+=======
+          <Route path="/premium" element={<Premium />} />
+>>>>>>> origin/main
           <Route path="*" element={<Navigate to="/build-my-resume" replace />} />
         </Routes>
         <CookieConsent />
@@ -164,8 +170,12 @@ function AuthenticatedApp() {
         <Route path="/privacy-request" element={<PrivacyRequest />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
+<<<<<<< HEAD
         <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
         <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
+=======
+        <Route path="/premium" element={<Premium />} />
+>>>>>>> origin/main
         <Route path="*" element={<NotFound />} />
       </Routes>
 

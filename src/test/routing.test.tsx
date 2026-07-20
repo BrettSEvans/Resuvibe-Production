@@ -310,11 +310,6 @@ describe("Routing: FirstTimeJobSeeker Page", () => {
       expect(jdAnalysisTabRoute).toContain("/jd-analysis");
     });
 
-    it("supports /applications/:id/materials tab", () => {
-      const materialsTabRoute = "/applications/123/materials";
-      expect(materialsTabRoute).toContain("/materials");
-    });
-
     it("supports /applications/:id/details tab", () => {
       const detailsTabRoute = "/applications/123/details";
       expect(detailsTabRoute).toContain("/details");

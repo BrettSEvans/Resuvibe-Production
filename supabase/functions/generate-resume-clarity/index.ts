@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     const guard = await requireUser(req, corsHeaders, { edgeFunction: "generate-resume-clarity", limitPerHour: 60 });
     if (guard instanceof Response) return guard;
 
-    const { jobDescription, resumeText, companyName, jobTitle, jdIntelligence } = await req.json();
+    const { jobDescription, resumeText, companyName, jobTitle, jdIntelligence, verbatimEducation } = await req.json();
 
     if (!jobDescription || jobDescription.trim().length < 50) {
       return new Response(
@@ -119,7 +119,12 @@ ${jobDescription.slice(0, 8000)}
 
 CANDIDATE'S CURRENT RESUME:
 ${resumeText.slice(0, 8000)}
-
+${verbatimEducation && verbatimEducation.trim().length > 0 ? `
+AUTHORITATIVE EDUCATION SECTION (reproduce EXACTLY, verbatim — do not add, remove, rephrase, or embellish any line):
+${verbatimEducation}
+` : `
+CANDIDATE HAS NO EDUCATION SECTION IN THEIR SOURCE RESUME. Do NOT include an Education section in the output. Do NOT invent any degree, school, or coursework.
+`}
 Generate the Human-First optimized resume HTML now. Return ONLY the HTML content, no markdown fences or explanations.`
         }
       ],
