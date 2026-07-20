@@ -118,12 +118,10 @@ function AuthenticatedApp() {
           <Route path="/privacy-request" element={<PrivacyRequest />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/contact" element={<Contact />} />
-<<<<<<< HEAD
           <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
           <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
-=======
           <Route path="/premium" element={<Premium />} />
->>>>>>> origin/main
+
           <Route path="*" element={<Navigate to="/build-my-resume" replace />} />
         </Routes>
         <CookieConsent />
@@ -170,12 +168,10 @@ function AuthenticatedApp() {
         <Route path="/privacy-request" element={<PrivacyRequest />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
-<<<<<<< HEAD
         <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
         <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
-=======
         <Route path="/premium" element={<Premium />} />
->>>>>>> origin/main
+
         <Route path="*" element={<NotFound />} />
       </Routes>
 
