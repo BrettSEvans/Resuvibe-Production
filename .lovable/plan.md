@@ -1,55 +1,50 @@
-## Plan: Add accessible names to icon-only buttons
+## Goal
 
-### Background
-The SEO/accessibility review flagged that several icon-only buttons in the app lack accessible names. These buttons are invisible to screen readers because they contain no text and no `aria-label`/`aria-labelledby`. Adding `aria-label` attributes will fix the issue without changing the visual UI.
+Add an MCP (Model Context Protocol) server to this app so AI assistants (ChatGPT, Claude, Cursor, etc.) can read the /FAQ content. Scope is limited to the public FAQ guides — nothing behind Google sign-in, no user data, no application/resume/cover-letter data.
 
-### Scope
-Fix all icon-only `<Button>` components in `src/components` and `src/pages` that contain only an icon and lack an accessible name. This includes buttons that rely on `title` (mouse tooltip only) — `title` is not a reliable accessible name for keyboard/screen-reader users.
+## Auth model
 
-### Work to do
+Public, no-login MCP server. The /FAQ content is already fully public (served from `public/guide-index.json`, no RLS, no personalization). No user identity is needed to answer FAQ questions.
 
-1. **Audit and catalog**
-   - Re-read the flagged files to confirm exact line numbers and icon purposes.
-   - Produce a final checklist of buttons to update (~35 instances across ~15 files).
+Because a public MCP server is callable by anyone on the internet, I'll confirm this choice with a one-question consent prompt before implementing (per Lovable's MCP authoring rules). Only the FAQ tools will be exposed — authenticated tables (applications, resumes, cover letters, interview data, entitlements, profiles, etc.) will not be reachable through MCP.
 
-2. **Add `aria-label` attributes**
-   - Add a descriptive `aria-label` to each icon-only button matching its action, e.g.:
-     - Close AI chat → `aria-label="Close AI assistant"`
-     - Send message → `aria-label="Send message"`
-     - Delete row → `aria-label="Delete"`
-     - Preview → `aria-label="Preview"`
-     - Rich-text toolbar buttons → `aria-label="Bold"`, `aria-label="Italic"`, etc.
-   - Where a button already has a `title`, keep the `title` and add `aria-label` with the same or clearer text.
-   - Ensure labels are concise and action-oriented.
+## What gets exposed
 
-3. **Special attention: `InlineHtmlEditor.tsx`**
-   - This file contains ~16 rich-text toolbar icon buttons; most currently have no accessible name.
-   - Add `aria-label` to every toolbar control (bold, italic, underline, lists, alignment, indent/outdent, link, unlink, undo, redo).
+Three read-only tools, all backed by the existing `public/guide-index.json`:
 
-4. **Verification**
-   - Run the TypeScript build (`bun run build` / `tsc --noEmit`) to ensure no type errors.
-   - Run the existing test suite (`bun test` / `vitest`) to catch regressions.
-   - Optionally run an accessibility lint/scan to confirm the icon-only button findings are resolved.
+1. `list_faq_guides` — returns the list of FAQ guides (slug, title, category, short description). No input.
+2. `get_faq_guide` — input: `slug`. Returns the full guide content (title, category, HTML/markdown body, canonical `/FAQ/<slug>` URL).
+3. `search_faq` — input: `query` (string). Case-insensitive substring search across title, description, category, and slug; returns matching guides with the same shape as `list_faq_guides`.
 
-### Files expected to change
-- `src/components/AiChat.tsx`
-- `src/components/BatchJobInput.tsx`
-- `src/components/CoverLetterRevisions.tsx`
-- `src/components/DashboardRevisions.tsx`
-- `src/components/GeneratedAssetRevisions.tsx`
-- `src/components/InlineHtmlEditor.tsx`
-- `src/components/ResumeDiffViewer.tsx`
-- `src/components/ResumeManager.tsx`
-- `src/components/ResumeRevisions.tsx`
-- `src/components/TutorialTour.tsx`
-- `src/components/stories/CopyPromptButton.tsx`
-- `src/components/stories/StoryDependencies.tsx`
-- `src/components/stories/StorySidebar.tsx`
-- `src/components/stories/StorySubTasks.tsx`
-- `src/components/tabs/JDAnalysisTab.tsx`
-- `src/pages/ApplicationDetail.tsx`
-- `src/pages/Applications.tsx`
-- `src/pages/Templates.tsx`
+Every tool is marked `readOnlyHint: true`, `openWorldHint: false`. No writes, no database access, no service-role key.
 
-### Outcome
-All icon-only buttons will have accessible names, resolving the "icon-only buttons lack accessible names" finding. No visible UI changes.
+## Files to add
+
+- `src/lib/mcp/tools/list-faq-guides.ts` — `defineTool` wrapping the guide index.
+- `src/lib/mcp/tools/get-faq-guide.ts` — `defineTool` returning one guide by slug.
+- `src/lib/mcp/tools/search-faq.ts` — `defineTool` running the substring filter.
+- `src/lib/mcp/faq-data.ts` — small helper that loads `public/guide-index.json` at build time (via `import ... assert { type: "json" }` or an inline copy) so the emitted Deno function has no filesystem/network dependency at runtime. Keeps `src/lib/mcp/index.ts` import-safe (no env reads, no I/O at module top level).
+- `src/lib/mcp/index.ts` — `defineMcp({ name: "resuvibe-faq-mcp", title: "ResuVibe FAQ", version: "0.1.0", instructions: "...", tools: [...] })`. No `auth` field (public server).
+
+## Files to edit
+
+- `vite.config.ts` — add `mcpPlugin()` from `@lovable.dev/mcp-js/stacks/supabase/vite` to the plugins array. The plugin generates `supabase/functions/mcp/index.ts` on build; that file must not be hand-edited.
+
+## Dependencies
+
+- Install `@lovable.dev/mcp-js` and confirm `zod` is present (it already is via existing edge functions).
+
+## Post-authoring steps
+
+- Run `app_mcp_server--extract_mcp_manifest` so Lovable's Agent integrations panel and the connectors list see the new server.
+- Deploy the generated edge function via `supabase--deploy_edge_functions` with `function_names: ["mcp"]`. Endpoint will be `https://<project-ref>.supabase.co/functions/v1/mcp`.
+
+## Explicitly out of scope
+
+- No access to `job_applications`, `resumes`, `cover_letters`, `interview_*`, `user_entitlements`, `profiles`, or storage buckets.
+- No OAuth / Supabase auth server changes (the app's Google SSO is untouched).
+- No changes to the /FAQ pages themselves — this only adds a read-only API surface over the same content.
+
+## Consent step before build
+
+Before writing any code, I'll ask one question confirming a Public (no-login) MCP server is what you want, given anyone on the internet will be able to call these three FAQ tools. Since the data is already published on your public /FAQ pages, this matches the current exposure level — but the confirmation is required.
