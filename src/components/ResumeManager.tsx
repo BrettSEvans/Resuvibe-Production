@@ -260,6 +260,7 @@ export default function ResumeManager({ userId, onResumeUploaded, onResumeTextEx
                     size="icon"
                     className="h-7 w-7"
                     title="Set as primary"
+                    aria-label="Set as primary resume"
                     disabled={setPrimary.isPending}
                     onClick={() => setPrimary.mutate(r.id)}
                   >
@@ -274,6 +275,7 @@ export default function ResumeManager({ userId, onResumeUploaded, onResumeTextEx
                   size="icon"
                   className="h-7 w-7 text-destructive/70 hover:text-destructive"
                   title="Delete"
+                  aria-label="Delete resume"
                   disabled={deleteResume.isPending}
                   onClick={() => deleteResume.mutate(r)}
                 >

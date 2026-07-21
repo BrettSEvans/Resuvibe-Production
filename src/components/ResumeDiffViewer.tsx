@@ -303,12 +303,12 @@ function FabricationReview({
               </div>
               <div className="flex gap-1 shrink-0">
                 {onAccept && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onAccept(f.change)} title="Accept">
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onAccept(f.change)} title="Accept" aria-label="Accept change">
                     <Check className="h-3.5 w-3.5 text-green-600" />
                   </Button>
                 )}
                 {onRevert && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onRevert(f.change)} title="Revert">
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onRevert(f.change)} title="Revert" aria-label="Revert change">
                     <X className="h-3.5 w-3.5 text-red-600" />
                   </Button>
                 )}
