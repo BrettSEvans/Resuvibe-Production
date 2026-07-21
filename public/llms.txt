@@ -1,0 +1,29 @@
+# ResuVibe
+
+> AI-powered resume, cover letter, and interview prep tools that turn your experience into tailored job application materials.
+
+ResuVibe helps job seekers build ATS-optimized resumes, craft role-specific cover letters, and practice behavioral interview answers grounded in their own work history.
+
+## Pages
+
+- [Home](/): Landing page for ResuVibe.
+- [About](/about): What ResuVibe does and who it's for.
+- [Pricing](/premium): ResuVibe Premium plans and features.
+- [Contact](/contact): Get in touch with the ResuVibe team.
+- [Privacy](/privacy): Privacy policy.
+- [Privacy Request](/privacy-request): Submit a privacy data request.
+- [Terms](/terms): Terms of service.
+
+## FAQ
+
+- [FAQ Directory](/FAQ): Browse all role-specific career FAQs.
+- [Software Engineer FAQ](/FAQ/software-engineer): Resume and interview guidance for software engineers.
+- [Data Analyst FAQ](/FAQ/data-analyst): Resume and interview guidance for data analysts.
+- [Product Manager FAQ](/FAQ/product-manager): Resume and interview guidance for product managers.
+- [Project Manager FAQ](/FAQ/project-manager): Resume and interview guidance for project managers.
+- [Marketing Manager FAQ](/FAQ/marketing-manager): Resume and interview guidance for marketing managers.
+- [Nurse Practitioner FAQ](/FAQ/nurse-practitioner): Resume and interview guidance for nurse practitioners.
+
+## Optional
+
+- [Sitemap](/sitemap.xml): XML sitemap for search engines.
