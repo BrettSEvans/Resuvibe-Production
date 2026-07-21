@@ -3,6 +3,9 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkHtml from "remark-html";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -66,6 +69,16 @@ function validateFrontmatter(frontmatter, filename) {
   }
 }
 
+// Convert markdown to HTML
+function markdownToHtml(markdown) {
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkHtml);
+
+  const result = processor.processSync(markdown);
+  return String(result);
+}
+
 // Extract sections from markdown body
 function extractSections(body) {
   const sections = [];
@@ -83,17 +96,20 @@ function extractSections(body) {
       if (currentSection) {
         sections.push({
           heading: currentSection,
-          content: currentContent.join("\n").trim(),
+          content: markdownToHtml(currentContent.join("\n").trim()),
         });
       }
-      currentSection = headerMatch[2].trim();
+      let heading = headerMatch[2].trim();
+      // Remove leading number and dot (e.g., "1. " or "10. ")
+      heading = heading.replace(/^\d+\.\s+/, '');
+      currentSection = heading;
       currentContent = [];
     } else if (currentSection && line.match(/^#{2,3}\s+FAQ/i)) {
       // Stop at FAQ section
       if (currentSection) {
         sections.push({
           heading: currentSection,
-          content: currentContent.join("\n").trim(),
+          content: markdownToHtml(currentContent.join("\n").trim()),
         });
       }
       break;
@@ -106,7 +122,7 @@ function extractSections(body) {
   if (currentSection) {
     sections.push({
       heading: currentSection,
-      content: currentContent.join("\n").trim(),
+      content: markdownToHtml(currentContent.join("\n").trim()),
     });
   }
 
@@ -128,11 +144,45 @@ function extractFaq(body) {
   while ((match = itemRegex.exec(faqContent)) !== null) {
     items.push({
       question: match[1].trim(),
-      answer: match[2].trim(),
+      answer: markdownToHtml(match[2].trim()),
     });
   }
 
   return items;
+}
+
+// Detect CTA focus based on section content sizes
+function detectCtaFocus(sections) {
+  const resumeFocusedHeadings = ['ats', 'keywords', 'resume', 'bullets', 'cover letter'];
+  const interviewFocusedHeadings = ['star', 'interview', 'behavioral'];
+
+  let resumeContentSize = 0;
+  let interviewContentSize = 0;
+
+  for (const section of sections) {
+    const headingLower = section.heading.toLowerCase();
+    const contentSize = section.content.length;
+
+    if (resumeFocusedHeadings.some(keyword => headingLower.includes(keyword))) {
+      resumeContentSize += contentSize;
+    } else if (interviewFocusedHeadings.some(keyword => headingLower.includes(keyword))) {
+      interviewContentSize += contentSize;
+    }
+  }
+
+  const totalContent = resumeContentSize + interviewContentSize;
+  if (totalContent === 0) {
+    return 'hybrid';
+  }
+
+  const resumeRatio = resumeContentSize / totalContent;
+  if (resumeRatio > 0.6) {
+    return 'resume';
+  } else if (resumeRatio < 0.4) {
+    return 'interview';
+  } else {
+    return 'hybrid';
+  }
 }
 
 // Parse a guide markdown file
@@ -142,6 +192,7 @@ function parseGuide(content, filename) {
 
   const sections = extractSections(body);
   const faq = extractFaq(body);
+  const ctaFocus = detectCtaFocus(sections);
 
   return {
     slug: frontmatter.slug,
@@ -149,6 +200,7 @@ function parseGuide(content, filename) {
     category: frontmatter.category,
     sections,
     faq: faq.length > 0 ? faq : undefined,
+    ctaFocus,
     metadata: {
       buildDate: new Date().toISOString(),
       contentLength: content.length,

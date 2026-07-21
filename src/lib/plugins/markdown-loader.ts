@@ -19,6 +19,7 @@ export interface Guide {
   category: string;
   sections: GuideSection[];
   faq?: FAQItem[];
+  ctaFocus: 'resume' | 'interview' | 'hybrid';
   metadata: {
     buildDate: string;
     contentLength: number;
@@ -92,17 +93,65 @@ export function parseGuideMarkdown(markdown: string): Guide {
   // Extract sections and FAQ
   const { sections, faq } = extractSectionsAndFaq(htmlContent);
 
+  // Determine CTA focus based on content
+  const ctaFocus = detectCtaFocus(sections);
+
   return {
     slug,
     title,
     category,
     sections,
     faq,
+    ctaFocus,
     metadata: {
       buildDate: new Date().toISOString(),
       contentLength: htmlContent.length,
     },
   };
+}
+
+/**
+ * Detect CTA focus (resume vs. interview) based on section content sizes
+ * Resume-focused sections: ATS Keywords, Resume Bullets, Cover Letter
+ * Interview-focused sections: STAR Interview Prep
+ */
+function detectCtaFocus(sections: GuideSection[]): 'resume' | 'interview' | 'hybrid' {
+  const resumeFocusedHeadings = ['ats', 'keywords', 'resume', 'bullets', 'cover letter'];
+  const interviewFocusedHeadings = ['star', 'interview', 'behavioral'];
+
+  let resumeContentSize = 0;
+  let interviewContentSize = 0;
+
+  for (const section of sections) {
+    const headingLower = section.heading.toLowerCase();
+    const contentSize = section.content.length;
+
+    // Check if this is a resume-focused section
+    if (resumeFocusedHeadings.some(keyword => headingLower.includes(keyword))) {
+      resumeContentSize += contentSize;
+    }
+    // Check if this is an interview-focused section
+    else if (interviewFocusedHeadings.some(keyword => headingLower.includes(keyword))) {
+      interviewContentSize += contentSize;
+    }
+  }
+
+  // Calculate ratio of resume content
+  const totalContent = resumeContentSize + interviewContentSize;
+
+  if (totalContent === 0) {
+    return 'hybrid'; // Default to hybrid if no content detected
+  }
+
+  const resumeRatio = resumeContentSize / totalContent;
+
+  if (resumeRatio > 0.6) {
+    return 'resume';
+  } else if (resumeRatio < 0.4) {
+    return 'interview';
+  } else {
+    return 'hybrid';
+  }
 }
 
 /**

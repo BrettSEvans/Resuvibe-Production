@@ -46,6 +46,35 @@ export const GuidePage = ({ guide }: GuidePageProps) => {
 
   const sectionNumber = (index: number) => index + 1;
 
+  // Extract role name from title (e.g., "Software Engineer" from "How to Write an ATS-Optimized Software Engineer Resume | ResuVibe")
+  const extractRoleName = (title: string): string => {
+    // Match pattern: extract text before "Resume |", then clean up
+    const match = title.match(/(.+?)\s+Resume\s*\|/);
+    if (!match) return title;
+
+    let roleName = match[1].trim();
+    // Remove "How to Write an " prefix
+    roleName = roleName.replace(/^How to Write an\s+/, '').trim();
+    // Remove "ATS-Optimized " prefix
+    roleName = roleName.replace(/^ATS-Optimized\s+/, '').trim();
+
+    return roleName;
+  };
+
+  const roleName = useMemo(() => extractRoleName(guide.title), [guide.title]);
+
+  // Generate CTA heading - simpler and more concise
+  const ctaHeading = useMemo(() => {
+    switch (guide.ctaFocus) {
+      case 'resume':
+        return `Let's get started on your ${roleName} resume`;
+      case 'interview':
+        return `Let's get ready to interview for ${roleName}`;
+      default: // 'hybrid'
+        return `Let's get started on your ${roleName} resume`;
+    }
+  }, [guide.ctaFocus, roleName]);
+
   return (
     <PublicLayout>
       <div className="max-w-4xl mx-auto px-4 py-12">
@@ -106,7 +135,7 @@ export const GuidePage = ({ guide }: GuidePageProps) => {
         {/* CTA Section */}
         <section className="bg-muted/20 p-8 rounded-lg border border-border text-center">
           <h2 className="text-2xl font-serif mb-4">
-            Ready to land your {guide.category} position?
+            {ctaHeading}
           </h2>
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
             Use ResuVibe to tailor your resume, generate cover letters, and
@@ -117,7 +146,7 @@ export const GuidePage = ({ guide }: GuidePageProps) => {
               size="lg"
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              Start your free trial with ResuVibe
+              Start your free Resuvibe Trial
             </Button>
           </Link>
         </section>
