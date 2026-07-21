@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "resuvibe-faq-mcp",
+      "version": "0.1.0",
+      "title": "ResuVibe FAQ"
+    },
+    "tools": [
+      {
+        "name": "list_faq_guides",
+        "title": "List FAQ guides",
+        "description": "List every public FAQ / resume guide published on ResuVibe. Returns slug, title, category, short description, and canonical URL for each guide.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_faq_guide",
+        "title": "Get FAQ guide",
+        "description": "Fetch the full contents of one public ResuVibe FAQ / resume guide by its slug. Returns title, category, canonical URL, and all section headings and HTML bodies.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Guide slug, e.g. 'account-executive'. Use list_faq_guides to discover available slugs."
+            }
+          },
+          "required": [
+            "slug"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_faq",
+        "title": "Search FAQ guides",
+        "description": "Case-insensitive substring search across ResuVibe's public FAQ / resume guides. Matches on title, slug, category, and description. Returns summaries; call get_faq_guide for full contents.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Free-text search query."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
