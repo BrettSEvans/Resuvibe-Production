@@ -63,6 +63,7 @@ export default function AppHeader({ onAiChatToggle, aiChatOpen }: AppHeaderProps
 
   const links = [
     { to: "/applications", label: "Applications", icon: null, match: (p: string) => p === "/applications" || p.startsWith("/applications/"), tourId: "applications" },
+    { to: "/resume-guides", label: "Resume Guides", icon: null, match: (p: string) => p.startsWith("/resume-guides"), tourId: undefined },
     ...(isAdmin ? [
       { to: "/admin", label: "Admin", icon: <Shield className="h-3.5 w-3.5" />, match: (p: string) => p === "/admin", tourId: undefined },
     ] : []),

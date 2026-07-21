@@ -63,6 +63,7 @@ describe("SSG Generator", () => {
               answer: "<p>PDF or docx are best...</p>",
             },
           ],
+          ctaFocus: 'resume' as const,
           metadata: {
             buildDate: new Date().toISOString(),
             contentLength: 500,
@@ -108,6 +109,7 @@ describe("SSG Generator", () => {
               answer: "<p>Focus on outcomes and learning...</p>",
             },
           ],
+          ctaFocus: 'resume' as const,
           metadata: {
             buildDate: new Date().toISOString(),
             contentLength: 400,
@@ -161,6 +163,7 @@ describe("SSG Generator", () => {
         category: "Technology",
         sections: [],
         faq: undefined,
+        ctaFocus: 'resume' as const,
         metadata: {
           buildDate: new Date().toISOString(),
           contentLength: 0,
@@ -192,6 +195,7 @@ describe("SSG Generator", () => {
             answer: "A2",
           },
         ],
+        ctaFocus: 'resume' as const,
         metadata: {
           buildDate: new Date().toISOString(),
           contentLength: 0,
@@ -297,6 +301,7 @@ describe("SSG Generator", () => {
             answer: "A7",
           },
         ],
+        ctaFocus: 'resume' as const,
         metadata: {
           buildDate: new Date().toISOString(),
           contentLength: 0,
