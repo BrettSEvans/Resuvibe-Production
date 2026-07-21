@@ -47,7 +47,7 @@ export function StorySubTasks({ parentStory, onSubTaskClick }: StorySubTasksProp
       <div className="flex gap-2 border-t border-border pt-3">
         <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Add sub-task…" className="text-xs h-8"
           onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }} />
-        <Button size="sm" className="h-8" onClick={handleAdd} disabled={!newTitle.trim()}>
+        <Button size="sm" className="h-8" onClick={handleAdd} disabled={!newTitle.trim()} aria-label="Add sub-task">
           <Plus className="w-3.5 h-3.5" />
         </Button>
       </div>

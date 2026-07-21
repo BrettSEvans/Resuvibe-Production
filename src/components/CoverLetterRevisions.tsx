@@ -103,6 +103,7 @@ export default function CoverLetterRevisions({
                     className="h-7 w-7"
                     onClick={() => handlePreview(rev)}
                     title={previewingId === rev.id ? "Back to current" : "Preview this version"}
+                    aria-label={previewingId === rev.id ? "Back to current cover letter" : "Preview this cover letter version"}
                   >
                     <Eye className="h-3.5 w-3.5" />
                   </Button>
@@ -112,6 +113,7 @@ export default function CoverLetterRevisions({
                     className="h-7 w-7"
                     onClick={() => handleDownload(rev.cover_letter, rev.label, rev.revision_number)}
                     title="Download cover letter"
+                    aria-label="Download cover letter"
                   >
                     <Download className="h-3.5 w-3.5" />
                   </Button>

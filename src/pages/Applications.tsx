@@ -242,7 +242,7 @@ const Applications = () => {
             <Button variant="outline" size="sm" onClick={() => navigate("/profile")}>
               Go to Profile
             </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setBannerDismissed(true)}>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setBannerDismissed(true)} aria-label="Dismiss profile banner">
               <X className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -332,7 +332,7 @@ const Applications = () => {
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button size="sm" variant="ghost" onClick={(e) => handleRetry(app.id, e)} title="Retry generation">
+                                  <Button size="sm" variant="ghost" onClick={(e) => handleRetry(app.id, e)} title="Retry generation" aria-label="Retry generation">
                                     <RefreshCw className="h-4 w-4 text-primary" />
                                   </Button>
                                 </TooltipTrigger>
@@ -343,7 +343,7 @@ const Applications = () => {
                             </TooltipProvider>
                           )}
                           {app.cover_letter && (
-                            <Button size="sm" variant="ghost" onClick={(e) => handleCopyCoverLetter(app.cover_letter, e)} title="Copy cover letter">
+                            <Button size="sm" variant="ghost" onClick={(e) => handleCopyCoverLetter(app.cover_letter, e)} title="Copy cover letter" aria-label="Copy cover letter">
                               <FileText className="h-4 w-4" />
                             </Button>
                           )}
@@ -357,10 +357,11 @@ const Applications = () => {
                                   setPreviewId(previewId === app.id ? null : app.id);
                                 }}
                                 title="Preview"
+                                aria-label="Preview dashboard"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="ghost" onClick={(e) => handleCopyHtml(app.dashboard_html, e)} title="Copy HTML">
+                              <Button size="sm" variant="ghost" onClick={(e) => handleCopyHtml(app.dashboard_html, e)} title="Copy HTML" aria-label="Copy dashboard HTML">
                                 <Copy className="h-4 w-4" />
                               </Button>
                             </>
@@ -373,6 +374,7 @@ const Applications = () => {
                               setDeleteTarget({ id: app.id, name: app.company_name || "this application" });
                             }}
                             title="Delete"
+                            aria-label="Delete application"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>

@@ -213,7 +213,7 @@ export function TutorialTour({ active, onComplete }: TutorialTourProps) {
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground">{currentStep?.title}</h3>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleSkip}>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleSkip} aria-label="Skip tour">
               <X className="h-3.5 w-3.5" />
             </Button>
           </div>

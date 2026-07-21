@@ -214,20 +214,20 @@ export default function InlineHtmlEditor({
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Basic formatting */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Bold" onClick={() => execCommand("bold")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Bold" aria-label="Bold" onClick={() => execCommand("bold")}>
           <Bold className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Italic" onClick={() => execCommand("italic")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Italic" aria-label="Italic" onClick={() => execCommand("italic")}>
           <Italic className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Underline" onClick={() => execCommand("underline")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Underline" aria-label="Underline" onClick={() => execCommand("underline")}>
           <Underline className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Text color */}
-        <label className="relative h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent cursor-pointer" title="Text Color">
+        <label className="relative h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent cursor-pointer" title="Text Color" aria-label="Text color">
           <Palette className="h-4 w-4" />
           <input
             type="color"
@@ -238,7 +238,7 @@ export default function InlineHtmlEditor({
         </label>
 
         {/* Highlight color */}
-        <label className="relative h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent cursor-pointer" title="Highlight Color">
+        <label className="relative h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent cursor-pointer" title="Highlight Color" aria-label="Highlight color">
           <Highlighter className="h-4 w-4" />
           <input
             type="color"
@@ -251,36 +251,36 @@ export default function InlineHtmlEditor({
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Lists */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Bullet List" onClick={() => execCommand("insertUnorderedList")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Bullet List" aria-label="Bullet list" onClick={() => execCommand("insertUnorderedList")}>
           <List className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Numbered List" onClick={() => execCommand("insertOrderedList")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Numbered List" aria-label="Numbered list" onClick={() => execCommand("insertOrderedList")}>
           <ListOrdered className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Alignment */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Left" onClick={() => execCommand("justifyLeft")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Left" aria-label="Align left" onClick={() => execCommand("justifyLeft")}>
           <AlignLeft className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Center" onClick={() => execCommand("justifyCenter")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Center" aria-label="Align center" onClick={() => execCommand("justifyCenter")}>
           <AlignCenter className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Right" onClick={() => execCommand("justifyRight")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Right" aria-label="Align right" onClick={() => execCommand("justifyRight")}>
           <AlignRight className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Justify" onClick={() => execCommand("justifyFull")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Justify" aria-label="Justify" onClick={() => execCommand("justifyFull")}>
           <AlignJustify className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Indent / Outdent */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Indent" onClick={() => execCommand("indent")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Indent" aria-label="Indent" onClick={() => execCommand("indent")}>
           <Indent className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Outdent" onClick={() => execCommand("outdent")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Outdent" aria-label="Outdent" onClick={() => execCommand("outdent")}>
           <Outdent className="h-4 w-4" />
         </Button>
 
@@ -329,7 +329,7 @@ export default function InlineHtmlEditor({
         {/* Insert link popover */}
         <Popover open={linkPopoverOpen} onOpenChange={setLinkPopoverOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Insert Link" onClick={handleOpenLinkPopover}>
+            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Insert Link" aria-label="Insert link" onClick={handleOpenLinkPopover}>
               <Link className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
@@ -367,17 +367,17 @@ export default function InlineHtmlEditor({
         </Popover>
 
         {/* Unlink */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Remove Link" onClick={handleUnlink}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Remove Link" aria-label="Remove link" onClick={handleUnlink}>
           <Unlink className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Undo / Redo */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Undo" onClick={() => execCommand("undo")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Undo" aria-label="Undo" onClick={() => execCommand("undo")}>
           <Undo className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Redo" onClick={() => execCommand("redo")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Redo" aria-label="Redo" onClick={() => execCommand("redo")}>
           <Redo className="h-4 w-4" />
         </Button>
 

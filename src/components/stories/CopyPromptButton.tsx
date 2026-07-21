@@ -76,7 +76,8 @@ export const CopyPromptButton = forwardRef<HTMLButtonElement, { prompt: string; 
             {copied ? "Copied!" : "Copy"}
           </Button>
           <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setPreviewOpen(true); }}
-            className="h-6 text-[11px] px-1.5 rounded-l-none border-l-0 border-primary/30 text-primary hover:bg-primary/10">
+            className="h-6 text-[11px] px-1.5 rounded-l-none border-l-0 border-primary/30 text-primary hover:bg-primary/10"
+            aria-label="Preview prompt">
             <Eye className="h-3 w-3" />
           </Button>
         </div>

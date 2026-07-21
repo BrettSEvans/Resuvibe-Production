@@ -64,7 +64,7 @@ export function StorySidebar({ sprints, storyCounts, doneCounts, selectedSprintI
             <SidebarGroupLabel>Sprints</SidebarGroupLabel>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowNewSprint(!showNewSprint)}>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowNewSprint(!showNewSprint)} aria-label="New sprint">
                   <Plus className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
@@ -117,7 +117,7 @@ export function StorySidebar({ sprints, storyCounts, doneCounts, selectedSprintI
                       </div>
                     </SidebarMenuButton>
                     <Tooltip><TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 ml-1" onClick={(e) => handleToggleStatus(sprint, e)}>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 ml-1" onClick={(e) => handleToggleStatus(sprint, e)} aria-label={sprint.status === "active" ? "Deactivate sprint" : "Activate sprint"}>
                         {sprint.status === "active" ? <Pause className="h-3.5 w-3.5 text-muted-foreground" /> : <Play className="h-3.5 w-3.5 text-muted-foreground" />}
                       </Button>
                     </TooltipTrigger><TooltipContent side="right">{sprint.status === "active" ? "Deactivate sprint" : "Activate sprint"}</TooltipContent></Tooltip>

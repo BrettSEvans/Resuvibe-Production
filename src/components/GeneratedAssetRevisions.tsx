@@ -122,6 +122,7 @@ export default function GeneratedAssetRevisions({
                         className="h-7 w-7"
                         onClick={() => handlePreview(rev)}
                         title={previewingId === rev.id ? "Back to current" : "Preview this version"}
+                        aria-label={previewingId === rev.id ? "Back to current version" : "Preview this version"}
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
@@ -131,6 +132,7 @@ export default function GeneratedAssetRevisions({
                         className="h-7 w-7"
                         onClick={() => handleDownload(rev.html, rev.revision_number)}
                         title="Download HTML"
+                        aria-label="Download HTML"
                       >
                         <Download className="h-3.5 w-3.5" />
                       </Button>

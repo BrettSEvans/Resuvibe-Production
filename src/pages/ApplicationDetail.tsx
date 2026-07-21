@@ -264,7 +264,7 @@ const ApplicationDetail = () => {
             <Button variant="outline" size="sm" disabled={addingToProfile} onClick={handleAddResumeToProfile}>
               {addingToProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : "Go to Profile"}
             </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setProfileBannerDismissed(true)}>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setProfileBannerDismissed(true)} aria-label="Dismiss profile banner">
               <X className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -291,11 +291,11 @@ const ApplicationDetail = () => {
           </div>
           <div className="flex items-center gap-2 shrink-0" data-tour="prev-next">
             <Button variant="outline" size="icon" className="h-8 w-8" disabled={!prevId}
-              onClick={() => prevId && navigate(`/applications/${prevId}`)} title="Previous application">
+              onClick={() => prevId && navigate(`/applications/${prevId}`)} title="Previous application" aria-label="Previous application">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="icon" className="h-8 w-8" disabled={!nextId}
-              onClick={() => nextId && navigate(`/applications/${nextId}`)} title="Next application">
+              onClick={() => nextId && navigate(`/applications/${nextId}`)} title="Next application" aria-label="Next application">
               <ChevronRightIcon className="h-4 w-4" />
             </Button>
             {app.status !== "complete" && (

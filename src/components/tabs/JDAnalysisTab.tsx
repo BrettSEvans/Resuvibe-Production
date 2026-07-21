@@ -86,6 +86,7 @@ export function JDAnalysisTab({
                     variant="outline"
                     disabled={saving}
                     onClick={() => saveField({ job_url: jobUrl })}
+                    aria-label="Save job URL"
                   >
                     <Check className="h-3.5 w-3.5" />
                   </Button>
@@ -105,6 +106,7 @@ export function JDAnalysisTab({
                     variant="outline"
                     disabled={saving}
                     onClick={() => saveField({ company_url: companyUrl })}
+                    aria-label="Save company URL"
                   >
                     <Check className="h-3.5 w-3.5" />
                   </Button>

@@ -58,7 +58,7 @@ export function StoryDependencies({ storyId }: StoryDependenciesProps) {
             <div key={link.id} className="flex items-center gap-2 rounded-md bg-secondary/50 border border-border px-2.5 py-1.5">
               <span className="text-[10px] text-muted-foreground uppercase font-medium w-20 shrink-0">{direction}</span>
               <span className="text-xs text-foreground flex-1 truncate">{otherTitle}</span>
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteLink.mutate(link.id)}>
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteLink.mutate(link.id)} aria-label="Remove dependency">
                 <Trash2 className="w-3 h-3" />
               </Button>
             </div>
