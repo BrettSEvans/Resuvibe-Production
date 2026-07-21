@@ -22,7 +22,7 @@ interface GuideIndexShape {
 }
 
 const GUIDE_INDEX_URL = "https://resuvibe.ai/guide-index.json";
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 let cache: { data: GuideIndexShape; fetchedAt: number } | null = null;
 let inflight: Promise<GuideIndexShape> | null = null;
