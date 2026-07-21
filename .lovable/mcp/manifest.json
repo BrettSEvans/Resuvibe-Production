@@ -43,7 +43,7 @@
             "slug": {
               "type": "string",
               "minLength": 1,
-              "description": "Guide slug, e.g. 'account-executive'. Use list_faq_guides to discover available slugs."
+              "description": "Guide slug, e.g. 'account-executive'. Use list_faq_guides to discover slugs."
             }
           },
           "required": [

@@ -1,6 +1,7 @@
-// Load the FAQ guide index at build time so the emitted Deno MCP function
-// has no filesystem or network dependency at runtime.
-import guideIndex from "../../../public/guide-index.json" with { type: "json" };
+// Fetch the FAQ guide index at request time from the app's own public site so
+// the emitted Deno MCP function stays small (the full JSON is ~5 MB, well over
+// Supabase's 5 MB function-source limit). Result is cached in module scope for
+// the lifetime of the isolate.
 
 export interface GuideSection {
   heading: string;
@@ -20,13 +21,39 @@ interface GuideIndexShape {
   bySlug?: Record<string, Guide>;
 }
 
-const index = guideIndex as GuideIndexShape;
+const GUIDE_INDEX_URL = "https://resuvibe.ai/guide-index.json";
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
-export const guides: Guide[] = index.guides ?? [];
+let cache: { data: GuideIndexShape; fetchedAt: number } | null = null;
+let inflight: Promise<GuideIndexShape> | null = null;
 
-export function getGuideBySlug(slug: string): Guide | undefined {
-  if (index.bySlug && index.bySlug[slug]) return index.bySlug[slug];
-  return guides.find((g) => g.slug === slug);
+async function loadIndex(): Promise<GuideIndexShape> {
+  const now = Date.now();
+  if (cache && now - cache.fetchedAt < CACHE_TTL_MS) return cache.data;
+  if (inflight) return inflight;
+  inflight = (async () => {
+    const res = await fetch(GUIDE_INDEX_URL, { headers: { accept: "application/json" } });
+    if (!res.ok) throw new Error(`Failed to load FAQ index: ${res.status}`);
+    const data = (await res.json()) as GuideIndexShape;
+    cache = { data, fetchedAt: Date.now() };
+    return data;
+  })();
+  try {
+    return await inflight;
+  } finally {
+    inflight = null;
+  }
+}
+
+export async function getAllGuides(): Promise<Guide[]> {
+  const idx = await loadIndex();
+  return idx.guides ?? [];
+}
+
+export async function getGuideBySlug(slug: string): Promise<Guide | undefined> {
+  const idx = await loadIndex();
+  if (idx.bySlug && idx.bySlug[slug]) return idx.bySlug[slug];
+  return (idx.guides ?? []).find((g) => g.slug === slug);
 }
 
 export function summarizeGuide(g: Guide) {

@@ -1,6 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-import { guides, summarizeGuide } from "../faq-data";
+import { getAllGuides, summarizeGuide } from "../faq-data";
 
 export default defineTool({
   name: "search_faq",
@@ -11,9 +11,10 @@ export default defineTool({
     query: z.string().min(1).describe("Free-text search query."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: ({ query }) => {
+  handler: async ({ query }) => {
     const q = query.toLowerCase();
-    const matches = guides.filter((g) => {
+    const all = await getAllGuides();
+    const matches = all.filter((g) => {
       const hay = [g.slug, g.title, g.category ?? "", g.description ?? ""].join(" ").toLowerCase();
       return hay.includes(q);
     });

@@ -11,11 +11,11 @@ export default defineTool({
     slug: z
       .string()
       .min(1)
-      .describe("Guide slug, e.g. 'account-executive'. Use list_faq_guides to discover available slugs."),
+      .describe("Guide slug, e.g. 'account-executive'. Use list_faq_guides to discover slugs."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: ({ slug }) => {
-    const guide = getGuideBySlug(slug);
+  handler: async ({ slug }) => {
+    const guide = await getGuideBySlug(slug);
     if (!guide) {
       return {
         content: [{ type: "text", text: `No FAQ guide found for slug '${slug}'.` }],
