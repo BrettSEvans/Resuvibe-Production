@@ -72,10 +72,10 @@ export const PublicLayout = ({ children }: PublicLayoutProps) => {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    to="/resume-guides"
+                    to="/FAQ"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Resume Guides
+                    FAQ
                   </Link>
                 </li>
                 <li>
