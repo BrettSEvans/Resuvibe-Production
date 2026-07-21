@@ -357,10 +357,11 @@ const Applications = () => {
                                   setPreviewId(previewId === app.id ? null : app.id);
                                 }}
                                 title="Preview"
+                                aria-label="Preview dashboard"
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="ghost" onClick={(e) => handleCopyHtml(app.dashboard_html, e)} title="Copy HTML">
+                              <Button size="sm" variant="ghost" onClick={(e) => handleCopyHtml(app.dashboard_html, e)} title="Copy HTML" aria-label="Copy dashboard HTML">
                                 <Copy className="h-4 w-4" />
                               </Button>
                             </>
@@ -373,6 +374,7 @@ const Applications = () => {
                               setDeleteTarget({ id: app.id, name: app.company_name || "this application" });
                             }}
                             title="Delete"
+                            aria-label="Delete application"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
