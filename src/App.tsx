@@ -88,8 +88,10 @@ function AuthenticatedApp() {
         <Route path="/privacy-request" element={<PrivacyRequest />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/resume-guides" element={<ResumeGuidesDirectory />} />
-        <Route path="/resume-guides/:slug" element={<ResumeGuidesDetail />} />
+        <Route path="/FAQ" element={<ResumeGuidesDirectory />} />
+        <Route path="/FAQ/:slug" element={<ResumeGuidesDetail />} />
+        <Route path="/resume-guides" element={<Navigate to="/FAQ" replace />} />
+        <Route path="/resume-guides/:slug" element={<Navigate to="/FAQ" replace />} />
         <Route path="/premium" element={<Premium />} />
         {/* Any other path sends unauthenticated visitors to the landing page */}
         <Route path="*" element={<Navigate to="/" replace />} />
