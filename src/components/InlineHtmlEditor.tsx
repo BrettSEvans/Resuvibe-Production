@@ -251,26 +251,26 @@ export default function InlineHtmlEditor({
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Lists */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Bullet List" onClick={() => execCommand("insertUnorderedList")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Bullet List" aria-label="Bullet list" onClick={() => execCommand("insertUnorderedList")}>
           <List className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Numbered List" onClick={() => execCommand("insertOrderedList")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Numbered List" aria-label="Numbered list" onClick={() => execCommand("insertOrderedList")}>
           <ListOrdered className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Alignment */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Left" onClick={() => execCommand("justifyLeft")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Left" aria-label="Align left" onClick={() => execCommand("justifyLeft")}>
           <AlignLeft className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Center" onClick={() => execCommand("justifyCenter")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Center" aria-label="Align center" onClick={() => execCommand("justifyCenter")}>
           <AlignCenter className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Right" onClick={() => execCommand("justifyRight")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Align Right" aria-label="Align right" onClick={() => execCommand("justifyRight")}>
           <AlignRight className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Justify" onClick={() => execCommand("justifyFull")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Justify" aria-label="Justify" onClick={() => execCommand("justifyFull")}>
           <AlignJustify className="h-4 w-4" />
         </Button>
 
