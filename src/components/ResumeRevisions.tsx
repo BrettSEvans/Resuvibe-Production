@@ -115,6 +115,7 @@ export default function ResumeRevisions({
                         className="h-7 w-7"
                         onClick={() => handlePreview(rev)}
                         title={previewingId === rev.id ? "Back to current" : "Preview this version"}
+                        aria-label={previewingId === rev.id ? "Back to current resume" : "Preview this resume version"}
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Button>
@@ -124,6 +125,7 @@ export default function ResumeRevisions({
                         className="h-7 w-7"
                         onClick={() => handleDownload(rev.html, rev.label, rev.revision_number)}
                         title="Download HTML"
+                        aria-label="Download resume HTML"
                       >
                         <Download className="h-3.5 w-3.5" />
                       </Button>
