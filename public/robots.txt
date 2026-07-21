@@ -18,3 +18,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://resuvibe.ai/sitemap.xml
