@@ -18,7 +18,7 @@ export async function generateStaticGuides(
   outputDir: string
 ): Promise<void> {
   // Create output directory if it doesn't exist
-  const resumeGuidesDir = path.join(outputDir, "resume-guides");
+  const resumeGuidesDir = path.join(outputDir, "FAQ");
   await fs.mkdir(resumeGuidesDir, { recursive: true });
 
   // Validate all guides have FAQ sections
@@ -32,7 +32,7 @@ export async function generateStaticGuides(
     console.log(`Generated: ${guide.slug}.html`);
   }
 
-  // Generate directory page (index for /resume-guides)
+  // Generate directory page (index for /FAQ)
   const directoryHtml = renderDirectoryPageToHtml(guideIndex);
   const directoryPath = path.join(resumeGuidesDir, "index.html");
   await fs.writeFile(directoryPath, directoryHtml, "utf-8");
@@ -114,7 +114,7 @@ function renderGuidePageToHtml(guide: Guide): string {
   <meta property="og:title" content="${escapeHtml(guide.title)}" />
   <meta property="og:description" content="Master your ${escapeHtml(guide.category)} resume with ResuVibe's role-specific guides" />
   <meta property="og:type" content="article" />
-  <link rel="canonical" href="/resume-guides/${guide.slug}" />
+  <link rel="canonical" href="/FAQ/${guide.slug}" />
   <script type="application/ld+json">
 ${JSON.stringify(structuredData, null, 2)}
   </script>
@@ -154,7 +154,7 @@ function renderDirectoryPageToHtml(guideIndex: GuideIndex): string {
   <meta property="og:title" content="Resume Guides by Role - ResuVibe" />
   <meta property="og:description" content="Master your resume for any role - ${guideIndex.guides.length} guides covering Technology, Product, Design, Sales, and more" />
   <meta property="og:type" content="website" />
-  <link rel="canonical" href="/resume-guides" />
+  <link rel="canonical" href="/FAQ" />
 </head>
 <body>
 ${content}
@@ -249,7 +249,7 @@ function renderDirectoryPageContent(
         ${group.guides
           .map(
             (guide) => `
-        <a href="/resume-guides/${guide.slug}" style="padding: 1.5rem; border: 1px solid var(--border); border-radius: 0.5rem; text-decoration: none; color: var(--foreground); display: block; transition: all 0.2s;">
+        <a href="/FAQ/${guide.slug}" style="padding: 1.5rem; border: 1px solid var(--border); border-radius: 0.5rem; text-decoration: none; color: var(--foreground); display: block; transition: all 0.2s;">
           <h3 style="font-weight: 600; margin-bottom: 0.5rem;">${escapeHtml(guide.title)}</h3>
           <p style="color: var(--muted-foreground); font-size: 0.875rem;">View guide →</p>
         </a>`
