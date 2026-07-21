@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,6 @@ interface LoginProps {
 
 export default function Login({ defaultTab = "login" }: LoginProps) {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const rawNext = searchParams.get("next") ?? "";
-  const safeNext = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "";
-  const postAuthRedirect = safeNext ? `${window.location.origin}${safeNext}` : window.location.origin;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

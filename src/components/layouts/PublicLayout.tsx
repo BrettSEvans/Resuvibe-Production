@@ -19,10 +19,10 @@ export const PublicLayout = ({ children }: PublicLayoutProps) => {
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center gap-8">
             <Link
-              to="/FAQ"
+              to="/resume-guides"
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
-              FAQ
+              Resume Guides
             </Link>
             <Link
               to="/about"
@@ -72,10 +72,10 @@ export const PublicLayout = ({ children }: PublicLayoutProps) => {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    to="/FAQ"
+                    to="/resume-guides"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    FAQ
+                    Resume Guides
                   </Link>
                 </li>
                 <li>

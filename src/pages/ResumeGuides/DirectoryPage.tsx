@@ -110,7 +110,7 @@ export const DirectoryPage = ({ guideIndex }: DirectoryPageProps) => {
                     {categoryGuides.map((guide) => (
                       <Link
                         key={guide.slug}
-                        to={`/FAQ/${guide.slug}`}
+                        to={`/resume-guides/${guide.slug}`}
                         className="block p-6 border border-border rounded-md hover:border-primary hover:shadow-md transition-all"
                       >
                         <h3 className="text-lg font-semibold text-foreground hover:text-primary transition-colors">
