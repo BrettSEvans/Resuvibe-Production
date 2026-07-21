@@ -214,20 +214,20 @@ export default function InlineHtmlEditor({
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Basic formatting */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Bold" onClick={() => execCommand("bold")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Bold" aria-label="Bold" onClick={() => execCommand("bold")}>
           <Bold className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Italic" onClick={() => execCommand("italic")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Italic" aria-label="Italic" onClick={() => execCommand("italic")}>
           <Italic className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Underline" onClick={() => execCommand("underline")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Underline" aria-label="Underline" onClick={() => execCommand("underline")}>
           <Underline className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Text color */}
-        <label className="relative h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent cursor-pointer" title="Text Color">
+        <label className="relative h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent cursor-pointer" title="Text Color" aria-label="Text color">
           <Palette className="h-4 w-4" />
           <input
             type="color"
@@ -238,7 +238,7 @@ export default function InlineHtmlEditor({
         </label>
 
         {/* Highlight color */}
-        <label className="relative h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent cursor-pointer" title="Highlight Color">
+        <label className="relative h-8 w-8 flex items-center justify-center rounded-md hover:bg-accent cursor-pointer" title="Highlight Color" aria-label="Highlight color">
           <Highlighter className="h-4 w-4" />
           <input
             type="color"
