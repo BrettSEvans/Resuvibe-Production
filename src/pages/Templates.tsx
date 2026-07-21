@@ -136,6 +136,7 @@ const Templates = () => {
                         variant="ghost"
                         onClick={() => setPreviewId(previewId === t.id ? null : t.id)}
                         title="Preview"
+                        aria-label="Preview template"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -144,6 +145,7 @@ const Templates = () => {
                         variant="ghost"
                         onClick={() => handleDelete(t.id)}
                         title="Delete"
+                        aria-label="Delete template"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
