@@ -18,7 +18,7 @@ export async function generateStaticGuides(
   outputDir: string
 ): Promise<void> {
   // Create output directory if it doesn't exist
-  const resumeGuidesDir = path.join(outputDir, "resume-guides");
+  const resumeGuidesDir = path.join(outputDir, "FAQ");
   await fs.mkdir(resumeGuidesDir, { recursive: true });
 
   // Validate all guides have FAQ sections

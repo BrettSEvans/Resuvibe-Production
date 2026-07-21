@@ -22,7 +22,7 @@ export const PublicLayout = ({ children }: PublicLayoutProps) => {
               to="/FAQ"
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
-              Resume Guides
+              FAQ
             </Link>
             <Link
               to="/about"
@@ -75,7 +75,7 @@ export const PublicLayout = ({ children }: PublicLayoutProps) => {
                     to="/FAQ"
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Resume Guides
+                    FAQ
                   </Link>
                 </li>
                 <li>
