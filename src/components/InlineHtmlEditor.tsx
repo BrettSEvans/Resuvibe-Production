@@ -277,10 +277,10 @@ export default function InlineHtmlEditor({
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Indent / Outdent */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Indent" onClick={() => execCommand("indent")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Indent" aria-label="Indent" onClick={() => execCommand("indent")}>
           <Indent className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Outdent" onClick={() => execCommand("outdent")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Outdent" aria-label="Outdent" onClick={() => execCommand("outdent")}>
           <Outdent className="h-4 w-4" />
         </Button>
 
@@ -329,7 +329,7 @@ export default function InlineHtmlEditor({
         {/* Insert link popover */}
         <Popover open={linkPopoverOpen} onOpenChange={setLinkPopoverOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Insert Link" onClick={handleOpenLinkPopover}>
+            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Insert Link" aria-label="Insert link" onClick={handleOpenLinkPopover}>
               <Link className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
@@ -367,17 +367,17 @@ export default function InlineHtmlEditor({
         </Popover>
 
         {/* Unlink */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Remove Link" onClick={handleUnlink}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Remove Link" aria-label="Remove link" onClick={handleUnlink}>
           <Unlink className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
         {/* Undo / Redo */}
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Undo" onClick={() => execCommand("undo")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Undo" aria-label="Undo" onClick={() => execCommand("undo")}>
           <Undo className="h-4 w-4" />
         </Button>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Redo" onClick={() => execCommand("redo")}>
+        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Redo" aria-label="Redo" onClick={() => execCommand("redo")}>
           <Redo className="h-4 w-4" />
         </Button>
 
