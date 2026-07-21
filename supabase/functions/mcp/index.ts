@@ -10,7 +10,7 @@ import { defineTool } from "npm:@lovable.dev/mcp-js@0.24.0";
 
 // src/lib/mcp/faq-data.ts
 var GUIDE_INDEX_URL = "https://resuvibe.ai/guide-index.json";
-var CACHE_TTL_MS = 10 * 60 * 1e3;
+var CACHE_TTL_MS = 12 * 60 * 60 * 1e3;
 var cache = null;
 var inflight = null;
 async function loadIndex() {
