@@ -139,7 +139,7 @@ export default function AiChat({ isOpen, onClose }: AiChatProps) {
           <span className="font-semibold text-sm">AI Assistant</span>
           <span className="text-xs text-muted-foreground">· {getContextLabel(pathname)}</span>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} aria-label="Close AI assistant">
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -186,7 +186,7 @@ export default function AiChat({ isOpen, onClose }: AiChatProps) {
           className="flex-1 h-9 text-sm"
           disabled={isThinking}
         />
-        <Button size="icon" className="h-9 w-9 shrink-0" onClick={send} disabled={!input.trim() || isThinking}>
+        <Button size="icon" className="h-9 w-9 shrink-0" onClick={send} disabled={!input.trim() || isThinking} aria-label="Send message">
           <Send className="h-4 w-4" />
         </Button>
       </div>

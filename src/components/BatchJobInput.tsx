@@ -200,7 +200,7 @@ export default function BatchJobInput() {
                   {entry.useManual ? "Use URL" : "Paste text"}
                 </Button>
                 {entries.length > 1 && (
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => removeEntry(entry.id)}>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => removeEntry(entry.id)} aria-label="Remove entry">
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </Button>
                 )}
