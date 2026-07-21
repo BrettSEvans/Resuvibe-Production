@@ -31,6 +31,7 @@ const mockGuides: Guide[] = [
         answer: "Start with your baseline...",
       },
     ],
+    ctaFocus: 'resume' as const,
     metadata: {
       buildDate: new Date().toISOString(),
       contentLength: 500,
@@ -52,6 +53,7 @@ const mockGuides: Guide[] = [
         answer: "Product sense, data literacy...",
       },
     ],
+    ctaFocus: 'resume' as const,
     metadata: {
       buildDate: new Date().toISOString(),
       contentLength: 400,
