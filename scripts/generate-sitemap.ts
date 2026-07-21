@@ -1,6 +1,6 @@
 // Runs before `vite dev` and `vite build` (predev/prebuild hooks); writes public/sitemap.xml.
 
-import { writeFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 
 const BASE_URL = "https://resuvibe.ai";
@@ -35,14 +35,10 @@ function loadGuideSlugs(): string[] {
     return parsed.guides
       .filter((g: unknown) => g && typeof (g as { slug?: unknown }).slug === "string")
       .map((g: { slug: string }) => `/resume-guides/${g.slug}`);
-  } catch {
+  } catch (err) {
+    console.warn("Could not load resume guide slugs:", err);
     return [];
   }
-}
-
-function readFileSync(path: string, encoding: BufferEncoding): string {
-  const { readFileSync } = require("fs");
-  return readFileSync(path, encoding);
 }
 
 function generateSitemap(entries: SitemapEntry[]) {
