@@ -117,20 +117,38 @@ src/pages/ApplicationDetail.tsx     # tab wiring
 
 ## Addendum — Voice input (audio dictation) for Interview Prep
 
-A universal voice-input option was added (`getUserMedia` + `MediaRecorder` →
-server-side transcription). A standalone **test page** exercises it at
-`/interview-prep-audio-test` (the live Interview Prep tab is unchanged). Recording
-works in-browser today; **live transcripts need one function deployed and one secret**:
+Universal voice input (`getUserMedia` + `MediaRecorder` → server-side transcription)
+is **now wired into the live Interview Prep tab** — a "Dictate answer" control on the
+answer step; the transcript appends to the answer text (everything else on the tab is
+unchanged). A standalone test page also exercises it at `/interview-prep-audio-test`.
+The **frontend is deployed**; live transcripts need **one function deployed and one
+secret set** on the target Supabase project:
 
-1. **Deploy the edge function** `supabase/functions/transcribe-answer/` — accepts the
-   recorded audio (webm/mp4), calls the transcription provider, returns `{ text }`.
-   Default JWT verification is correct (no `config.toml` change). Audio is **not** persisted.
-2. **Set the secret** `OPENAI_API_KEY` on the Supabase project (the function defaults to
-   OpenAI `gpt-4o-mini-transcribe`; override the model via `TRANSCRIBE_MODEL`). If the
-   Lovable AI gateway exposes an audio-transcription endpoint, point the function there
-   instead and reuse `LOVABLE_API_KEY` — it's the single integration point.
-3. **No DB change required.** Usage is logged to `generation_usage`
-   (`asset_type: 'answer-transcription'`).
+### Deploy steps (run from the repo root, CLI linked to the target project)
+```bash
+# 1. Deploy the transcription edge function
+supabase functions deploy transcribe-answer
 
-Verify on staging: record an answer in Chrome, Firefox, and Safari (macOS + iOS) →
-transcript fills the textarea (Firefox is the key case for universality).
+# 2. Set the transcription secret (function defaults to OpenAI gpt-4o-mini-transcribe)
+supabase secrets set OPENAI_API_KEY=<your-openai-key>
+# optional — override the model:
+supabase secrets set TRANSCRIBE_MODEL=gpt-4o-mini-transcribe
+```
+
+- **No `config.toml` change** — default JWT verification is correct.
+- **No DB change** — usage is logged to `generation_usage` (`asset_type: 'answer-transcription'`).
+- **Audio is not persisted.** The function accepts `webm` (Chrome/Firefox) and `mp4/m4a`
+  (Safari), ≤25 MB — no transcoding needed.
+- **Alternative provider:** if the Lovable AI gateway exposes an audio-transcription
+  endpoint, point `transcribe-answer` at it and reuse `LOVABLE_API_KEY` instead — that
+  function (`supabase/functions/transcribe-answer/index.ts`) is the single integration point.
+
+### Until it's deployed
+The "Dictate answer" control records fine but returns *"transcription not configured"*
+on stop. (The test page's separate **on-device** button works with no backend in
+Chrome/Safari, but not Firefox — which is exactly why the server path is the production input.)
+
+### Verify
+Record an answer in **Chrome, Firefox, and Safari (macOS + iOS)** → the transcript fills
+the answer box, then Submit scores it as normal. **Firefox is the key case** — it proves
+the universal path (on-device Web Speech doesn't cover Firefox).
