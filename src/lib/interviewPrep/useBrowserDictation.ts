@@ -38,6 +38,8 @@ export function useBrowserDictation(opts: { onTranscript: (text: string) => void
     getRecognizerCtor() ? "idle" : "unsupported",
   );
   const [error, setError] = useState<string | null>(null);
+  const [finalPreview, setFinalPreview] = useState("");
+  const [interimPreview, setInterimPreview] = useState("");
   const recRef = useRef<SpeechRecognizer | null>(null);
 
   const stop = useCallback(() => {
@@ -51,29 +53,50 @@ export function useBrowserDictation(opts: { onTranscript: (text: string) => void
       return;
     }
     setError(null);
+    setFinalPreview("");
+    setInterimPreview("");
     const rec = new Ctor();
     rec.continuous = true;
-    rec.interimResults = false; // only emit finalized text into the answer
+    rec.interimResults = true; // show live preview while user is speaking
     rec.lang = "en-US";
     recRef.current = rec;
 
     rec.onstart = () => setState("listening");
-    rec.onend = () => setState("idle");
+    rec.onend = () => {
+      setState("idle");
+      setInterimPreview("");
+    };
     rec.onerror = (e) => {
       setError(e?.error || "Dictation failed");
       setState("error");
+      setInterimPreview("");
     };
     rec.onresult = (e) => {
-      let chunk = "";
+      let finalChunk = "";
+      let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) chunk += e.results[i][0].transcript;
+        const r = e.results[i];
+        if (r.isFinal) finalChunk += r[0].transcript;
+        else interim += r[0].transcript;
       }
-      chunk = chunk.trim();
-      if (chunk) onTranscript(chunk);
+      finalChunk = finalChunk.trim();
+      if (finalChunk) {
+        onTranscript(finalChunk);
+        setFinalPreview((prev) => (prev ? `${prev} ${finalChunk}` : finalChunk));
+      }
+      setInterimPreview(interim.trim());
     };
 
     rec.start();
   }, [onTranscript]);
 
-  return { state, error, supported: state !== "unsupported", start, stop };
+  return {
+    state,
+    error,
+    supported: state !== "unsupported",
+    start,
+    stop,
+    finalPreview,
+    interimPreview,
+  };
 }
