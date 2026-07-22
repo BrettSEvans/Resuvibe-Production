@@ -11,16 +11,19 @@ import { cn } from "@/lib/utils";
  */
 export function BrowserDictationControl({
   onTranscript,
+  onInterim,
   onStart,
   className,
   containerClassName,
 }: {
   onTranscript: (text: string) => void;
+  onInterim?: (text: string) => void;
   onStart?: () => void;
   className?: string;
   containerClassName?: string;
 }) {
-  const d = useBrowserDictation({ onTranscript, onStart });
+  const d = useBrowserDictation({ onTranscript, onInterim, onStart });
+
 
   if (!d.supported) {
     return (

@@ -33,9 +33,14 @@ function getRecognizerCtor(): SpeechRecognizerCtor | undefined {
 export type BrowserDictationState = "unsupported" | "idle" | "listening" | "error";
 
 export function useBrowserDictation(
-  opts: { onTranscript: (text: string) => void; onStart?: () => void; silenceMs?: number },
+  opts: {
+    onTranscript: (text: string) => void;
+    onInterim?: (text: string) => void;
+    onStart?: () => void;
+    silenceMs?: number;
+  },
 ) {
-  const { onTranscript, onStart, silenceMs = 2500 } = opts;
+  const { onTranscript, onInterim, onStart, silenceMs = 2500 } = opts;
   const [state, setState] = useState<BrowserDictationState>(() =>
     getRecognizerCtor() ? "idle" : "unsupported",
   );
@@ -44,6 +49,10 @@ export function useBrowserDictation(
   const bufferRef = useRef<string[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const emitInterim = useCallback((text: string) => {
+    onInterim?.(text);
+  }, [onInterim]);
+
   const flush = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -51,10 +60,13 @@ export function useBrowserDictation(
     }
     const text = bufferRef.current.join(" ").trim();
     bufferRef.current = [];
+    // Clear the live preview before committing the formatted final chunk so
+    // the consumer can append cleanly without double-counting.
+    emitInterim("");
     if (text) {
       onTranscript(text);
     }
-  }, [onTranscript]);
+  }, [onTranscript, emitInterim]);
 
   const scheduleFlush = useCallback(() => {
     if (timerRef.current) {
@@ -100,10 +112,13 @@ export function useBrowserDictation(
     };
     rec.onresult = (e) => {
       let newFinal = "";
+      let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
         if (r.isFinal) {
           newFinal += r[0].transcript;
+        } else {
+          interim += r[0].transcript;
         }
       }
       newFinal = newFinal.trim();
@@ -111,10 +126,19 @@ export function useBrowserDictation(
         bufferRef.current.push(newFinal);
         scheduleFlush();
       }
+      // Emit a live preview combining any buffered finals (not yet committed
+      // through the silence-debounce) with the current in-progress interim
+      // words, so the UI can show text as it's being spoken.
+      const preview = [bufferRef.current.join(" "), interim.trim()]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      emitInterim(preview);
     };
 
     rec.start();
-  }, [flush, scheduleFlush]);
+  }, [flush, scheduleFlush, onStart, emitInterim]);
+
 
   return {
     state,
