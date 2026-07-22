@@ -10,8 +10,10 @@ import { useBrowserDictation } from "@/lib/interviewPrep/useBrowserDictation";
  */
 export function BrowserDictationControl({
   onTranscript,
+  className,
 }: {
   onTranscript: (text: string) => void;
+  className?: string;
 }) {
   const d = useBrowserDictation({ onTranscript });
 
@@ -25,7 +27,7 @@ export function BrowserDictationControl({
 
   if (d.state === "listening") {
     return (
-      <Button type="button" variant="destructive" onClick={d.stop}>
+      <Button type="button" variant="destructive" onClick={d.stop} className={className}>
         <Square className="mr-2 h-4 w-4" /> Stop dictation
       </Button>
     );
@@ -33,7 +35,7 @@ export function BrowserDictationControl({
 
   return (
     <>
-      <Button type="button" variant="outline" onClick={d.start}>
+      <Button type="button" variant="outline" onClick={d.start} className={className}>
         <Mic className="mr-2 h-4 w-4" /> Dictate
       </Button>
       {d.state === "error" && d.error && (
