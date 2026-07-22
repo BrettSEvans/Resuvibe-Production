@@ -112,3 +112,25 @@ src/pages/ApplicationDetail.tsx     # tab wiring
 
 *Full design + QA record lives in the `ExpertInterview` repo under
 `docs/features/resuvibe-integration/` (architecture, diagrams, critic + QA reports).*
+
+---
+
+## Addendum — Voice input (audio dictation) for Interview Prep
+
+A universal voice-input option was added (`getUserMedia` + `MediaRecorder` →
+server-side transcription). A standalone **test page** exercises it at
+`/interview-prep-audio-test` (the live Interview Prep tab is unchanged). Recording
+works in-browser today; **live transcripts need one function deployed and one secret**:
+
+1. **Deploy the edge function** `supabase/functions/transcribe-answer/` — accepts the
+   recorded audio (webm/mp4), calls the transcription provider, returns `{ text }`.
+   Default JWT verification is correct (no `config.toml` change). Audio is **not** persisted.
+2. **Set the secret** `OPENAI_API_KEY` on the Supabase project (the function defaults to
+   OpenAI `gpt-4o-mini-transcribe`; override the model via `TRANSCRIBE_MODEL`). If the
+   Lovable AI gateway exposes an audio-transcription endpoint, point the function there
+   instead and reuse `LOVABLE_API_KEY` — it's the single integration point.
+3. **No DB change required.** Usage is logged to `generation_usage`
+   (`asset_type: 'answer-transcription'`).
+
+Verify on staging: record an answer in Chrome, Firefox, and Safari (macOS + iOS) →
+transcript fills the textarea (Firefox is the key case for universality).

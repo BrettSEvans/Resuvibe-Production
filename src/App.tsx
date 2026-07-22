@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Applications from "./pages/Applications";
 import NewApplication from "./pages/NewApplication";
 import ApplicationDetail from "./pages/ApplicationDetail";
+import InterviewPrepAudioTest from "./pages/InterviewPrepAudioTest";
 
 import Templates from "./pages/Templates";
 import StoryBoard from "./pages/StoryBoard";
@@ -93,6 +94,7 @@ function AuthenticatedApp() {
         <Route path="/resume-guides" element={<Navigate to="/FAQ" replace />} />
         <Route path="/resume-guides/:slug" element={<Navigate to="/FAQ" replace />} />
         <Route path="/premium" element={<Premium />} />
+        <Route path="/interview-prep-audio-test" element={<InterviewPrepAudioTest />} />
         {/* Any other path sends unauthenticated visitors to the landing page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -177,6 +179,7 @@ function AuthenticatedApp() {
         <Route path="/resume-guides" element={<Navigate to="/FAQ" replace />} />
         <Route path="/resume-guides/:slug" element={<Navigate to="/FAQ" replace />} />
         <Route path="/premium" element={<Premium />} />
+        <Route path="/interview-prep-audio-test" element={<InterviewPrepAudioTest />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
