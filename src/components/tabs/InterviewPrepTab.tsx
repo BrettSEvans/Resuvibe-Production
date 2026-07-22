@@ -67,6 +67,10 @@ export function InterviewPrepTab({
   // before applying the next preview or committed chunk.
   const insertPosRef = useRef(0);
   const previewLenRef = useRef(0);
+  // Tracks the last caret position the user placed in the textarea. Updated on
+  // every selection change so we still know where to insert dictation even if
+  // the textarea has since lost focus (e.g. the Dictate button was clicked).
+  const lastCaretRef = useRef<number | null>(null);
 
 
   /** True when this is a free-tier user on their one free trial. */
