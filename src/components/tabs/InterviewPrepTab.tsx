@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { BrowserDictationControl } from "@/components/interviewPrep/BrowserDictationControl";
-import { appendDictationChunk } from "@/lib/interviewPrep/punctuate";
+import { formatDictationChunk } from "@/lib/interviewPrep/punctuate";
 import { Loader2, Lock, RotateCcw, ArrowRight, Sparkles, Check, Circle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -52,9 +52,12 @@ export function InterviewPrepTab({
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Length of the live dictation preview currently appended to `answer`.
-  // We strip this many trailing characters before applying the next preview
-  // (or the committed final chunk) so the textarea never shows stale text.
+  // Cursor-anchored dictation insertion. `insertPosRef` is the index inside
+  // `answer` where new dictated text is being inserted (captured when the user
+  // starts dictation). `previewLenRef` is the length of the live preview
+  // currently occupying [insertPos, insertPos + previewLen] — we strip it
+  // before applying the next preview or committed chunk.
+  const insertPosRef = useRef(0);
   const previewLenRef = useRef(0);
 
 
@@ -446,29 +449,58 @@ export function InterviewPrepTab({
                   containerClassName="self-start"
                   onTranscript={(t) =>
                     setAnswer((a) => {
-                      const base = previewLenRef.current
-                        ? a.slice(0, a.length - previewLenRef.current)
-                        : a;
+                      const pos = insertPosRef.current;
+                      const before = a.slice(0, pos);
+                      const after = a.slice(pos + previewLenRef.current);
+                      const formatted = formatDictationChunk(t);
+                      if (!formatted) {
+                        previewLenRef.current = 0;
+                        return before + after;
+                      }
+                      const needLead = before && !/[\s\n]$/.test(before);
+                      const needTrail = after && !/^[\s\n.,;:!?)]/.test(after);
+                      const inserted = (needLead ? " " : "") + formatted + (needTrail ? " " : "");
+                      insertPosRef.current = pos + inserted.length;
                       previewLenRef.current = 0;
-                      return appendDictationChunk(base, t);
+                      // Keep the caret at the end of the newly-inserted text so
+                      // the next chunk continues to flow after it.
+                      queueMicrotask(() => {
+                        const el = textareaRef.current;
+                        if (el) el.setSelectionRange(insertPosRef.current, insertPosRef.current);
+                      });
+                      return before + inserted + after;
                     })
                   }
                   onInterim={(preview) =>
                     setAnswer((a) => {
-                      const base = previewLenRef.current
-                        ? a.slice(0, a.length - previewLenRef.current)
-                        : a;
+                      const pos = insertPosRef.current;
+                      const before = a.slice(0, pos);
+                      const after = a.slice(pos + previewLenRef.current);
                       if (!preview) {
                         previewLenRef.current = 0;
-                        return base;
+                        return before + after;
                       }
-                      const sep = base && !base.endsWith(" ") && !base.endsWith("\n") ? " " : "";
-                      const suffix = sep + preview;
-                      previewLenRef.current = suffix.length;
-                      return base + suffix;
+                      const needLead = before && !/[\s\n]$/.test(before);
+                      const chunk = (needLead ? " " : "") + preview;
+                      previewLenRef.current = chunk.length;
+                      return before + chunk + after;
                     })
                   }
-                  onStart={() => textareaRef.current?.focus()}
+                  onStart={() => {
+                    const el = textareaRef.current;
+                    if (el) {
+                      // Anchor insertion at the current caret (or end of text
+                      // if the textarea has never been focused).
+                      const pos = el.selectionStart ?? el.value.length;
+                      insertPosRef.current = pos;
+                      previewLenRef.current = 0;
+                      el.focus();
+                      el.setSelectionRange(pos, pos);
+                    } else {
+                      insertPosRef.current = 0;
+                      previewLenRef.current = 0;
+                    }
+                  }}
                 />
                 <Button className="h-10 self-start" onClick={handleSubmit} disabled={submitting || answer.trim().length === 0}>
                   {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…</> : "Submit answer"}
