@@ -25,7 +25,7 @@ export function BrowserDictationControl({
 
   if (d.state === "listening") {
     return (
-      <Button type="button" size="sm" variant="destructive" onClick={d.stop}>
+      <Button type="button" variant="destructive" onClick={d.stop}>
         <Square className="mr-2 h-4 w-4" /> Stop dictation
       </Button>
     );
@@ -33,7 +33,7 @@ export function BrowserDictationControl({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <Button type="button" size="sm" variant="outline" onClick={d.start}>
+      <Button type="button" variant="outline" onClick={d.start}>
         <Mic className="mr-2 h-4 w-4" /> Dictate
       </Button>
       {d.state === "error" && d.error && (
