@@ -33,8 +33,8 @@ export function BrowserDictationControl({
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <Button type="button" size="sm" onClick={d.start}>
-        <Mic className="mr-2 h-4 w-4" /> Dictate (on-device)
+      <Button type="button" size="sm" variant="outline" onClick={d.start}>
+        <Mic className="mr-2 h-4 w-4" /> Dictate
       </Button>
       {d.state === "error" && d.error && (
         <span className="flex items-center gap-1 text-xs text-destructive">
