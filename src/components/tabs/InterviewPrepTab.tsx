@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { BrowserDictationControl } from "@/components/interviewPrep/BrowserDictationControl";
+import { appendDictationChunk } from "@/lib/interviewPrep/punctuate";
 import { Loader2, Lock, RotateCcw, ArrowRight, Sparkles, Check, Circle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -383,9 +384,7 @@ export function InterviewPrepTab({
                 <BrowserDictationControl
                   className="h-10 self-center"
                   containerClassName="self-start"
-                  onTranscript={(t) =>
-                    setAnswer((a) => (a.trim() ? a.trim() + " " : "") + t)
-                  }
+                  onTranscript={(t) => setAnswer((a) => appendDictationChunk(a, t))}
                 />
                 <Button className="h-10 self-start" onClick={handleSubmit} disabled={submitting || answer.trim().length === 0}>
                   {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…</> : "Submit answer"}
