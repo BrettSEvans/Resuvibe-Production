@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Mic, Square, AlertCircle } from "lucide-react";
 import { useBrowserDictation } from "@/lib/interviewPrep/useBrowserDictation";
+import { cn } from "@/lib/utils";
 
 /**
  * On-device dictation button (Web Speech API). Works instantly in Chrome / Edge /
@@ -11,9 +12,11 @@ import { useBrowserDictation } from "@/lib/interviewPrep/useBrowserDictation";
 export function BrowserDictationControl({
   onTranscript,
   className,
+  containerClassName,
 }: {
   onTranscript: (text: string) => void;
   className?: string;
+  containerClassName?: string;
 }) {
   const d = useBrowserDictation({ onTranscript });
 
@@ -27,14 +30,16 @@ export function BrowserDictationControl({
 
   if (d.state === "listening") {
     return (
-      <Button type="button" variant="destructive" onClick={d.stop} className={className}>
-        <Square className="mr-2 h-4 w-4" /> Stop dictation
-      </Button>
+      <div className={cn("flex flex-col items-start gap-1", containerClassName)}>
+        <Button type="button" variant="destructive" onClick={d.stop} className={className}>
+          <Square className="mr-2 h-4 w-4" /> Stop dictation
+        </Button>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className={cn("flex flex-col items-start gap-1", containerClassName)}>
       <Button type="button" variant="outline" onClick={d.start} className={className}>
         <Mic className="mr-2 h-4 w-4" /> Dictate
       </Button>
@@ -43,6 +48,6 @@ export function BrowserDictationControl({
           <AlertCircle className="h-3 w-3" /> {d.error}
         </span>
       )}
-    </>
+    </div>
   );
 }
