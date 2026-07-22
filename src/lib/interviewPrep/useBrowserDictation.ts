@@ -32,17 +32,43 @@ function getRecognizerCtor(): SpeechRecognizerCtor | undefined {
 
 export type BrowserDictationState = "unsupported" | "idle" | "listening" | "error";
 
-export function useBrowserDictation(opts: { onTranscript: (text: string) => void }) {
-  const { onTranscript } = opts;
+export function useBrowserDictation(
+  opts: { onTranscript: (text: string) => void; silenceMs?: number },
+) {
+  const { onTranscript, silenceMs = 2500 } = opts;
   const [state, setState] = useState<BrowserDictationState>(() =>
     getRecognizerCtor() ? "idle" : "unsupported",
   );
   const [error, setError] = useState<string | null>(null);
   const recRef = useRef<SpeechRecognizer | null>(null);
+  const bufferRef = useRef<string[]>([]);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flush = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    const text = bufferRef.current.join(" ").trim();
+    bufferRef.current = [];
+    if (text) {
+      onTranscript(text);
+    }
+  }, [onTranscript]);
+
+  const scheduleFlush = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      flush();
+    }, silenceMs);
+  }, [flush, silenceMs]);
 
   const stop = useCallback(() => {
+    flush();
     recRef.current?.stop();
-  }, []);
+  }, [flush]);
 
   const start = useCallback(() => {
     const Ctor = getRecognizerCtor();
@@ -51,6 +77,11 @@ export function useBrowserDictation(opts: { onTranscript: (text: string) => void
       return;
     }
     setError(null);
+    bufferRef.current = [];
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
     const rec = new Ctor();
     rec.continuous = true;
     rec.interimResults = true;
@@ -58,25 +89,31 @@ export function useBrowserDictation(opts: { onTranscript: (text: string) => void
     recRef.current = rec;
 
     rec.onstart = () => setState("listening");
-    rec.onend = () => setState("idle");
+    rec.onend = () => {
+      flush();
+      setState("idle");
+    };
     rec.onerror = (e) => {
       setError(e?.error || "Dictation failed");
       setState("error");
     };
     rec.onresult = (e) => {
-      let finalChunk = "";
+      let newFinal = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
-        if (r.isFinal) finalChunk += r[0].transcript;
+        if (r.isFinal) {
+          newFinal += r[0].transcript;
+        }
       }
-      finalChunk = finalChunk.trim();
-      if (finalChunk) {
-        onTranscript(finalChunk);
+      newFinal = newFinal.trim();
+      if (newFinal) {
+        bufferRef.current.push(newFinal);
+        scheduleFlush();
       }
     };
 
     rec.start();
-  }, [onTranscript]);
+  }, [flush, scheduleFlush]);
 
   return {
     state,
