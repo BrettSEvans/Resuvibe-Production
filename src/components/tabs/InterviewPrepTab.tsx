@@ -424,6 +424,7 @@ export function InterviewPrepTab({
             <ReviewPanel
               questionAttempts={currentQuestionAttempts}
               fallbackFeedback={state.currentFeedback}
+              isLastQuestion={state.currentIndex === state.questions.length - 1}
               hideRetry={trialAttemptsExhausted}
               retryHint={
                 trialAttemptsExhausted
@@ -534,6 +535,7 @@ export function InterviewPrepTab({
 function ReviewPanel({
   questionAttempts,
   fallbackFeedback,
+  isLastQuestion = false,
   hideRetry = false,
   retryHint,
   onRetry,
@@ -541,6 +543,7 @@ function ReviewPanel({
 }: {
   questionAttempts: TurnAttempt[];
   fallbackFeedback: import("@/lib/interviewPrep/types").Feedback | null;
+  isLastQuestion?: boolean;
   hideRetry?: boolean;
   retryHint?: string;
   onRetry: (prefill: string) => void;
@@ -600,7 +603,8 @@ function ReviewPanel({
           </Button>
         )}
         <Button onClick={onNext}>
-          Next Question <ArrowRight className="ml-2 h-4 w-4" />
+          {isLastQuestion ? "See Interview score dashboard" : "Next Question"}
+          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
     </div>
