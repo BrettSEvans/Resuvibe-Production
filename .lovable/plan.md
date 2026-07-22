@@ -1,50 +1,40 @@
-## Goal
+# Interview Prep — Backend Provisioning Plan
 
-Add an MCP (Model Context Protocol) server to this app so AI assistants (ChatGPT, Claude, Cursor, etc.) can read the /FAQ content. Scope is limited to the public FAQ guides — nothing behind Google sign-in, no user data, no application/resume/cover-letter data.
+## Current state (verified against this project)
 
-## Auth model
+- ✅ Tables exist in `public`: `user_entitlements`, `interview_questions`, `interview_sessions`, `interview_turns` (created earlier this thread).
+- ✅ All 4 edge functions present and deployed: `get-interview-entitlement`, `start-interview-session`, `generate-interview-plan`, `score-interview-answer` (plus the bonus `transcribe-answer`).
+- ✅ Frontend tab, entitlement gating, premium upsell, subway progress, and resume-grounded questions are wired.
+- ❌ `public.generation_usage` currently has only `id, user_id, asset_type, edge_function, created_at` — the `input_tokens`, `output_tokens`, `cost` columns from the handoff migration are missing.
+- ❓ Need to confirm `LOVABLE_API_KEY` secret is present for the interview functions (existing AI functions already use it, so almost certainly yes).
+- ❓ No `CHECK` constraint on `generation_usage.asset_type` was found, so `interview-plan` / `interview-scoring` / `answer-transcription` values will insert cleanly — no ALTER needed there.
 
-Public, no-login MCP server. The /FAQ content is already fully public (served from `public/guide-index.json`, no RLS, no personalization). No user identity is needed to answer FAQ questions.
+The handoff doc's "staging vs prod" framing does not apply — this Lovable Cloud project IS the target. We just finish the missing pieces here.
 
-Because a public MCP server is callable by anyone on the internet, I'll confirm this choice with a one-question consent prompt before implementing (per Lovable's MCP authoring rules). Only the FAQ tools will be exposed — authenticated tables (applications, resumes, cover letters, interview data, entitlements, profiles, etc.) will not be reachable through MCP.
+## Steps
 
-## What gets exposed
+1. **Add token/cost columns to `generation_usage`** via migration:
+   - `ALTER TABLE public.generation_usage ADD COLUMN IF NOT EXISTS input_tokens integer NOT NULL DEFAULT 0;`
+   - `ADD COLUMN IF NOT EXISTS output_tokens integer NOT NULL DEFAULT 0;`
+   - `ADD COLUMN IF NOT EXISTS cost numeric(10,6) NOT NULL DEFAULT 0;`
+   - Additive + defaulted → no data risk.
 
-Three read-only tools, all backed by the existing `public/guide-index.json`:
+2. **Confirm `LOVABLE_API_KEY` secret** is set for edge functions. If missing, request it via `add_secret`. (Interview functions share the same gateway key used by ~25 existing AI functions, so this should already be satisfied.)
 
-1. `list_faq_guides` — returns the list of FAQ guides (slug, title, category, short description). No input.
-2. `get_faq_guide` — input: `slug`. Returns the full guide content (title, category, HTML/markdown body, canonical `/FAQ/<slug>` URL).
-3. `search_faq` — input: `query` (string). Case-insensitive substring search across title, description, category, and slug; returns matching guides with the same shape as `list_faq_guides`.
+3. **Verify end-to-end on a real application** (no code changes):
+   - Open an application with a generated resume → Interview Prep tab unlocks.
+   - Free user: "Begin interview" claims trial; second application shows paywall.
+   - Regenerate plan after resume edit → prior `interview_turns` retained, old questions flip `is_active=false`.
+   - Confirm `generation_usage` rows appear with `asset_type` = `interview-plan` / `interview-scoring` and non-zero token counts once step 1 lands.
 
-Every tool is marked `readOnlyHint: true`, `openWorldHint: false`. No writes, no database access, no service-role key.
+4. **Optional — voice input**: `transcribe-answer` function is already deployed and points at the Lovable gateway (not OpenAI). Only action needed is to confirm the "Dictate answer" UI works in Chrome/Firefox/Safari. No new secret required if using the Lovable gateway path.
 
-## Files to add
+## Out of scope (by design, per handoff §7)
+- Real billing / Stripe checkout for the "Upgrade" CTA.
+- Populating `cost` with real per-model pricing (stays 0).
+- RAG scoring corpus and session resumability.
 
-- `src/lib/mcp/tools/list-faq-guides.ts` — `defineTool` wrapping the guide index.
-- `src/lib/mcp/tools/get-faq-guide.ts` — `defineTool` returning one guide by slug.
-- `src/lib/mcp/tools/search-faq.ts` — `defineTool` running the substring filter.
-- `src/lib/mcp/faq-data.ts` — small helper that loads `public/guide-index.json` at build time (via `import ... assert { type: "json" }` or an inline copy) so the emitted Deno function has no filesystem/network dependency at runtime. Keeps `src/lib/mcp/index.ts` import-safe (no env reads, no I/O at module top level).
-- `src/lib/mcp/index.ts` — `defineMcp({ name: "resuvibe-faq-mcp", title: "ResuVibe FAQ", version: "0.1.0", instructions: "...", tools: [...] })`. No `auth` field (public server).
-
-## Files to edit
-
-- `vite.config.ts` — add `mcpPlugin()` from `@lovable.dev/mcp-js/stacks/supabase/vite` to the plugins array. The plugin generates `supabase/functions/mcp/index.ts` on build; that file must not be hand-edited.
-
-## Dependencies
-
-- Install `@lovable.dev/mcp-js` and confirm `zod` is present (it already is via existing edge functions).
-
-## Post-authoring steps
-
-- Run `app_mcp_server--extract_mcp_manifest` so Lovable's Agent integrations panel and the connectors list see the new server.
-- Deploy the generated edge function via `supabase--deploy_edge_functions` with `function_names: ["mcp"]`. Endpoint will be `https://<project-ref>.supabase.co/functions/v1/mcp`.
-
-## Explicitly out of scope
-
-- No access to `job_applications`, `resumes`, `cover_letters`, `interview_*`, `user_entitlements`, `profiles`, or storage buckets.
-- No OAuth / Supabase auth server changes (the app's Google SSO is untouched).
-- No changes to the /FAQ pages themselves — this only adds a read-only API surface over the same content.
-
-## Consent step before build
-
-Before writing any code, I'll ask one question confirming a Public (no-login) MCP server is what you want, given anyone on the internet will be able to call these three FAQ tools. Since the data is already published on your public /FAQ pages, this matches the current exposure level — but the confirmation is required.
+## Technical notes
+- Migration is a single additive `ALTER TABLE` — no RLS or GRANT changes needed (existing policies cover new columns).
+- No `supabase/config.toml` changes — JWT verification defaults are correct for all 4 functions.
+- No client code changes required.

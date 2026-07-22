@@ -560,23 +560,32 @@ export type Database = {
       generation_usage: {
         Row: {
           asset_type: string
+          cost: number
           created_at: string
           edge_function: string
           id: string
+          input_tokens: number
+          output_tokens: number
           user_id: string
         }
         Insert: {
           asset_type: string
+          cost?: number
           created_at?: string
           edge_function: string
           id?: string
+          input_tokens?: number
+          output_tokens?: number
           user_id: string
         }
         Update: {
           asset_type?: string
+          cost?: number
           created_at?: string
           edge_function?: string
           id?: string
+          input_tokens?: number
+          output_tokens?: number
           user_id?: string
         }
         Relationships: []
