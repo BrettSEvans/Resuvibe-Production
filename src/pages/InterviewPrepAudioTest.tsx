@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowRight, Info } from "lucide-react";
 import { AudioDictationControl } from "@/components/interviewPrep/AudioDictationControl";
+import { BrowserDictationControl } from "@/components/interviewPrep/BrowserDictationControl";
 
 /**
  * Standalone TEST page for the new audio-dictation input on Interview Prep.
@@ -61,10 +62,11 @@ export default function InterviewPrepAudioTest() {
       <div className="flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 p-2.5 text-xs text-muted-foreground">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <span>
-          Recording works in every modern browser (Chrome, Firefox, Safari, Edge,
-          mobile). Transcription runs server-side via the <code>transcribe-answer</code>{" "}
-          edge function — deploy it (see <code>LOVABLE_HANDOFF.md</code>) for live
-          transcripts. Your audio is sent for transcription and not stored.
+          <strong>On-device</strong> dictation works instantly in Chrome/Edge/Safari —
+          no setup. The <strong>universal</strong> path records audio (works in every
+          browser incl. Firefox) and transcribes server-side via the{" "}
+          <code>transcribe-answer</code> edge function — deploy it (see{" "}
+          <code>LOVABLE_HANDOFF.md</code>) for live transcripts. Audio is not stored.
         </span>
       </div>
 
@@ -90,8 +92,23 @@ export default function InterviewPrepAudioTest() {
             placeholder="Type your answer… or use dictation"
             rows={7}
           />
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <AudioDictationControl onTranscript={appendTranscript} />
+          <div className="space-y-3 rounded-md border p-3">
+            <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  On-device · instant
+                </p>
+                <BrowserDictationControl onTranscript={appendTranscript} />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Universal · server (needs deploy)
+                </p>
+                <AudioDictationControl onTranscript={appendTranscript} />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end">
             <Button onClick={next} variant="outline">
               Next question <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
