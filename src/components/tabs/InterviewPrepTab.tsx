@@ -398,6 +398,7 @@ export function InterviewPrepTab({
         <SubwayProgress
           total={state.questions.length}
           currentIndex={state.currentIndex}
+          maxReachedIndex={Math.max(furthestIndex, state.currentIndex)}
           answeredIndices={
             new Set(
               state.questions
