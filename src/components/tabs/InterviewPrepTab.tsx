@@ -52,9 +52,12 @@ export function InterviewPrepTab({
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Length of the live dictation preview currently appended to `answer`.
-  // We strip this many trailing characters before applying the next preview
-  // (or the committed final chunk) so the textarea never shows stale text.
+  // Cursor-anchored dictation insertion. `insertPosRef` is the index inside
+  // `answer` where new dictated text is being inserted (captured when the user
+  // starts dictation). `previewLenRef` is the length of the live preview
+  // currently occupying [insertPos, insertPos + previewLen] — we strip it
+  // before applying the next preview or committed chunk.
+  const insertPosRef = useRef(0);
   const previewLenRef = useRef(0);
 
 
