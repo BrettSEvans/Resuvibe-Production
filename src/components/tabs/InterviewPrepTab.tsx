@@ -50,6 +50,7 @@ export function InterviewPrepTab({
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   /** True when this is a free-tier user on their one free trial. */
   const isTrial = decision?.kind === "claim";
