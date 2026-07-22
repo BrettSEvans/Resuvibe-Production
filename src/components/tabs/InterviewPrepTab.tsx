@@ -320,31 +320,61 @@ export function InterviewPrepTab({
       const best = state.attempts.find((a) => counted.has(a.id) && a.questionId === q.id);
       return { q, best };
     });
+    const answeredQuestionIds = new Set(state.attempts.map((a) => a.questionId));
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Interview complete</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <div className="text-3xl font-bold">{overallScore(state.attempts)}<span className="text-lg text-muted-foreground">/100</span></div>
-            <p className="text-sm text-muted-foreground">Overall score (best attempt per question)</p>
-          </div>
-          <div className="space-y-2">
-            {bestByQuestion.map(({ q, best }) => (
-              <div key={q.id} className="flex items-center justify-between rounded-md border p-2 text-sm">
-                <span className="truncate pr-3">{q.competency}</span>
-                <Badge variant={best && best.score >= 70 ? "default" : "secondary"}>
-                  {best ? best.score : "—"}
-                </Badge>
-              </div>
-            ))}
-          </div>
-          <Button variant="outline" onClick={() => { dispatch({ type: "RESET" }); setAnswer(""); setPhase("plan"); }}>
-            <RotateCcw className="mr-2 h-4 w-4" /> Practice again
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Interview complete</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <div className="text-3xl font-bold">{overallScore(state.attempts)}<span className="text-lg text-muted-foreground">/100</span></div>
+              <p className="text-sm text-muted-foreground">Overall score (best attempt per question)</p>
+            </div>
+            <div className="space-y-2">
+              {bestByQuestion.map(({ q, best }) => (
+                <div key={q.id} className="flex items-center justify-between rounded-md border p-2 text-sm">
+                  <span className="truncate pr-3">{q.competency}</span>
+                  <Badge variant={best && best.score >= 70 ? "default" : "secondary"}>
+                    {best ? best.score : "—"}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Review or improve your answers</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Click any question below to revisit your answer and feedback, or try again to improve your score.
+            </p>
+            <SubwayProgress
+              total={state.questions.length}
+              currentIndex={state.currentIndex}
+              maxReachedIndex={state.questions.length - 1}
+              answeredIndices={
+                new Set(
+                  state.questions
+                    .map((q, i) => (answeredQuestionIds.has(q.id) ? i : -1))
+                    .filter((i) => i >= 0),
+                )
+              }
+              onJump={(i) => {
+                dispatch({ type: "JUMP_TO_QUESTION", index: i });
+                setPhase("interview");
+              }}
+            />
+            <Button variant="outline" onClick={() => { dispatch({ type: "RESET" }); setAnswer(""); setPhase("plan"); }}>
+              <RotateCcw className="mr-2 h-4 w-4" /> Practice again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
