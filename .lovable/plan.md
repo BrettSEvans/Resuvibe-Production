@@ -1,20 +1,11 @@
-## Plan
+## Accept all 3 moderate dependency risks
 
-### Goal
-Mark the `app_mcp_public_unauthenticated` security finding as ignored and update the project's security memory to reflect the accepted risk.
+Update the project's **Security Memory** to document these as accepted risks so future scans/agents know they're intentional:
 
-### Background
-The MCP server is intentionally public and read-only. It exposes only three tools (`list_faq_guides`, `get_faq_guide`, `search_faq`) that fetch static public FAQ content from `guide-index.json`. No write, delete, or authenticated data access is possible.
+1. **ajv ReDoS via `$data`** (transitive of `@lovable.dev/mcp-js`) — accepted: MCP tool schemas are fixed/not user-supplied; `$data` isn't used.
+2. **esbuild dev-server request exposure** (transitive of `@lovable.dev/mcp-js`) — accepted: dev-time only, never runs in production.
+3. **@hono/node-server path traversal on Windows** (transitive of `@lovable.dev/mcp-js`) — accepted: MCP runs on Deno (Lovable Cloud), not Node/Windows, and doesn't serve static files.
 
-### Steps
-1. **Ignore the finding** via `security--manage_security_finding`:
-   - `scanner_name`: `app_mcp`
-   - `internal_id`: `app_mcp_public_unauthenticated`
-   - Rationale: the MCP server is deliberately public for FAQ discoverability; tools are read-only, operate on public static data only, and cannot write or access per-user data.
+No package or code changes — `@lovable.dev/mcp-js@0.24.0` is already the latest published version and no upstream patch exists.
 
-2. **Update security memory** via `security--update_memory` to record:
-   - The MCP server is intentionally unauthenticated.
-   - It only reads public FAQ data.
-   - This is an accepted risk, not a vulnerability to fix.
-
-### No code changes required.
+Single action: call `security--update_memory` to append an "Accepted dependency risks" section covering the three items above.
