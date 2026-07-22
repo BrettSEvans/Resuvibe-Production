@@ -76,6 +76,7 @@ export function useBrowserDictation(
       setState("unsupported");
       return;
     }
+    onStart?.();
     setError(null);
     bufferRef.current = [];
     if (timerRef.current) {
