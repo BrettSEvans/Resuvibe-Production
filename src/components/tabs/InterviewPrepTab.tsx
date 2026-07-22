@@ -48,6 +48,14 @@ export function InterviewPrepTab({
   const [plan, setPlan] = useState<InterviewPlan | null>(null);
   const [decision, setDecision] = useState<GateDecision | null>(null);
   const [state, dispatch] = useReducer(interviewReducer, initialState);
+  // Track the furthest question the user has advanced to. This is monotonically
+  // increasing so that jumping BACK via the subway indicator keeps the stop for
+  // the previously-current question clickable (so the user can return forward),
+  // while stops for never-visited questions remain inert.
+  const [furthestIndex, setFurthestIndex] = useState(0);
+  useEffect(() => {
+    setFurthestIndex((prev) => Math.max(prev, state.currentIndex));
+  }, [state.currentIndex]);
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
