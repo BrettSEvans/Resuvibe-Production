@@ -32,7 +32,7 @@ export function BrowserDictationControl({
   }
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <>
       <Button type="button" variant="outline" onClick={d.start}>
         <Mic className="mr-2 h-4 w-4" /> Dictate
       </Button>
@@ -41,6 +41,6 @@ export function BrowserDictationControl({
           <AlertCircle className="h-3 w-3" /> {d.error}
         </span>
       )}
-    </div>
+    </>
   );
 }
