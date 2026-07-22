@@ -87,6 +87,58 @@ export function InterviewPrepTab({
             description: "Your resume or job description changed, so we regenerated the questions.",
           });
         }
+
+        // Attempt to rehydrate a prior in-progress session for this app so
+        // every previously submitted answer is retained and reachable via the
+        // subway indicator.
+        const { data: sessions } = await supabase
+          .from("interview_sessions")
+          .select("id")
+          .eq("application_id", applicationId)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        const existing = sessions?.[0];
+        if (existing) {
+          const { data: turns } = await supabase
+            .from("interview_turns")
+            .select("id, question_id, order_index, attempt_number, answer_text, score, feedback")
+            .eq("session_id", existing.id)
+            .order("order_index", { ascending: true })
+            .order("attempt_number", { ascending: true });
+          if (!cancelled && turns && turns.length > 0) {
+            const attempts: TurnAttempt[] = turns
+              .filter((t) => p.questions.some((q) => q.id === t.question_id))
+              .map((t) => ({
+                id: t.id,
+                questionId: t.question_id,
+                orderIndex: t.order_index,
+                attemptNumber: t.attempt_number,
+                answerText: t.answer_text,
+                score: t.score,
+                feedback: t.feedback as unknown as import("@/lib/interviewPrep/types").Feedback,
+              }));
+            if (attempts.length > 0) {
+              const answeredIdx = new Set(
+                attempts
+                  .map((a) => p.questions.findIndex((q) => q.id === a.questionId))
+                  .filter((i) => i >= 0),
+              );
+              const firstUnanswered = p.questions.findIndex((_, i) => !answeredIdx.has(i));
+              const allAnswered = firstUnanswered === -1;
+              const currentIndex = allAnswered ? p.questions.length - 1 : firstUnanswered;
+              setSessionId(existing.id);
+              dispatch({
+                type: "INIT_FROM_SNAPSHOT",
+                questions: p.questions,
+                attempts,
+                currentIndex,
+              });
+              setPhase(allAnswered ? "complete" : "interview");
+              return;
+            }
+          }
+        }
+
         setPhase("plan");
       } catch (e) {
         if (cancelled) return;
