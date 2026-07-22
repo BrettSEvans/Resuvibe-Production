@@ -67,6 +67,10 @@ export function InterviewPrepTab({
   // before applying the next preview or committed chunk.
   const insertPosRef = useRef(0);
   const previewLenRef = useRef(0);
+  // Tracks the last caret position the user placed in the textarea. Updated on
+  // every selection change so we still know where to insert dictation even if
+  // the textarea has since lost focus (e.g. the Dictate button was clicked).
+  const lastCaretRef = useRef<number | null>(null);
 
 
   /** True when this is a free-tier user on their one free trial. */
@@ -475,7 +479,19 @@ export function InterviewPrepTab({
               <Textarea
                 ref={textareaRef}
                 value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
+                onChange={(e) => {
+                  setAnswer(e.target.value);
+                  lastCaretRef.current = e.target.selectionStart ?? null;
+                }}
+                onSelect={(e) => {
+                  lastCaretRef.current = e.currentTarget.selectionStart ?? null;
+                }}
+                onKeyUp={(e) => {
+                  lastCaretRef.current = e.currentTarget.selectionStart ?? null;
+                }}
+                onClick={(e) => {
+                  lastCaretRef.current = e.currentTarget.selectionStart ?? null;
+                }}
                 placeholder="Type your answer…"
                 rows={7}
                 disabled={submitting}
@@ -526,9 +542,17 @@ export function InterviewPrepTab({
                   onStart={() => {
                     const el = textareaRef.current;
                     if (el) {
-                      // Anchor insertion at the current caret (or end of text
-                      // if the textarea has never been focused).
-                      const pos = el.selectionStart ?? el.value.length;
+                      // Prefer the last caret position the user chose (tracked
+                      // via onSelect/onClick/onKeyUp). Fall back to the
+                      // textarea's live selection, then to end-of-text. This
+                      // matters because clicking the Dictate button can blur
+                      // the textarea before this handler runs, which in some
+                      // browsers resets selectionStart to 0 or end-of-text.
+                      const tracked = lastCaretRef.current;
+                      const pos =
+                        tracked != null
+                          ? Math.min(tracked, el.value.length)
+                          : el.selectionStart ?? el.value.length;
                       insertPosRef.current = pos;
                       previewLenRef.current = 0;
                       el.focus();
