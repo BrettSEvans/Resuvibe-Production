@@ -383,9 +383,7 @@ export function InterviewPrepTab({
                 <BrowserDictationControl
                   className="h-10 self-center"
                   containerClassName="self-start"
-                  onTranscript={(t) =>
-                    setAnswer((a) => (a.trim() ? a.trim() + " " : "") + t)
-                  }
+                  onTranscript={(t) => setAnswer((a) => appendDictationChunk(a, t))}
                 />
                 <Button className="h-10 self-start" onClick={handleSubmit} disabled={submitting || answer.trim().length === 0}>
                   {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…</> : "Submit answer"}
