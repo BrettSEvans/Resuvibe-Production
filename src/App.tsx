@@ -128,6 +128,7 @@ function AuthenticatedApp() {
           <Route path="/resume-guides/:slug" element={<Navigate to="/FAQ" replace />} />
           <Route path="/premium" element={<Premium />} />
 
+          <Route path="/interview-prep-audio-test" element={<InterviewPrepAudioTest />} />
           <Route path="*" element={<Navigate to="/build-my-resume" replace />} />
         </Routes>
         <CookieConsent />
