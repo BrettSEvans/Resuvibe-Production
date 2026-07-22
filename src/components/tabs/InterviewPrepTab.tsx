@@ -22,6 +22,7 @@ import {
   scoreInterviewAnswer,
   type InterviewPlan,
 } from "@/lib/api/interviewPrep";
+import { supabase } from "@/integrations/supabase/client";
 
 type Phase = "loading" | "paywall" | "plan" | "interview" | "trial-upsell" | "complete" | "error";
 
