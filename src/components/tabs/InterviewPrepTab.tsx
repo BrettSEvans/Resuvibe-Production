@@ -379,13 +379,15 @@ export function InterviewPrepTab({
                 rows={7}
                 disabled={submitting}
               />
-              <div className="flex items-baseline gap-2 flex-wrap">
+              <div className="flex flex-wrap items-start gap-2">
                 <BrowserDictationControl
+                  className="h-10 self-center"
+                  containerClassName="self-start"
                   onTranscript={(t) =>
                     setAnswer((a) => (a.trim() ? a.trim() + " " : "") + t)
                   }
                 />
-                <Button onClick={handleSubmit} disabled={submitting || answer.trim().length === 0}>
+                <Button className="h-10 self-start" onClick={handleSubmit} disabled={submitting || answer.trim().length === 0}>
                   {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…</> : "Submit answer"}
                 </Button>
               </div>
