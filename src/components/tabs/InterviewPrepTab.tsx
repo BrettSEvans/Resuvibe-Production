@@ -542,9 +542,17 @@ export function InterviewPrepTab({
                   onStart={() => {
                     const el = textareaRef.current;
                     if (el) {
-                      // Anchor insertion at the current caret (or end of text
-                      // if the textarea has never been focused).
-                      const pos = el.selectionStart ?? el.value.length;
+                      // Prefer the last caret position the user chose (tracked
+                      // via onSelect/onClick/onKeyUp). Fall back to the
+                      // textarea's live selection, then to end-of-text. This
+                      // matters because clicking the Dictate button can blur
+                      // the textarea before this handler runs, which in some
+                      // browsers resets selectionStart to 0 or end-of-text.
+                      const tracked = lastCaretRef.current;
+                      const pos =
+                        tracked != null
+                          ? Math.min(tracked, el.value.length)
+                          : el.selectionStart ?? el.value.length;
                       insertPosRef.current = pos;
                       previewLenRef.current = 0;
                       el.focus();
