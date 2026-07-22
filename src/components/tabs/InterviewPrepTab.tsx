@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { BrowserDictationControl } from "@/components/interviewPrep/BrowserDictationControl";
-import { appendDictationChunk } from "@/lib/interviewPrep/punctuate";
+import { appendDictationChunk, formatDictationChunk } from "@/lib/interviewPrep/punctuate";
 import { Loader2, Lock, RotateCcw, ArrowRight, Sparkles, Check, Circle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
