@@ -369,9 +369,6 @@ export function InterviewPrepTab({
                 setPhase("interview");
               }}
             />
-            <Button variant="outline" onClick={() => { dispatch({ type: "RESET" }); setAnswer(""); setPhase("plan"); }}>
-              <RotateCcw className="mr-2 h-4 w-4" /> Practice again
-            </Button>
           </CardContent>
         </Card>
       </div>
