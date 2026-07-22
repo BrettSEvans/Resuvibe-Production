@@ -38,11 +38,23 @@ export function BrowserDictationControl({
   return (
     <div className={cn("flex flex-col items-start gap-2", containerClassName)}>
       {isListening ? (
-        <Button type="button" variant="destructive" onClick={d.stop} className={className}>
+        <Button
+          type="button"
+          variant="destructive"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={d.stop}
+          className={className}
+        >
           <Square className="mr-2 h-4 w-4" /> Stop dictation
         </Button>
       ) : (
-        <Button type="button" variant="outline" onClick={d.start} className={className}>
+        <Button
+          type="button"
+          variant="outline"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={d.start}
+          className={className}
+        >
           <Mic className="mr-2 h-4 w-4" /> Dictate
         </Button>
       )}
