@@ -479,7 +479,19 @@ export function InterviewPrepTab({
               <Textarea
                 ref={textareaRef}
                 value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
+                onChange={(e) => {
+                  setAnswer(e.target.value);
+                  lastCaretRef.current = e.target.selectionStart ?? null;
+                }}
+                onSelect={(e) => {
+                  lastCaretRef.current = e.currentTarget.selectionStart ?? null;
+                }}
+                onKeyUp={(e) => {
+                  lastCaretRef.current = e.currentTarget.selectionStart ?? null;
+                }}
+                onClick={(e) => {
+                  lastCaretRef.current = e.currentTarget.selectionStart ?? null;
+                }}
                 placeholder="Type your answer…"
                 rows={7}
                 disabled={submitting}
