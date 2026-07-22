@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { AudioDictationControl } from "@/components/interviewPrep/AudioDictationControl";
 import { Loader2, Lock, RotateCcw, ArrowRight, Sparkles, Check, Circle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -376,6 +377,12 @@ export function InterviewPrepTab({
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="Type your answer…"
                 rows={7}
+                disabled={submitting}
+              />
+              <AudioDictationControl
+                onTranscript={(t) =>
+                  setAnswer((a) => (a.trim() ? a.trim() + " " : "") + t)
+                }
                 disabled={submitting}
               />
               <Button onClick={handleSubmit} disabled={submitting || answer.trim().length === 0}>
