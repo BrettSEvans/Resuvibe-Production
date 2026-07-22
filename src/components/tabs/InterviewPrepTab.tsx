@@ -51,6 +51,11 @@ export function InterviewPrepTab({
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Length of the live dictation preview currently appended to `answer`.
+  // We strip this many trailing characters before applying the next preview
+  // (or the committed final chunk) so the textarea never shows stale text.
+  const previewLenRef = useRef(0);
+
 
   /** True when this is a free-tier user on their one free trial. */
   const isTrial = decision?.kind === "claim";
