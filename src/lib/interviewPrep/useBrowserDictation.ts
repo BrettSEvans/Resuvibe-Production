@@ -33,9 +33,9 @@ function getRecognizerCtor(): SpeechRecognizerCtor | undefined {
 export type BrowserDictationState = "unsupported" | "idle" | "listening" | "error";
 
 export function useBrowserDictation(
-  opts: { onTranscript: (text: string) => void; silenceMs?: number },
+  opts: { onTranscript: (text: string) => void; onStart?: () => void; silenceMs?: number },
 ) {
-  const { onTranscript, silenceMs = 2500 } = opts;
+  const { onTranscript, onStart, silenceMs = 2500 } = opts;
   const [state, setState] = useState<BrowserDictationState>(() =>
     getRecognizerCtor() ? "idle" : "unsupported",
   );
