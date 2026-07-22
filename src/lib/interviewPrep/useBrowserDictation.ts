@@ -38,8 +38,6 @@ export function useBrowserDictation(opts: { onTranscript: (text: string) => void
     getRecognizerCtor() ? "idle" : "unsupported",
   );
   const [error, setError] = useState<string | null>(null);
-  const [finalPreview, setFinalPreview] = useState("");
-  const [interimPreview, setInterimPreview] = useState("");
   const recRef = useRef<SpeechRecognizer | null>(null);
 
   const stop = useCallback(() => {
@@ -53,38 +51,28 @@ export function useBrowserDictation(opts: { onTranscript: (text: string) => void
       return;
     }
     setError(null);
-    setFinalPreview("");
-    setInterimPreview("");
     const rec = new Ctor();
     rec.continuous = true;
-    rec.interimResults = true; // show live preview while user is speaking
+    rec.interimResults = true;
     rec.lang = "en-US";
     recRef.current = rec;
 
     rec.onstart = () => setState("listening");
-    rec.onend = () => {
-      setState("idle");
-      setInterimPreview("");
-    };
+    rec.onend = () => setState("idle");
     rec.onerror = (e) => {
       setError(e?.error || "Dictation failed");
       setState("error");
-      setInterimPreview("");
     };
     rec.onresult = (e) => {
       let finalChunk = "";
-      let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
         if (r.isFinal) finalChunk += r[0].transcript;
-        else interim += r[0].transcript;
       }
       finalChunk = finalChunk.trim();
       if (finalChunk) {
         onTranscript(finalChunk);
-        setFinalPreview((prev) => (prev ? `${prev} ${finalChunk}` : finalChunk));
       }
-      setInterimPreview(interim.trim());
     };
 
     rec.start();
@@ -96,7 +84,5 @@ export function useBrowserDictation(opts: { onTranscript: (text: string) => void
     supported: state !== "unsupported",
     start,
     stop,
-    finalPreview,
-    interimPreview,
   };
 }
