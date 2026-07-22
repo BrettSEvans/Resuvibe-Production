@@ -644,11 +644,13 @@ function FeedbackView({ feedback }: { feedback: import("@/lib/interviewPrep/type
 function SubwayProgress({
   total,
   currentIndex,
+  maxReachedIndex,
   answeredIndices,
   onJump,
 }: {
   total: number;
   currentIndex: number;
+  maxReachedIndex: number;
   answeredIndices: Set<number>;
   onJump: (index: number) => void;
 }) {
@@ -657,12 +659,15 @@ function SubwayProgress({
       {Array.from({ length: total }, (_, i) => {
         const isCurrent = i === currentIndex;
         const isAnswered = answeredIndices.has(i);
-        const canJump = isAnswered && !isCurrent;
+        // A stop is "active" (visited) if the user has reached it — either it's
+        // been answered, or they've navigated to/through it during this session.
+        const isReached = isAnswered || i <= maxReachedIndex;
+        const canJump = isReached && !isCurrent;
         const stopClasses = [
           "flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-colors",
           isCurrent
             ? "border-primary bg-primary text-primary-foreground ring-2 ring-primary/30"
-            : isAnswered
+            : isReached
               ? "border-primary bg-primary/10 text-primary hover:bg-primary/20"
               : "border-muted-foreground/30 bg-background text-muted-foreground",
           canJump ? "cursor-pointer" : "cursor-default",
