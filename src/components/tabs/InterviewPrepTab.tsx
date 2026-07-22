@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +50,7 @@ export function InterviewPrepTab({
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [starting, setStarting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   /** True when this is a free-tier user on their one free trial. */
   const isTrial = decision?.kind === "claim";
@@ -374,6 +375,7 @@ export function InterviewPrepTab({
           ) : (
             <>
               <Textarea
+                ref={textareaRef}
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="Type your answer…"
@@ -385,6 +387,7 @@ export function InterviewPrepTab({
                   className="h-10 self-center"
                   containerClassName="self-start"
                   onTranscript={(t) => setAnswer((a) => appendDictationChunk(a, t))}
+                  onStart={() => textareaRef.current?.focus()}
                 />
                 <Button className="h-10 self-start" onClick={handleSubmit} disabled={submitting || answer.trim().length === 0}>
                   {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…</> : "Submit answer"}
