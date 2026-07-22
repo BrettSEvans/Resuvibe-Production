@@ -375,6 +375,7 @@ export function InterviewPrepTab({
           ) : (
             <>
               <Textarea
+                ref={textareaRef}
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 placeholder="Type your answer…"
@@ -386,6 +387,7 @@ export function InterviewPrepTab({
                   className="h-10 self-center"
                   containerClassName="self-start"
                   onTranscript={(t) => setAnswer((a) => appendDictationChunk(a, t))}
+                  onStart={() => textareaRef.current?.focus()}
                 />
                 <Button className="h-10 self-start" onClick={handleSubmit} disabled={submitting || answer.trim().length === 0}>
                   {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Scoring…</> : "Submit answer"}
